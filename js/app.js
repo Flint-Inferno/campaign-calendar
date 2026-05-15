@@ -231,7 +231,7 @@ function collectModalData() {
 document.getElementById('save-event-btn').addEventListener('click', async () => {
   const data = collectModalData();
   if (!data.title) { showBanner('Title is required.', 'error'); return; }
-  if (!GithubAPI.getPAT()) { showBanner('Write key not set — contact the DM.', 'error'); return; }
+  if (!canWrite()) { showBanner('Set your identity to a recognized player name to edit.', 'error'); return; }
   setBusy(true);
   try {
     if (editingEventId) {
@@ -254,7 +254,7 @@ document.getElementById('save-event-btn').addEventListener('click', async () => 
 document.getElementById('delete-event-btn').addEventListener('click', async () => {
   if (!editingEventId) return;
   if (!confirm('Delete this event?')) return;
-  if (!GithubAPI.getPAT()) { showBanner('Write key not set — contact the DM.', 'error'); return; }
+  if (!canWrite()) { showBanner('Set your identity to a recognized player name to edit.', 'error'); return; }
   setBusy(true);
   try {
     const evTitle = Events.getAll().find(e => e.id === editingEventId)?.title || 'Unknown';
@@ -304,7 +304,7 @@ document.getElementById('calc-btn').addEventListener('click', () => {
 document.getElementById('set-current-btn').addEventListener('click', async () => {
   const result = JSON.parse(document.getElementById('set-current-btn').dataset.result || 'null');
   if (!result) return;
-  if (!GithubAPI.getPAT()) { showBanner('Write key not set — contact the DM.', 'error'); return; }
+  if (!canWrite()) { showBanner('Set your identity to a recognized player name to edit.', 'error'); return; }
   setBusy(true);
   try {
     await GithubAPI.writeJSON('data/current-date.json', result, `Advance time to ${TimeCalc.format(result, CFG)}`);
@@ -347,12 +347,24 @@ function setPlayerIdentity(name, color) {
   updateIdentityDisplay();
 }
 
+function canWrite() {
+  if (!GithubAPI.getPAT()) return false;
+  const { name } = getPlayerIdentity();
+  if (!name) return false;
+  const members = CFG?.partyMembers || [];
+  if (members.length === 0) return true;
+  return members.some(m => m.name.toLowerCase() === name.toLowerCase());
+}
+
 function updateIdentityDisplay() {
   const { name, color } = getPlayerIdentity();
   const display = document.getElementById('identity-name-display');
   if (display) display.textContent = name || 'Set Identity';
   const btn = document.getElementById('identity-toggle');
-  if (btn) btn.style.borderColor = name ? color : '';
+  if (btn) {
+    btn.style.borderColor = name ? color : '';
+    btn.title = canWrite() ? 'Edit access granted' : (name ? 'Name not on player roster — view only' : 'Set your identity to edit');
+  }
 }
 
 document.getElementById('identity-toggle')?.addEventListener('click', () => {
@@ -373,13 +385,17 @@ document.getElementById('identity-save')?.addEventListener('click', () => {
   if (!name) { showBanner('Enter your character name.', 'error'); return; }
   setPlayerIdentity(name, color);
   document.getElementById('identity-panel').classList.add('hidden');
-  showBanner(`Identity set: ${name}`, 'success');
+  if (canWrite()) {
+    showBanner(`Welcome, ${name}! You have edit access.`, 'success');
+  } else {
+    showBanner(`Identity set: ${name}. Name not on roster — view only.`, 'info');
+  }
 });
 
 
 /* ── Map controls ────────────────────────────────────────────── */
 document.getElementById('pin-mode-btn').addEventListener('click', () => {
-  if (!GithubAPI.getPAT()) { showBanner('Write key not set — contact the DM.', 'error'); return; }
+  if (!canWrite()) { showBanner('Set your identity to a recognized player name to edit.', 'error'); return; }
   if (MapView.isPinMode()) {
     MapView.disablePinMode();
     document.getElementById('pin-mode-btn').classList.remove('active');
@@ -489,7 +505,7 @@ document.getElementById('wp-cancel-btn')?.addEventListener('click', () => {
 
 document.getElementById('wp-save-btn')?.addEventListener('click', async () => {
   if (!_scrubDate) return;
-  if (!GithubAPI.getPAT()) { showBanner('Write key not set — contact the DM.', 'error'); return; }
+  if (!canWrite()) { showBanner('Set your identity to a recognized player name to edit.', 'error'); return; }
   const waypoints = MapView.getPendingWaypoints();
   const waypointColor = MapView.getPendingColor();
   try {
@@ -635,7 +651,7 @@ document.getElementById('mvt-add-seg-btn')?.addEventListener('click', () => addS
 
 document.getElementById('mvt-save-btn')?.addEventListener('click', async () => {
   if (!_mvtDate) return;
-  if (!GithubAPI.getPAT()) { showBanner('Write key not set — contact the DM.', 'error'); return; }
+  if (!canWrite()) { showBanner('Set your identity to a recognized player name to edit.', 'error'); return; }
   const segments = collectSegmentsFromForm();
   const endLoc = document.getElementById('mvt-end-loc').value.trim() || null;
   try {
@@ -650,7 +666,7 @@ document.getElementById('mvt-save-btn')?.addEventListener('click', async () => {
 document.getElementById('mvt-clear-btn')?.addEventListener('click', async () => {
   if (!_mvtDate) return;
   if (!confirm('Clear all movement data for this day?')) return;
-  if (!GithubAPI.getPAT()) { showBanner('Write key not set — contact the DM.', 'error'); return; }
+  if (!canWrite()) { showBanner('Set your identity to a recognized player name to edit.', 'error'); return; }
   try {
     await Movements.clearDay(_mvtDate.year, _mvtDate.month, _mvtDate.week, _mvtDate.day);
     appendActivityLog('movement_clear', `Cleared movement: Y${_mvtDate.year} M${_mvtDate.month} W${_mvtDate.week} D${(_mvtDate.week-1)*CFG.daysPerWeek+_mvtDate.day}`);
