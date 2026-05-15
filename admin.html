@@ -204,7 +204,7 @@ function populateFields() {
   document.getElementById('cfg-daysPerWeek').value    = CFG.daysPerWeek;
   document.getElementById('cfg-hoursPerDay').value    = CFG.hoursPerDay;
 
-  buildNamesList('month-names-list', CFG.monthNames || []);
+  buildMonthList(CFG.monthNames || [], CFG.monthColors || []);
   buildNamesList('week-names-list',  CFG.weekNames  || []);
   buildNamesList('day-names-list',   CFG.dayNames   || []);
 
@@ -228,12 +228,52 @@ function populateFields() {
   img.src = mapUrl;
 }
 
+function buildMonthList(names, colors) {
+  const el = document.getElementById('month-names-list');
+  el.innerHTML = '';
+  names.forEach((name, i) => el.appendChild(makeMonthItem(name, colors[i] || '')));
+}
+
+function makeMonthItem(name, color) {
+  const div = document.createElement('div');
+  div.className = 'name-item';
+
+  const swatch = document.createElement('input');
+  swatch.type = 'color';
+  swatch.className = 'month-color-swatch';
+  swatch.value = color || '#2c1810';
+  swatch.title = 'Month color';
+
+  const inp = document.createElement('input');
+  inp.type = 'text';
+  inp.value = name;
+  inp.placeholder = 'Month name';
+
+  const rm = document.createElement('button');
+  rm.className = 'rm-btn';
+  rm.textContent = '×';
+  rm.addEventListener('click', () => div.remove());
+
+  div.appendChild(swatch);
+  div.appendChild(inp);
+  div.appendChild(rm);
+  return div;
+}
+
+function readMonthNames() {
+  return Array.from(document.querySelectorAll('#month-names-list .name-item input[type=text]'))
+    .map(i => i.value.trim()).filter(Boolean);
+}
+
+function readMonthColors() {
+  return Array.from(document.querySelectorAll('#month-names-list .month-color-swatch'))
+    .map(s => s.value);
+}
+
 function buildNamesList(containerId, names) {
   const el = document.getElementById(containerId);
   el.innerHTML = '';
-  names.forEach((name, i) => {
-    el.appendChild(makeNameItem(name, i));
-  });
+  names.forEach((name, i) => el.appendChild(makeNameItem(name, i)));
 }
 
 function makeNameItem(value, idx) {
@@ -253,7 +293,8 @@ function makeNameItem(value, idx) {
 }
 
 function readNamesList(containerId) {
-  return Array.from(document.querySelectorAll(`#${containerId} .name-item input`)).map(i => i.value.trim()).filter(Boolean);
+  return Array.from(document.querySelectorAll(`#${containerId} .name-item input[type=text]`))
+    .map(i => i.value.trim()).filter(Boolean);
 }
 
 function buildSelect(id, names, selectedIdx) {
@@ -354,11 +395,13 @@ document.getElementById('save-structure-btn').addEventListener('click', () => {
 });
 
 document.getElementById('add-month-btn').addEventListener('click', () => {
-  const list = document.getElementById('month-names-list');
-  list.appendChild(makeNameItem('', list.children.length));
+  document.getElementById('month-names-list').appendChild(makeMonthItem('', ''));
 });
 document.getElementById('save-months-btn').addEventListener('click', () => {
-  saveConfig({ monthNames: readNamesList('month-names-list') }, 'Month names saved!');
+  saveConfig({
+    monthNames: readMonthNames(),
+    monthColors: readMonthColors()
+  }, 'Month names & colors saved!');
 });
 
 document.getElementById('add-week-btn').addEventListener('click', () => {

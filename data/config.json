@@ -9,5 +9,6 @@
   "monthNames": ["Month I", "Month II", "Month III", "Month IV", "Month V", "Month VI", "Month VII", "Month VIII"],
   "weekNames": ["First Week", "Second Week", "Third Week", "Fourth Week", "Fifth Week"],
   "dayNames": [],
+  "monthColors": [],
   "defaultEventColor": "#6B3A2A"
 }

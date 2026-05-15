@@ -219,26 +219,26 @@ header {
 }
 
 .week-label-header, .day-header {
-  background: var(--ink);
-  color: var(--gold-light);
+  background: rgba(var(--mc-rgb, 44, 24, 16), 0.92);
+  color: rgba(var(--mc-text, 244, 228, 193), 1);
   font-family: 'Cinzel', serif;
   font-size: 0.75rem;
   text-align: center;
   padding: 8px 4px;
-  border-right: 1px solid #3a2a1a;
+  border-right: 1px solid rgba(var(--mc-rgb, 44, 24, 16), 0.4);
   letter-spacing: 0.03em;
 }
 .day-header:last-child { border-right: none; }
 
 .week-label {
-  background: var(--parchment-deep);
+  background: rgba(var(--mc-rgb, 44, 24, 16), 0.14);
   color: var(--ink);
   font-family: 'Cinzel', serif;
   font-size: 0.72rem;
   font-weight: 600;
   padding: 8px 6px;
-  border-right: 1px solid var(--parchment-deep);
-  border-bottom: 1px solid var(--parchment-deep);
+  border-right: 1px solid rgba(var(--mc-rgb, 44, 24, 16), 0.2);
+  border-bottom: 1px solid rgba(var(--mc-rgb, 44, 24, 16), 0.2);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -247,10 +247,14 @@ header {
   letter-spacing: 0.02em;
 }
 
+.month-view {
+  border-color: rgba(var(--mc-rgb, 44, 24, 16), 0.5) !important;
+}
+
 .day-cell {
-  background: var(--parchment);
-  border-right: 1px solid var(--parchment-deep);
-  border-bottom: 1px solid var(--parchment-deep);
+  background: rgba(var(--mc-rgb, 244, 228, 193), 0.04);
+  border-right: 1px solid rgba(var(--mc-rgb, 44, 24, 16), 0.15);
+  border-bottom: 1px solid rgba(var(--mc-rgb, 44, 24, 16), 0.15);
   min-height: 90px;
   padding: 4px;
   cursor: pointer;
@@ -258,8 +262,8 @@ header {
   position: relative;
 }
 .day-cell:last-child { border-right: none; }
-.day-cell:hover { background: #ede0b8; }
-.day-cell.current-day { background: #f0e0a8; }
+.day-cell:hover { background: rgba(var(--mc-rgb, 44, 24, 16), 0.10); }
+.day-cell.current-day { background: rgba(var(--mc-rgb, 44, 24, 16), 0.20); }
 .day-cell.current-day .day-number {
   background: var(--crimson);
   color: var(--parchment);
@@ -302,24 +306,24 @@ header {
   position: sticky;
   top: 0;
   z-index: 10;
-  background: var(--ink);
+  background: rgba(var(--mc-rgb, 44, 24, 16), 0.92);
   grid-template-columns: 56px repeat(var(--days-per-week, 10), 1fr);
-  border-bottom: 2px solid var(--gold);
+  border-bottom: 2px solid rgba(var(--mc-rgb, 139, 105, 20), 0.6);
 }
 
-.wv-corner { border-right: 1px solid #3a2a1a; }
+.wv-corner { border-right: 1px solid rgba(var(--mc-rgb, 44, 24, 16), 0.4); }
 
 .wv-day-header {
   font-family: 'Cinzel', serif;
   font-size: 0.75rem;
-  color: var(--gold-light);
+  color: rgba(var(--mc-text, 244, 228, 193), 1);
   text-align: center;
   padding: 8px 4px;
-  border-right: 1px solid #3a2a1a;
+  border-right: 1px solid rgba(var(--mc-rgb, 44, 24, 16), 0.35);
   letter-spacing: 0.03em;
 }
 .wv-day-header:last-child { border-right: none; }
-.wv-day-header.current-day-header { color: #f0d060; font-weight: 700; }
+.wv-day-header.current-day-header { font-weight: 700; text-decoration: underline; }
 
 .week-view-body { display: flex; }
 
@@ -747,7 +751,7 @@ header {
 
 .names-list { display: flex; flex-direction: column; gap: 6px; }
 .name-item { display: flex; gap: 6px; align-items: center; }
-.name-item input {
+.name-item input[type=text] {
   flex: 1;
   font-family: 'IM Fell English', serif;
   font-size: 0.88rem;
@@ -756,6 +760,17 @@ header {
   border: 1px solid var(--border);
   border-radius: var(--radius);
   color: var(--ink);
+}
+
+.month-color-swatch {
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 2px;
+  cursor: pointer;
+  background: var(--parchment-dark);
 }
 .name-item .rm-btn {
   background: transparent;

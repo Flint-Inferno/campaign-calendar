@@ -112,6 +112,7 @@ const Calendar = (() => {
     }
     html.push('</div>');
     _container.innerHTML = html.join('');
+    applyMonthColor(_container.querySelector('.month-view'));
     attachMonthListeners();
   }
 
@@ -172,6 +173,7 @@ const Calendar = (() => {
     html.push('</div>');
     html.push('</div>');
     _container.innerHTML = html.join('');
+    applyMonthColor(_container.querySelector('.week-view'));
     attachWeekListeners();
   }
 
@@ -222,6 +224,22 @@ const Calendar = (() => {
     const g = parseInt(c.slice(2, 4), 16);
     const b = parseInt(c.slice(4, 6), 16);
     return (r * 299 + g * 587 + b * 114) / 1000 > 140;
+  }
+
+  function hexToRgb(hex) {
+    const c = hex.replace('#', '');
+    return {
+      r: parseInt(c.slice(0, 2), 16),
+      g: parseInt(c.slice(2, 4), 16),
+      b: parseInt(c.slice(4, 6), 16)
+    };
+  }
+
+  function applyMonthColor(el) {
+    const hex = (_cfg.monthColors || [])[_nav.month - 1] || '#2c1810';
+    const { r, g, b } = hexToRgb(hex);
+    el.style.setProperty('--mc-rgb', `${r}, ${g}, ${b}`);
+    el.style.setProperty('--mc-text', isColorLight(hex) ? '44, 24, 16' : '244, 228, 193');
   }
 
   function escHtml(s) {
