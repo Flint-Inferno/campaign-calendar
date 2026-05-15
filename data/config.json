@@ -7,14 +7,14 @@
   "daysPerWeek": 10,
   "hoursPerDay": 24,
   "monthNames": [
-    "Month I",
-    "Month II",
-    "Month III",
-    "Month IV",
-    "Month V",
-    "Month VI",
-    "Month VII",
-    "Month VIII"
+    "Atua",
+    "Meiss",
+    "Frigis",
+    "Tund",
+    "Flor",
+    "Polum",
+    "Falm",
+    "Psol"
   ],
   "weekNames": [
     "Pelora",
@@ -24,6 +24,15 @@
     "Ravethen"
   ],
   "dayNames": [],
-  "monthColors": [],
+  "monthColors": [
+    "#cc0000",
+    "#dd9500",
+    "#caca00",
+    "#2ca08c",
+    "#29c5bd",
+    "#2c1810",
+    "#2c1810",
+    "#e1e100"
+  ],
   "defaultEventColor": "#6B3A2A"
 }
