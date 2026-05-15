@@ -347,7 +347,7 @@ function updateIdentityDisplay() {
   if (btn) btn.style.borderColor = name ? color : '';
 }
 
-document.getElementById('identity-toggle').addEventListener('click', () => {
+document.getElementById('identity-toggle')?.addEventListener('click', () => {
   const { name, color } = getPlayerIdentity();
   if (name) document.getElementById('identity-name-input').value = name;
   document.getElementById('identity-color-input').value = color || '#8B2E2E';
@@ -355,11 +355,11 @@ document.getElementById('identity-toggle').addEventListener('click', () => {
   document.getElementById('identity-panel').classList.toggle('hidden');
 });
 
-document.getElementById('identity-color-input').addEventListener('input', e => {
+document.getElementById('identity-color-input')?.addEventListener('input', e => {
   document.getElementById('identity-preview-swatch').style.background = e.target.value;
 });
 
-document.getElementById('identity-save').addEventListener('click', () => {
+document.getElementById('identity-save')?.addEventListener('click', () => {
   const name = document.getElementById('identity-name-input').value.trim();
   const color = document.getElementById('identity-color-input').value;
   if (!name) { showBanner('Enter your character name.', 'error'); return; }
@@ -532,9 +532,9 @@ function renderMovementTimeline() {
   container.innerHTML = html;
 }
 
-document.getElementById('mvt-add-seg-btn').addEventListener('click', () => addSegmentRow());
+document.getElementById('mvt-add-seg-btn')?.addEventListener('click', () => addSegmentRow());
 
-document.getElementById('mvt-save-btn').addEventListener('click', async () => {
+document.getElementById('mvt-save-btn')?.addEventListener('click', async () => {
   if (!_mvtDate) return;
   if (!GithubAPI.getPAT()) { showBanner('Write key not set — contact the DM.', 'error'); return; }
   const segments = collectSegmentsFromForm();
@@ -548,7 +548,7 @@ document.getElementById('mvt-save-btn').addEventListener('click', async () => {
   } catch (e) { showBanner(e.message, 'error'); }
 });
 
-document.getElementById('mvt-clear-btn').addEventListener('click', async () => {
+document.getElementById('mvt-clear-btn')?.addEventListener('click', async () => {
   if (!_mvtDate) return;
   if (!confirm('Clear all movement data for this day?')) return;
   if (!GithubAPI.getPAT()) { showBanner('Write key not set — contact the DM.', 'error'); return; }
@@ -561,8 +561,8 @@ document.getElementById('mvt-clear-btn').addEventListener('click', async () => {
   } catch (e) { showBanner(e.message, 'error'); }
 });
 
-document.getElementById('mvt-cancel-btn').addEventListener('click', () => closeModal('mvt-modal'));
-document.getElementById('mvt-modal').querySelector('.modal-backdrop').addEventListener('click', () => closeModal('mvt-modal'));
+document.getElementById('mvt-cancel-btn')?.addEventListener('click', () => closeModal('mvt-modal'));
+document.getElementById('mvt-modal')?.querySelector('.modal-backdrop')?.addEventListener('click', () => closeModal('mvt-modal'));
 
 /* ── Activity Log ───────────────────────────────────────────── */
 function appendActivityLog(action, details) {
@@ -598,7 +598,7 @@ function renderLogTab() {
   }).join('');
 }
 
-document.getElementById('refresh-log-btn').addEventListener('click', async () => {
+document.getElementById('refresh-log-btn')?.addEventListener('click', async () => {
   try {
     const { content } = await GithubAPI.readFile('data/activity-log.json');
     ActivityLog.importJSON(content);
