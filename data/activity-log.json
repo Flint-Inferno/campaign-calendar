@@ -30,5 +30,13 @@
     "playerColor": "#0000c4",
     "action": "event_delete",
     "details": "Deleted event: \"A thing lol\""
+  },
+  {
+    "id": "39ffd6c1-dd45-4cf8-a05a-aa9b4967901e",
+    "timestamp": "2026-05-15T17:25:13.940Z",
+    "playerName": "Flint (DM)",
+    "playerColor": "#0000c4",
+    "action": "date_advance",
+    "details": "Advanced date to Year 6531 · Psol · Viridor · Day 10 · 01:00"
   }
 ]
