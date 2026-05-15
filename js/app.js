@@ -4,6 +4,7 @@ let CURRENT_DATE = null;
 let mapLoaded = false;
 let editingEventId = null;
 let _mvtDate = null;
+let _scrubDate = null;
 
 const COLOR_SWATCHES = [
   '#8B2E2E','#6B3A2A','#8B6914','#2E5A1C','#1C3D5A',
@@ -26,6 +27,9 @@ async function appInit() {
     CFG = cfgRes.content;
     Events.importJSON(evRes.content);
     CURRENT_DATE = cdRes.content;
+    _scrubDate = CURRENT_DATE
+      ? { year: CURRENT_DATE.year, month: CURRENT_DATE.month, week: CURRENT_DATE.week, day: CURRENT_DATE.day, hour: 0 }
+      : { year: 1, month: 1, week: 1, day: 1, hour: 0 };
     Movements.importJSON(mvtRes.content);
     ActivityLog.importJSON(logRes.content);
     const writeToken = wtRes.content?.token || '';
@@ -70,7 +74,9 @@ async function initMap() {
   showBanner('Loading map…', 'info');
   try {
     await MapView.loadMap();
-    MapView.renderPins(Events.getAll());
+    if (!_scrubDate) _scrubDate = { year: 1, month: 1, week: 1, day: 1, hour: 0 };
+    updateScrubLabel();
+    MapView.renderScrubbed(Events.getAll(), Movements.getAll(), _scrubDate, CFG);
     mapLoaded = true;
     hideBanner();
   } catch (e) {
@@ -235,7 +241,7 @@ document.getElementById('save-event-btn').addEventListener('click', async () => 
     }
     closeModal('event-modal');
     Calendar.render();
-    if (mapLoaded) { MapView.renderPins(Events.getAll()); MapView.renderTrail(Events.getAll()); }
+    if (mapLoaded && _scrubDate) MapView.renderScrubbed(Events.getAll(), Movements.getAll(), _scrubDate, CFG);
     showBanner('Saved!', 'success');
   } catch (e) {
     showBanner(e.message, 'error');
@@ -254,7 +260,7 @@ document.getElementById('delete-event-btn').addEventListener('click', async () =
     appendActivityLog('event_delete', `Deleted event: "${evTitle}"`);
     closeModal('event-modal');
     Calendar.render();
-    if (mapLoaded) { MapView.renderPins(Events.getAll()); MapView.renderTrail(Events.getAll()); }
+    if (mapLoaded && _scrubDate) MapView.renderScrubbed(Events.getAll(), Movements.getAll(), _scrubDate, CFG);
     showBanner('Event deleted.', 'success');
   } catch (e) {
     showBanner(e.message, 'error');
@@ -387,7 +393,7 @@ document.getElementById('pin-mode-btn').addEventListener('click', () => {
 });
 
 document.getElementById('trail-toggle-btn').addEventListener('click', () => {
-  const visible = MapView.toggleTrail(Events.getAll());
+  const visible = MapView.toggleTrail(Movements.getAll(), _scrubDate, CFG);
   document.getElementById('trail-toggle-btn').classList.toggle('active', visible);
 });
 
@@ -401,6 +407,89 @@ document.addEventListener('map:goto-event', e => {
   Calendar.render();
   updateNavLabel();
   setTimeout(() => openViewModal(id), 100);
+});
+
+/* ── Map scrubber ────────────────────────────────────────────── */
+function updateScrubLabel() {
+  const label = document.getElementById('scrub-date-label');
+  if (!label || !_scrubDate || !CFG) return;
+  const mn = (CFG.monthNames || [])[_scrubDate.month - 1] || `M${_scrubDate.month}`;
+  const wn = (CFG.weekNames || [])[_scrubDate.week - 1] || `W${_scrubDate.week}`;
+  label.textContent = `Y${_scrubDate.year} · ${mn} · ${wn} · D${_scrubDate.day}`;
+}
+
+function exitWaypointModeIfActive() {
+  if (!MapView.isWaypointMode()) return;
+  MapView.disableWaypointMode();
+  document.getElementById('waypoint-mode-btn')?.classList.remove('active');
+  document.getElementById('waypoint-panel')?.classList.add('hidden');
+}
+
+document.getElementById('scrub-prev-btn')?.addEventListener('click', () => {
+  if (!_scrubDate || !CFG) return;
+  exitWaypointModeIfActive();
+  _scrubDate = { ...TimeCalc.add({ ..._scrubDate, hour: 0 }, { days: -1 }, CFG), hour: 0 };
+  updateScrubLabel();
+  if (mapLoaded) MapView.renderScrubbed(Events.getAll(), Movements.getAll(), _scrubDate, CFG);
+});
+
+document.getElementById('scrub-next-btn')?.addEventListener('click', () => {
+  if (!_scrubDate || !CFG) return;
+  exitWaypointModeIfActive();
+  _scrubDate = { ...TimeCalc.add({ ..._scrubDate, hour: 0 }, { days: 1 }, CFG), hour: 0 };
+  updateScrubLabel();
+  if (mapLoaded) MapView.renderScrubbed(Events.getAll(), Movements.getAll(), _scrubDate, CFG);
+});
+
+/* ── Waypoint mode ───────────────────────────────────────────── */
+function updateWaypointPanelLabel(count) {
+  const el = document.getElementById('wp-panel-label');
+  if (!el || !_scrubDate || !CFG) return;
+  const mn = (CFG.monthNames || [])[_scrubDate.month - 1] || `M${_scrubDate.month}`;
+  const wn = (CFG.weekNames || [])[_scrubDate.week - 1] || `W${_scrubDate.week}`;
+  el.textContent = `Waypoints for Y${_scrubDate.year} · ${mn} · ${wn} · D${_scrubDate.day} — ${count} placed`;
+}
+
+document.getElementById('waypoint-mode-btn')?.addEventListener('click', () => {
+  if (!GithubAPI.getPAT()) { showBanner('Write key not set — contact the DM.', 'error'); return; }
+  if (!_scrubDate || !mapLoaded) return;
+  if (MapView.isWaypointMode()) {
+    exitWaypointModeIfActive();
+    MapView.renderScrubbed(Events.getAll(), Movements.getAll(), _scrubDate, CFG);
+  } else {
+    const existing = Movements.getForDay(_scrubDate.year, _scrubDate.month, _scrubDate.week, _scrubDate.day)?.waypoints || [];
+    MapView.enableWaypointMode(existing, waypoints => updateWaypointPanelLabel(waypoints.length));
+    document.getElementById('waypoint-mode-btn')?.classList.add('active');
+    document.getElementById('waypoint-panel')?.classList.remove('hidden');
+    updateWaypointPanelLabel(existing.length);
+  }
+});
+
+document.getElementById('wp-undo-btn')?.addEventListener('click', () => {
+  MapView.undoLastWaypoint();
+});
+
+document.getElementById('wp-clear-btn')?.addEventListener('click', () => {
+  MapView.clearPendingWaypoints();
+});
+
+document.getElementById('wp-cancel-btn')?.addEventListener('click', () => {
+  exitWaypointModeIfActive();
+  if (mapLoaded && _scrubDate) MapView.renderScrubbed(Events.getAll(), Movements.getAll(), _scrubDate, CFG);
+});
+
+document.getElementById('wp-save-btn')?.addEventListener('click', async () => {
+  if (!_scrubDate) return;
+  if (!GithubAPI.getPAT()) { showBanner('Write key not set — contact the DM.', 'error'); return; }
+  const waypoints = MapView.getPendingWaypoints();
+  try {
+    await Movements.setDay(_scrubDate.year, _scrubDate.month, _scrubDate.week, _scrubDate.day, { waypoints });
+    const mn = (CFG.monthNames || [])[_scrubDate.month - 1] || `M${_scrubDate.month}`;
+    appendActivityLog('waypoints_save', `Saved ${waypoints.length} waypoint${waypoints.length !== 1 ? 's' : ''} — Y${_scrubDate.year} ${mn} W${_scrubDate.week} D${_scrubDate.day}`);
+    exitWaypointModeIfActive();
+    MapView.renderScrubbed(Events.getAll(), Movements.getAll(), _scrubDate, CFG);
+    showBanner(`${waypoints.length} waypoint${waypoints.length !== 1 ? 's' : ''} saved!`, 'success');
+  } catch (e) { showBanner(e.message, 'error'); }
 });
 
 /* ── Movement modal ──────────────────────────────────────────── */

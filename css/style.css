@@ -645,6 +645,83 @@ header {
 .map-controls button:hover { background: var(--gold); color: var(--parchment); }
 .map-controls button.active { background: var(--crimson); color: var(--parchment); border-color: var(--crimson); }
 
+/* Map scrubber */
+.map-scrubber {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: auto;
+}
+.map-scrubber button {
+  font-family: 'Cinzel', serif;
+  font-size: 0.8rem;
+  background: var(--parchment-dark);
+  border: 1px solid var(--border);
+  color: var(--ink);
+  padding: 4px 10px;
+  cursor: pointer;
+  border-radius: var(--radius);
+}
+.map-scrubber button:hover { background: var(--gold); color: var(--parchment); }
+#scrub-date-label {
+  font-family: 'Cinzel', serif;
+  font-size: 0.8rem;
+  color: var(--ink);
+  min-width: 200px;
+  text-align: center;
+  letter-spacing: 0.02em;
+}
+
+/* Waypoint panel */
+.waypoint-panel {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 20px;
+  background: rgba(139,105,20,0.12);
+  border-bottom: 1px solid var(--gold);
+  flex-wrap: wrap;
+}
+#wp-panel-label {
+  font-family: 'Cinzel', serif;
+  font-size: 0.8rem;
+  color: var(--ink);
+  flex: 1;
+  font-style: italic;
+}
+.wp-panel-actions { display: flex; gap: 6px; flex-wrap: wrap; }
+.wp-panel-actions button {
+  font-family: 'Cinzel', serif;
+  font-size: 0.75rem;
+  background: var(--parchment-dark);
+  border: 1px solid var(--border);
+  color: var(--ink);
+  padding: 4px 10px;
+  cursor: pointer;
+  border-radius: var(--radius);
+}
+.wp-panel-actions button:hover { background: var(--parchment-deep); }
+#wp-save-btn { background: var(--crimson) !important; color: var(--parchment) !important; border-color: var(--crimson) !important; }
+#wp-save-btn:hover { opacity: 0.88; }
+
+/* Waypoint markers (Leaflet divIcon) */
+.wp-marker-wrap { background: none !important; border: none !important; }
+.wp-marker {
+  width: 22px; height: 22px;
+  border-radius: 50%;
+  background: var(--gold);
+  color: var(--ink);
+  font-family: 'Cinzel', serif;
+  font-size: 10px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid #2c1810;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.45);
+  line-height: 1;
+}
+
 #map-container { flex: 1; position: relative; background: var(--parchment-dark); }
 
 #map-placeholder {

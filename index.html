@@ -135,6 +135,21 @@
   <div class="map-controls">
     <button id="pin-mode-btn">📍 Place Pin</button>
     <button id="trail-toggle-btn">🗺 Party Trail</button>
+    <div class="map-scrubber">
+      <button id="scrub-prev-btn">◄</button>
+      <span id="scrub-date-label">—</span>
+      <button id="scrub-next-btn">►</button>
+    </div>
+    <button id="waypoint-mode-btn">✦ Waypoints</button>
+  </div>
+  <div id="waypoint-panel" class="waypoint-panel hidden">
+    <span id="wp-panel-label"></span>
+    <div class="wp-panel-actions">
+      <button id="wp-undo-btn">↩ Undo</button>
+      <button id="wp-clear-btn">✕ Clear</button>
+      <button id="wp-cancel-btn">Cancel</button>
+      <button id="wp-save-btn">Save Waypoints</button>
+    </div>
   </div>
   <div id="map-container">
     <div id="map-placeholder" class="hidden">
