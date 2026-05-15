@@ -99,7 +99,7 @@ const Calendar = (() => {
         const cellEvents = Events.getForDay(_nav.year, _nav.month, w, d, _cfg);
         const cls = ['day-cell', isCurrent ? 'current-day' : ''].filter(Boolean).join(' ');
         html.push(`<div class="${cls}" data-year="${_nav.year}" data-month="${_nav.month}" data-week="${w}" data-day="${d}">`);
-        html.push(`<span class="day-number">${d}</span>`);
+        html.push(`<span class="day-number">${(w - 1) * _cfg.daysPerWeek + d}</span>`);
         html.push('<div class="cell-events">');
         for (const ev of cellEvents) {
           const color = ev.color || _cfg.defaultEventColor || '#6B3A2A';
@@ -127,7 +127,8 @@ const Calendar = (() => {
         _currentDate.year === _nav.year && _currentDate.month === _nav.month &&
         _currentDate.week === _nav.week && _currentDate.day === d;
       const cls = ['wv-day-header', isCurrent ? 'current-day-header' : ''].filter(Boolean).join(' ');
-      html.push(`<div class="${cls}" data-day="${d}">${dayLabel(d - 1)}</div>`);
+      const domLabel = (_cfg.dayNames || [])[d - 1] || String((_nav.week - 1) * _cfg.daysPerWeek + d);
+      html.push(`<div class="${cls}" data-day="${d}">${domLabel}</div>`);
     }
     html.push('</div>');
 
