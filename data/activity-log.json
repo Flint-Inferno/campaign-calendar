@@ -46,5 +46,13 @@
     "playerColor": "#0000c4",
     "action": "date_advance",
     "details": "Advanced date to Year 6531 · Psol · Etarepena · Day 10 · 01:00"
+  },
+  {
+    "id": "d0121307-4e8e-4411-92f6-4792eefc5aee",
+    "timestamp": "2026-05-15T17:34:47.803Z",
+    "playerName": "Flint (DM)",
+    "playerColor": "#0000c4",
+    "action": "waypoints_save",
+    "details": "Saved 3 waypoints — Y6531 Psol W2 D9"
   }
 ]
