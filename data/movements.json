@@ -45,5 +45,14 @@
       }
     ],
     "waypointColor": "#0000ff"
+  },
+  {
+    "id": "aa34c9d0-1249-420a-a65b-87b8e438e071",
+    "year": 6531,
+    "month": 8,
+    "week": 3,
+    "day": 5,
+    "segments": [],
+    "endLocation": "gdbdf"
   }
 ]
