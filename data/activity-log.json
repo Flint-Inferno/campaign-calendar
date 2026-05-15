@@ -38,5 +38,13 @@
     "playerColor": "#0000c4",
     "action": "date_advance",
     "details": "Advanced date to Year 6531 · Psol · Viridor · Day 10 · 01:00"
+  },
+  {
+    "id": "cf8d4120-cd1e-4dc7-95f4-31e37e1aedee",
+    "timestamp": "2026-05-15T17:26:52.069Z",
+    "playerName": "Flint (DM)",
+    "playerColor": "#0000c4",
+    "action": "date_advance",
+    "details": "Advanced date to Year 6531 · Psol · Etarepena · Day 10 · 01:00"
   }
 ]
