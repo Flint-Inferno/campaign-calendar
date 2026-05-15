@@ -14,5 +14,13 @@
     "playerColor": "#0000c4",
     "action": "event_add",
     "details": "Added event: \"A thing lol\""
+  },
+  {
+    "id": "b98488df-87b4-4189-8996-606ead76beb3",
+    "timestamp": "2026-05-15T16:52:35.803Z",
+    "playerName": "Flint (DM)",
+    "playerColor": "#0000c4",
+    "action": "event_edit",
+    "details": "Edited event: \"A thing lol\""
   }
 ]
