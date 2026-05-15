@@ -38,6 +38,14 @@
         <div id="identity-preview-swatch" style="background:#8B2E2E"></div>
       </div>
       <button id="identity-save">Set Identity</button>
+      <hr class="identity-divider">
+      <label for="identity-pat-input">Personal PAT <span style="font-size:.7em;opacity:.7">(optional — bypasses roster)</span></label>
+      <div class="identity-pat-row">
+        <input id="identity-pat-input" type="password" placeholder="ghp_…" autocomplete="off" spellcheck="false">
+        <button id="identity-pat-save">Set</button>
+        <button id="identity-pat-clear" class="hidden">Remove</button>
+      </div>
+      <p id="identity-pat-status"></p>
     </div>
   </div>
 </header>

@@ -348,6 +348,7 @@ function setPlayerIdentity(name, color) {
 }
 
 function canWrite() {
+  if (GithubAPI.getPersonalPAT()) return true;
   if (!GithubAPI.getPAT()) return false;
   const { name } = getPlayerIdentity();
   if (!name) return false;
@@ -367,11 +368,23 @@ function updateIdentityDisplay() {
   }
 }
 
+function refreshPatStatus() {
+  const active = !!GithubAPI.getPersonalPAT();
+  const statusEl = document.getElementById('identity-pat-status');
+  const clearBtn = document.getElementById('identity-pat-clear');
+  if (statusEl) {
+    statusEl.textContent = active ? 'PAT active — full edit access' : '';
+    statusEl.style.color = active ? 'var(--success-text, #2a5c2a)' : '';
+  }
+  if (clearBtn) clearBtn.classList.toggle('hidden', !active);
+}
+
 document.getElementById('identity-toggle')?.addEventListener('click', () => {
   const { name, color } = getPlayerIdentity();
   if (name) document.getElementById('identity-name-input').value = name;
   document.getElementById('identity-color-input').value = color || '#8B2E2E';
   document.getElementById('identity-preview-swatch').style.background = color || '#8B2E2E';
+  refreshPatStatus();
   document.getElementById('identity-panel').classList.toggle('hidden');
 });
 
@@ -390,6 +403,34 @@ document.getElementById('identity-save')?.addEventListener('click', () => {
   } else {
     showBanner(`Identity set: ${name}. Name not on roster — view only.`, 'info');
   }
+});
+
+document.getElementById('identity-pat-save')?.addEventListener('click', async () => {
+  const pat = document.getElementById('identity-pat-input').value.trim();
+  if (!pat) return;
+  const btn = document.getElementById('identity-pat-save');
+  btn.disabled = true;
+  btn.textContent = '…';
+  try {
+    await GithubAPI.testPAT(pat);
+    GithubAPI.setPersonalPAT(pat);
+    document.getElementById('identity-pat-input').value = '';
+    refreshPatStatus();
+    updateIdentityDisplay();
+    showBanner('PAT set — you have full edit access.', 'success');
+  } catch (e) {
+    showBanner('Invalid PAT — check the token and try again.', 'error');
+  }
+  btn.disabled = false;
+  btn.textContent = 'Set';
+});
+
+document.getElementById('identity-pat-clear')?.addEventListener('click', () => {
+  GithubAPI.setPersonalPAT('');
+  document.getElementById('identity-pat-input').value = '';
+  refreshPatStatus();
+  updateIdentityDisplay();
+  showBanner('Personal PAT removed.', 'info');
 });
 
 

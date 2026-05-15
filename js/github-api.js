@@ -9,8 +9,17 @@ const GithubAPI = (() => {
     localStorage.setItem('campaign_pat', pat.trim());
   }
 
+  function getPersonalPAT() {
+    return localStorage.getItem('campaign_personal_pat') || '';
+  }
+
+  function setPersonalPAT(pat) {
+    if (pat) localStorage.setItem('campaign_personal_pat', pat.trim());
+    else localStorage.removeItem('campaign_personal_pat');
+  }
+
   function authHeaders() {
-    const pat = getPAT();
+    const pat = getPersonalPAT() || getPAT();
     const h = { 'Accept': 'application/vnd.github.v3+json' };
     if (pat) h['Authorization'] = `token ${pat}`;
     return h;
@@ -95,5 +104,5 @@ const GithubAPI = (() => {
     return (await res.json()).login;
   }
 
-  return { getPAT, setPAT, readFile, writeJSON, writeImage, testPAT };
+  return { getPAT, setPAT, getPersonalPAT, setPersonalPAT, readFile, writeJSON, writeImage, testPAT };
 })();

@@ -187,6 +187,30 @@ header {
   border-radius: var(--radius);
   align-self: flex-end;
 }
+.identity-divider { border: none; border-top: 1px solid var(--border); margin: 10px 0 8px; }
+.identity-pat-row { display: flex; gap: 6px; align-items: center; }
+.identity-pat-row input {
+  flex: 1;
+  padding: 5px 8px;
+  font-size: 0.8rem;
+  background: var(--parchment);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--ink);
+  font-family: monospace;
+}
+.identity-pat-row button {
+  font-family: 'Cinzel', serif;
+  font-size: 0.75rem;
+  padding: 5px 10px;
+  background: var(--gold);
+  color: var(--ink);
+  border: none;
+  border-radius: var(--radius);
+  cursor: pointer;
+}
+#identity-pat-clear { background: var(--parchment-dark) !important; color: var(--parchment) !important; }
+#identity-pat-status { font-size: 0.72rem; margin: 3px 0 0; min-height: 1em; }
 
 /* ── Log tab ─────────────────────────────────────────────────── */
 .log-header {
