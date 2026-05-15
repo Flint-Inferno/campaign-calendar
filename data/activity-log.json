@@ -80,11 +80,27 @@
     "details": "Saved 3 waypoints — Y6531 Psol W3 D1"
   },
   {
-    "id": "843c1337-be39-4471-bc78-0a1db59c5f0b",
-    "timestamp": "2026-05-15T23:40:46.570Z",
+    "id": "8f3f37d2-b8d4-4a3f-ac8f-6157f05de383",
+    "timestamp": "2026-05-15T23:41:20.547Z",
     "playerName": "Flint (DM)",
     "playerColor": "#0000c4",
-    "action": "movement_clear",
-    "details": "Cleared movement: Y6532 M1 W3 D24"
+    "action": "movement_save",
+    "details": "Movement: Y6531 M8 W3 D25"
+  },
+  {
+    "id": "870854e9-3d43-4a9a-a11b-80bf104f7495",
+    "timestamp": "2026-05-15T23:41:34.435Z",
+    "playerName": "Flint (DM)",
+    "playerColor": "#0000c4",
+    "action": "event_delete",
+    "details": "Deleted event: \"some sh*t\""
+  },
+  {
+    "id": "82c64cf1-ad28-4867-a455-ea19fccbda2e",
+    "timestamp": "2026-05-15T23:42:02.845Z",
+    "playerName": "Flint (DM)",
+    "playerColor": "#0000c4",
+    "action": "movement_save",
+    "details": "Movement: Y6531 M8 W3 D25"
   }
 ]
