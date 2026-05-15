@@ -1,7 +1,7 @@
 const MapView = (() => {
   let _map = null;
   let _overlay = null;
-  let _trailLayer = null;
+  let _trailLayers = [];
   let _pinLayers = [];
   let _waypointLayers = [];
   let _container = null;
@@ -11,6 +11,7 @@ const MapView = (() => {
   let _wpModeActive = false;
   let _wpModeCallback = null;
   let _pendingWaypoints = [];
+  let _pendingColor = '#8b6914';
   let _trailVisible = false;
 
   const MAP_URL = `https://raw.githubusercontent.com/${REPO_OWNER}/${REPO_NAME}/main/data/map.png`;
@@ -96,8 +97,12 @@ const MapView = (() => {
     }
   }
 
-  /* ── Movement waypoint trail ───────────────────────────────── */
-  function _buildTrailLatLngs(movements, scrubDate, cfg) {
+  /* ── Movement waypoint trail (per-day colored segments) ─────── */
+  function renderTrail(movements, scrubDate, cfg) {
+    _trailLayers.forEach(l => _map.removeLayer(l));
+    _trailLayers = [];
+    if (!_map || !_trailVisible || !scrubDate || !cfg) return;
+
     const scrubAbs = TimeCalc.toAbsolute({ ...scrubDate, hour: 23 }, cfg);
     const sorted = [...movements]
       .filter(m => m.waypoints && m.waypoints.length > 0 &&
@@ -107,24 +112,31 @@ const MapView = (() => {
         TimeCalc.toAbsolute({ year: a.year, month: a.month, week: a.week, day: a.day, hour: 0 }, cfg) -
         TimeCalc.toAbsolute({ year: b.year, month: b.month, week: b.week, day: b.day, hour: 0 }, cfg)
       );
-    const latlngs = [];
-    for (const m of sorted) {
-      for (const wp of m.waypoints) latlngs.push([wp.y, wp.x]);
-    }
-    return latlngs;
-  }
 
-  function renderTrail(movements, scrubDate, cfg) {
-    if (_trailLayer) { _map.removeLayer(_trailLayer); _trailLayer = null; }
-    if (!_map || !_trailVisible || !scrubDate || !cfg) return;
-    const latlngs = _buildTrailLatLngs(movements, scrubDate, cfg);
-    if (latlngs.length < 2) return;
-    _trailLayer = L.polyline(latlngs, {
-      color: '#8b6914',
-      weight: 2,
-      dashArray: '6,4',
-      opacity: 0.8
-    }).addTo(_map);
+    for (let i = 0; i < sorted.length; i++) {
+      const day = sorted[i];
+      const color = day.waypointColor || '#8b6914';
+
+      if (day.waypoints.length >= 2) {
+        const latlngs = day.waypoints.map(wp => [wp.y, wp.x]);
+        _trailLayers.push(
+          L.polyline(latlngs, { color, weight: 2.5, opacity: 0.9 }).addTo(_map)
+        );
+      }
+
+      if (i < sorted.length - 1) {
+        const last = day.waypoints[day.waypoints.length - 1];
+        const next = sorted[i + 1].waypoints[0];
+        _trailLayers.push(
+          L.polyline([[last.y, last.x], [next.y, next.x]], {
+            color: '#999',
+            weight: 1,
+            dashArray: '4,7',
+            opacity: 0.45
+          }).addTo(_map)
+        );
+      }
+    }
   }
 
   function toggleTrail(movements, scrubDate, cfg) {
@@ -133,10 +145,11 @@ const MapView = (() => {
     return _trailVisible;
   }
 
-  /* ── Waypoint markers (numbered) ───────────────────────────── */
-  function _makeWpIcon(num) {
+  /* ── Waypoint markers (numbered, colored) ──────────────────── */
+  function _makeWpIcon(num, color) {
+    const bg = color || '#8b6914';
     return L.divIcon({
-      html: `<div class="wp-marker">${num}</div>`,
+      html: `<div class="wp-marker" style="background:${bg}">${num}</div>`,
       className: 'wp-marker-wrap',
       iconSize: [22, 22],
       iconAnchor: [11, 11]
@@ -148,17 +161,23 @@ const MapView = (() => {
     _waypointLayers = [];
     if (!_map) return;
     _pendingWaypoints.forEach((wp, i) => {
-      const m = L.marker([wp.y, wp.x], { icon: _makeWpIcon(i + 1), interactive: false }).addTo(_map);
+      const m = L.marker([wp.y, wp.x], {
+        icon: _makeWpIcon(i + 1, _pendingColor),
+        interactive: false
+      }).addTo(_map);
       _waypointLayers.push(m);
     });
   }
 
-  function renderDayWaypoints(waypoints) {
+  function renderDayWaypoints(waypoints, color) {
     _waypointLayers.forEach(l => _map.removeLayer(l));
     _waypointLayers = [];
     if (!_map || !waypoints || waypoints.length === 0) return;
     waypoints.forEach((wp, i) => {
-      const m = L.marker([wp.y, wp.x], { icon: _makeWpIcon(i + 1), interactive: !!wp.label }).addTo(_map);
+      const m = L.marker([wp.y, wp.x], {
+        icon: _makeWpIcon(i + 1, color || '#8b6914'),
+        interactive: !!wp.label
+      }).addTo(_map);
       if (wp.label) m.bindTooltip(escHtml(wp.label));
       _waypointLayers.push(m);
     });
@@ -178,7 +197,7 @@ const MapView = (() => {
         m.year === scrubDate.year && m.month === scrubDate.month &&
         m.week === scrubDate.week && m.day === scrubDate.day
       );
-      renderDayWaypoints(dayMvt?.waypoints || []);
+      renderDayWaypoints(dayMvt?.waypoints || [], dayMvt?.waypointColor);
     }
   }
 
@@ -198,9 +217,10 @@ const MapView = (() => {
   function isPinMode() { return _pinModeActive; }
 
   /* ── Waypoint mode ─────────────────────────────────────────── */
-  function enableWaypointMode(existingWaypoints, callback) {
+  function enableWaypointMode(existingWaypoints, existingColor, callback) {
     _wpModeActive = true;
     _pendingWaypoints = [...(existingWaypoints || [])];
+    _pendingColor = existingColor || '#8b6914';
     _wpModeCallback = callback;
     if (_container) _container.style.cursor = 'crosshair';
     _refreshWaypointMarkers();
@@ -212,6 +232,7 @@ const MapView = (() => {
     _waypointLayers.forEach(l => _map.removeLayer(l));
     _waypointLayers = [];
     _pendingWaypoints = [];
+    _pendingColor = '#8b6914';
     if (_container) _container.style.cursor = '';
   }
 
@@ -230,7 +251,13 @@ const MapView = (() => {
     if (_wpModeCallback) _wpModeCallback([]);
   }
 
+  function setPendingColor(color) {
+    _pendingColor = color || '#8b6914';
+    _refreshWaypointMarkers();
+  }
+
   function getPendingWaypoints() { return [..._pendingWaypoints]; }
+  function getPendingColor() { return _pendingColor; }
 
   /* ── Utilities ─────────────────────────────────────────────── */
   function invalidateSize() {
@@ -255,6 +282,7 @@ const MapView = (() => {
     enablePinMode, disablePinMode, isPinMode,
     enableWaypointMode, disableWaypointMode, isWaypointMode,
     undoLastWaypoint, clearPendingWaypoints, getPendingWaypoints,
+    setPendingColor, getPendingColor,
     invalidateSize
   };
 })();

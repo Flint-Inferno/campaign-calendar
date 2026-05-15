@@ -458,12 +458,20 @@ document.getElementById('waypoint-mode-btn')?.addEventListener('click', () => {
     exitWaypointModeIfActive();
     MapView.renderScrubbed(Events.getAll(), Movements.getAll(), _scrubDate, CFG);
   } else {
-    const existing = Movements.getForDay(_scrubDate.year, _scrubDate.month, _scrubDate.week, _scrubDate.day)?.waypoints || [];
-    MapView.enableWaypointMode(existing, waypoints => updateWaypointPanelLabel(waypoints.length));
+    const dayMvt = Movements.getForDay(_scrubDate.year, _scrubDate.month, _scrubDate.week, _scrubDate.day);
+    const existing = dayMvt?.waypoints || [];
+    const existingColor = dayMvt?.waypointColor || '#8b6914';
+    MapView.enableWaypointMode(existing, existingColor, waypoints => updateWaypointPanelLabel(waypoints.length));
+    const colorInput = document.getElementById('wp-color-input');
+    if (colorInput) colorInput.value = existingColor;
     document.getElementById('waypoint-mode-btn')?.classList.add('active');
     document.getElementById('waypoint-panel')?.classList.remove('hidden');
     updateWaypointPanelLabel(existing.length);
   }
+});
+
+document.getElementById('wp-color-input')?.addEventListener('input', e => {
+  MapView.setPendingColor(e.target.value);
 });
 
 document.getElementById('wp-undo-btn')?.addEventListener('click', () => {
@@ -483,8 +491,9 @@ document.getElementById('wp-save-btn')?.addEventListener('click', async () => {
   if (!_scrubDate) return;
   if (!GithubAPI.getPAT()) { showBanner('Write key not set — contact the DM.', 'error'); return; }
   const waypoints = MapView.getPendingWaypoints();
+  const waypointColor = MapView.getPendingColor();
   try {
-    await Movements.setDay(_scrubDate.year, _scrubDate.month, _scrubDate.week, _scrubDate.day, { waypoints });
+    await Movements.setDay(_scrubDate.year, _scrubDate.month, _scrubDate.week, _scrubDate.day, { waypoints, waypointColor });
     const mn = (CFG.monthNames || [])[_scrubDate.month - 1] || `M${_scrubDate.month}`;
     appendActivityLog('waypoints_save', `Saved ${waypoints.length} waypoint${waypoints.length !== 1 ? 's' : ''} — Y${_scrubDate.year} ${mn} W${_scrubDate.week} D${_scrubDate.day}`);
     exitWaypointModeIfActive();
