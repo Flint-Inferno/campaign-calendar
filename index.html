@@ -45,119 +45,139 @@
 <!-- ── Banner ──────────────────────────────────────────────── -->
 <div id="banner" class="banner banner-info hidden"></div>
 
-<!-- ══════════════════════════════════════════════════════════ -->
-<!-- Calendar Tab -->
-<!-- ══════════════════════════════════════════════════════════ -->
-<div id="tab-calendar" class="tab-content">
+<!-- ── Main body: tab area + persistent sidebar ────────────── -->
+<div class="main-body">
 
-  <div class="calendar-controls">
-    <div class="view-toggle">
-      <button class="view-btn active" data-view="month">Month</button>
-      <button class="view-btn" data-view="week">Week</button>
-    </div>
+  <div class="tab-area">
 
-    <div class="nav-controls">
-      <button id="prev-btn">◄</button>
-      <span id="nav-label"></span>
-      <button id="next-btn">►</button>
-      <button id="today-btn">Today</button>
-    </div>
+    <!-- ══════════════════════════════════════════════════════ -->
+    <!-- Calendar Tab -->
+    <!-- ══════════════════════════════════════════════════════ -->
+    <div id="tab-calendar" class="tab-content">
 
-    <button id="add-event-btn">+ Add Event</button>
-  </div>
+      <div class="calendar-controls">
+        <div class="view-toggle">
+          <button class="view-btn active" data-view="month">Month</button>
+          <button class="view-btn" data-view="week">Week</button>
+        </div>
 
-  <div class="calendar-layout">
-    <div id="calendar-grid"></div>
+        <div class="nav-controls">
+          <button id="prev-btn">◄</button>
+          <span id="nav-label"></span>
+          <button id="next-btn">►</button>
+          <button id="today-btn">Today</button>
+        </div>
 
-    <aside class="sidebar">
-      <div class="current-date-box">
-        <h3>Current Date</h3>
-        <p id="current-date-display">Loading…</p>
-        <button id="advance-time-toggle">Advance Time ▾</button>
+        <button id="add-event-btn">+ Add Event</button>
       </div>
 
-      <div id="time-calc-panel" class="hidden">
-        <h4>Time Calculator</h4>
-        <form id="time-calc-form" onsubmit="return false">
-          <div class="tc-section-label">Start date</div>
-          <div class="tc-date-row">
-            <div>
-              <label>Year</label>
-              <input type="number" name="tc-year" min="1" value="1">
-            </div>
-            <div>
-              <label>Month</label>
-              <select name="tc-month"></select>
-            </div>
-          </div>
-          <div class="tc-date-row">
-            <div>
-              <label>Week</label>
-              <select name="tc-week"></select>
-            </div>
-            <div>
-              <label>Day</label>
-              <select name="tc-day"></select>
-            </div>
-          </div>
-          <div class="tc-date-row">
-            <div>
-              <label>Hour</label>
-              <select name="tc-hour"></select>
-            </div>
-          </div>
+      <div id="calendar-grid"></div>
 
-          <div class="tc-section-label">Add duration</div>
-          <div class="tc-dur-grid">
-            <div><label>Years</label><input type="number" name="dur-years" value="0"></div>
-            <div><label>Months</label><input type="number" name="dur-months" value="0"></div>
-            <div><label>Weeks</label><input type="number" name="dur-weeks" value="0"></div>
-            <div><label>Days</label><input type="number" name="dur-days" value="0"></div>
-            <div><label>Hours</label><input type="number" name="dur-hours" value="0"></div>
-          </div>
+    </div>
 
-          <button id="calc-btn">Calculate</button>
-
-          <div id="calc-result-row" class="hidden">
-            <div id="calc-result"></div>
-            <button id="set-current-btn" data-result="">Set as Current Date</button>
-          </div>
-        </form>
+    <!-- ══════════════════════════════════════════════════════ -->
+    <!-- Map Tab -->
+    <!-- ══════════════════════════════════════════════════════ -->
+    <div id="tab-map" class="tab-content hidden">
+      <div class="map-controls">
+        <button id="pin-mode-btn">📍 Place Pin</button>
+        <button id="trail-toggle-btn">🗺 Party Trail</button>
+        <div class="map-scrubber">
+          <button id="scrub-prev-btn">◄</button>
+          <span id="scrub-date-label">—</span>
+          <button id="scrub-next-btn">►</button>
+        </div>
+        <button id="waypoint-mode-btn">✦ Waypoints</button>
       </div>
-    </aside>
-  </div>
-</div>
+      <div id="waypoint-panel" class="waypoint-panel hidden">
+        <span id="wp-panel-label"></span>
+        <div class="wp-panel-actions">
+          <button id="wp-undo-btn">↩ Undo</button>
+          <button id="wp-clear-btn">✕ Clear</button>
+          <button id="wp-cancel-btn">Cancel</button>
+          <button id="wp-save-btn">Save Waypoints</button>
+        </div>
+      </div>
+      <div id="map-container">
+        <div id="map-placeholder" class="hidden">
+          <p style="font-size:1.1rem">No world map uploaded.</p>
+          <p style="font-size:0.85rem;color:#5a3a28">Open <strong>/admin.html</strong> to upload your world map image.</p>
+        </div>
+      </div>
+    </div>
 
-<!-- ══════════════════════════════════════════════════════════ -->
-<!-- Map Tab -->
-<!-- ══════════════════════════════════════════════════════════ -->
-<div id="tab-map" class="tab-content hidden">
-  <div class="map-controls">
-    <button id="pin-mode-btn">📍 Place Pin</button>
-    <button id="trail-toggle-btn">🗺 Party Trail</button>
-    <div class="map-scrubber">
-      <button id="scrub-prev-btn">◄</button>
-      <span id="scrub-date-label">—</span>
-      <button id="scrub-next-btn">►</button>
+    <!-- ══════════════════════════════════════════════════════ -->
+    <!-- Log Tab -->
+    <!-- ══════════════════════════════════════════════════════ -->
+    <div id="tab-log" class="tab-content hidden">
+      <div class="log-header">
+        <span>Activity Log</span>
+        <button id="refresh-log-btn">↺ Refresh</button>
+      </div>
+      <div id="log-list"></div>
     </div>
-    <button id="waypoint-mode-btn">✦ Waypoints</button>
-  </div>
-  <div id="waypoint-panel" class="waypoint-panel hidden">
-    <span id="wp-panel-label"></span>
-    <div class="wp-panel-actions">
-      <button id="wp-undo-btn">↩ Undo</button>
-      <button id="wp-clear-btn">✕ Clear</button>
-      <button id="wp-cancel-btn">Cancel</button>
-      <button id="wp-save-btn">Save Waypoints</button>
+
+  </div><!-- /tab-area -->
+
+  <!-- ── Persistent sidebar ──────────────────────────────── -->
+  <aside class="sidebar" id="app-sidebar">
+    <div class="current-date-box">
+      <h3>Current Date</h3>
+      <p id="current-date-display">Loading…</p>
+      <button id="advance-time-toggle">Advance Time ▾</button>
     </div>
-  </div>
-  <div id="map-container">
-    <div id="map-placeholder" class="hidden">
-      <p style="font-size:1.1rem">No world map uploaded.</p>
-      <p style="font-size:0.85rem;color:#5a3a28">Open <strong>/admin.html</strong> to upload your world map image.</p>
+
+    <div id="time-calc-panel" class="hidden">
+      <h4>Time Calculator</h4>
+      <form id="time-calc-form" onsubmit="return false">
+        <div class="tc-section-label">Start date</div>
+        <div class="tc-date-row">
+          <div>
+            <label>Year</label>
+            <input type="number" name="tc-year" min="1" value="1">
+          </div>
+          <div>
+            <label>Month</label>
+            <select name="tc-month"></select>
+          </div>
+        </div>
+        <div class="tc-date-row">
+          <div>
+            <label>Week</label>
+            <select name="tc-week"></select>
+          </div>
+          <div>
+            <label>Day</label>
+            <select name="tc-day"></select>
+          </div>
+        </div>
+        <div class="tc-date-row">
+          <div>
+            <label>Hour</label>
+            <select name="tc-hour"></select>
+          </div>
+        </div>
+
+        <div class="tc-section-label">Add duration</div>
+        <div class="tc-dur-grid">
+          <div><label>Years</label><input type="number" name="dur-years" value="0"></div>
+          <div><label>Months</label><input type="number" name="dur-months" value="0"></div>
+          <div><label>Weeks</label><input type="number" name="dur-weeks" value="0"></div>
+          <div><label>Days</label><input type="number" name="dur-days" value="0"></div>
+          <div><label>Hours</label><input type="number" name="dur-hours" value="0"></div>
+        </div>
+
+        <button id="calc-btn">Calculate</button>
+
+        <div id="calc-result-row" class="hidden">
+          <div id="calc-result"></div>
+          <button id="set-current-btn" data-result="">Set as Current Date</button>
+        </div>
+      </form>
     </div>
-  </div>
-</div>
+  </aside>
+
+</div><!-- /main-body -->
 
 <!-- ══════════════════════════════════════════════════════════ -->
 <!-- Event Modal -->
@@ -272,17 +292,6 @@
       <button id="save-event-btn">Save</button>
     </div>
   </div>
-</div>
-
-<!-- ══════════════════════════════════════════════════════════ -->
-<!-- Log Tab -->
-<!-- ══════════════════════════════════════════════════════════ -->
-<div id="tab-log" class="tab-content hidden">
-  <div class="log-header">
-    <span>Activity Log</span>
-    <button id="refresh-log-btn">↺ Refresh</button>
-  </div>
-  <div id="log-list"></div>
 </div>
 
 <!-- ══════════════════════════════════════════════════════════ -->

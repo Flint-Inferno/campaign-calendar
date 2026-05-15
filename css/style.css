@@ -252,9 +252,22 @@ header {
 #banner.banner-success { background: #2a4a2a; color: #b0e0b0; border-color: #5a9a5a; }
 #banner.banner-error   { background: #4a1c1c; color: #f0b0b0; border-color: #9a5a5a; }
 
+/* ── Main body layout (tab area + persistent sidebar) ────────── */
+.main-body {
+  display: flex;
+  align-items: stretch;
+}
+.tab-area {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
 /* ── Tab content ─────────────────────────────────────────────── */
 .tab-content { display: block; }
 .tab-content.hidden { display: none; }
+#tab-map { flex: 1; }
 
 /* ── Calendar controls bar ───────────────────────────────────── */
 .calendar-controls {
@@ -624,7 +637,7 @@ header {
 }
 
 /* ── Map tab ──────────────────────────────────────────────────── */
-#tab-map { display: flex; flex-direction: column; height: calc(100vh - 100px); }
+#tab-map { display: flex; flex-direction: column; min-height: 400px; }
 
 .map-controls {
   display: flex;
@@ -665,11 +678,16 @@ header {
 .map-scrubber button:hover { background: var(--gold); color: var(--parchment); }
 #scrub-date-label {
   font-family: 'Cinzel', serif;
-  font-size: 0.8rem;
+  font-size: 0.85rem;
   color: var(--ink);
-  min-width: 200px;
+  min-width: 220px;
   text-align: center;
   letter-spacing: 0.02em;
+  font-weight: 600;
+  background: var(--parchment);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 3px 10px;
 }
 
 /* Waypoint panel */

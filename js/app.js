@@ -56,6 +56,7 @@ async function appInit() {
   hideBanner();
 
   updateIdentityDisplay();
+  updateScrubLabel();
 }
 
 /* ── Tab switching ──────────────────────────────────────────── */
@@ -65,6 +66,7 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
     btn.classList.add('active');
     const tab = btn.dataset.tab;
     document.querySelectorAll('.tab-content').forEach(c => c.classList.toggle('hidden', c.id !== `tab-${tab}`));
+    document.getElementById('app-sidebar')?.classList.toggle('hidden', tab === 'log');
     if (tab === 'map' && !mapLoaded) initMap();
     if (tab === 'log') renderLogTab();
   });
@@ -451,7 +453,6 @@ function updateWaypointPanelLabel(count) {
 }
 
 document.getElementById('waypoint-mode-btn')?.addEventListener('click', () => {
-  if (!GithubAPI.getPAT()) { showBanner('Write key not set — contact the DM.', 'error'); return; }
   if (!_scrubDate || !mapLoaded) return;
   if (MapView.isWaypointMode()) {
     exitWaypointModeIfActive();
