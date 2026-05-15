@@ -78,5 +78,13 @@
     "playerColor": "#0000c4",
     "action": "waypoints_save",
     "details": "Saved 3 waypoints — Y6531 Psol W3 D1"
+  },
+  {
+    "id": "843c1337-be39-4471-bc78-0a1db59c5f0b",
+    "timestamp": "2026-05-15T23:40:46.570Z",
+    "playerName": "Flint (DM)",
+    "playerColor": "#0000c4",
+    "action": "movement_clear",
+    "details": "Cleared movement: Y6532 M1 W3 D24"
   }
 ]
