@@ -256,11 +256,53 @@
   </div>
 </div>
 
+<!-- ══════════════════════════════════════════════════════════ -->
+<!-- Movement Modal -->
+<!-- ══════════════════════════════════════════════════════════ -->
+<div id="mvt-modal" class="modal hidden" role="dialog" aria-modal="true">
+  <div class="modal-backdrop"></div>
+  <div class="modal-box" style="width:min(640px,95vw)">
+    <h2>Movement — <span id="mvt-modal-date" style="font-weight:400;font-size:.88em"></span></h2>
+
+    <div class="form-row">
+      <label>Starting Location <span style="font-size:.7em;opacity:.7">(auto-filled from previous day)</span></label>
+      <input id="mvt-start-loc" type="text" readonly style="opacity:.65;cursor:default" placeholder="Unknown">
+    </div>
+
+    <div class="form-row">
+      <label>Ending Location</label>
+      <input id="mvt-end-loc" type="text" placeholder="Where did the party end up?">
+    </div>
+
+    <div class="form-row">
+      <label>Party Segments</label>
+      <p id="mvt-no-members-note" class="hidden">No party members configured. Add them in <strong>admin.html</strong> → Party Members.</p>
+      <div class="mvt-seg-headers">
+        <span>Member</span><span>Activity</span><span>From</span><span>To</span><span></span>
+      </div>
+      <div id="mvt-segments-table"></div>
+      <button type="button" id="mvt-add-seg-btn">+ Add Segment</button>
+    </div>
+
+    <div class="form-row">
+      <label>Timeline Preview</label>
+      <div id="mvt-timeline"></div>
+    </div>
+
+    <div class="modal-actions">
+      <button id="mvt-clear-btn">Clear Day</button>
+      <button id="mvt-cancel-btn">Cancel</button>
+      <button id="mvt-save-btn">Save</button>
+    </div>
+  </div>
+</div>
+
 <!-- ── Scripts ─────────────────────────────────────────────── -->
 <script src="js/repo-config.js"></script>
 <script src="js/github-api.js"></script>
 <script src="js/time-calc.js"></script>
 <script src="js/events.js"></script>
+<script src="js/movements.js"></script>
 <script src="js/calendar.js"></script>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="js/map.js"></script>

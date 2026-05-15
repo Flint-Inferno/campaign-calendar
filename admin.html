@@ -110,6 +110,20 @@
     </div>
   </div>
 
+  <!-- ── 5b. Party Members ────────────────────────────────────── -->
+  <div class="admin-section">
+    <div class="admin-section-title">Party Members</div>
+    <div class="admin-section-body">
+      <p style="font-size:.85rem;color:var(--ink-light);margin-bottom:10px">
+        Define party members for the movement annotation system. Each member gets a color used on the calendar timeline.
+      </p>
+      <div class="names-list" id="party-members-list"></div>
+      <button class="add-name-btn" id="add-member-btn">+ Add Member</button>
+      <br>
+      <button class="admin-save-btn" id="save-members-btn">Save Members</button>
+    </div>
+  </div>
+
   <!-- ── 6. World Map ──────────────────────────────────────── -->
   <div class="admin-section">
     <div class="admin-section-title">6 · World Map</div>
@@ -207,6 +221,7 @@ function populateFields() {
   buildMonthList(CFG.monthNames || [], CFG.monthColors || []);
   buildNamesList('week-names-list',  CFG.weekNames  || []);
   buildNamesList('day-names-list',   CFG.dayNames   || []);
+  buildMembersList(CFG.partyMembers || []);
 
   const col = CFG.defaultEventColor || '#6B3A2A';
   document.getElementById('cfg-defaultEventColor').value    = col;
@@ -392,6 +407,54 @@ document.getElementById('save-structure-btn').addEventListener('click', () => {
     daysPerWeek:    +document.getElementById('cfg-daysPerWeek').value,
     hoursPerDay:    +document.getElementById('cfg-hoursPerDay').value
   }, 'Structure saved!');
+});
+
+function buildMembersList(members) {
+  const el = document.getElementById('party-members-list');
+  el.innerHTML = '';
+  members.forEach(m => el.appendChild(makeMemberItem(m)));
+}
+
+function makeMemberItem(member) {
+  const div = document.createElement('div');
+  div.className = 'name-item';
+  div.dataset.memberId = member.id || '';
+
+  const swatch = document.createElement('input');
+  swatch.type = 'color';
+  swatch.className = 'month-color-swatch';
+  swatch.value = member.color || '#8B2E2E';
+  swatch.title = 'Member color';
+
+  const inp = document.createElement('input');
+  inp.type = 'text';
+  inp.value = member.name || '';
+  inp.placeholder = 'Character name';
+
+  const rm = document.createElement('button');
+  rm.className = 'rm-btn';
+  rm.textContent = '×';
+  rm.addEventListener('click', () => div.remove());
+
+  div.appendChild(swatch);
+  div.appendChild(inp);
+  div.appendChild(rm);
+  return div;
+}
+
+function readMembers() {
+  return Array.from(document.querySelectorAll('#party-members-list .name-item')).map(div => ({
+    id:    div.dataset.memberId || crypto.randomUUID(),
+    name:  div.querySelector('input[type=text]').value.trim(),
+    color: div.querySelector('input[type=color]').value
+  })).filter(m => m.name);
+}
+
+document.getElementById('add-member-btn').addEventListener('click', () => {
+  document.getElementById('party-members-list').appendChild(makeMemberItem({ id: '', name: '', color: '#8B2E2E' }));
+});
+document.getElementById('save-members-btn').addEventListener('click', () => {
+  saveConfig({ partyMembers: readMembers() }, 'Party members saved!');
 });
 
 document.getElementById('add-month-btn').addEventListener('click', () => {

@@ -3,6 +3,7 @@ let CFG = null;
 let CURRENT_DATE = null;
 let mapLoaded = false;
 let editingEventId = null;
+let _mvtDate = null;
 
 const COLOR_SWATCHES = [
   '#8B2E2E','#6B3A2A','#8B6914','#2E5A1C','#1C3D5A',
@@ -14,14 +15,16 @@ const COLOR_SWATCHES = [
 async function appInit() {
   showBanner('Loading…', 'info');
   try {
-    const [cfgRes, evRes, cdRes] = await Promise.all([
+    const [cfgRes, evRes, cdRes, mvtRes] = await Promise.all([
       GithubAPI.readFile('data/config.json'),
       GithubAPI.readFile('data/events.json').catch(() => ({ content: [] })),
-      GithubAPI.readFile('data/current-date.json').catch(() => ({ content: { year:1,month:1,week:1,day:1,hour:0 } }))
+      GithubAPI.readFile('data/current-date.json').catch(() => ({ content: { year:1,month:1,week:1,day:1,hour:0 } })),
+      GithubAPI.readFile('data/movements.json').catch(() => ({ content: [] }))
     ]);
     CFG = cfgRes.content;
     Events.importJSON(evRes.content);
     CURRENT_DATE = cdRes.content;
+    Movements.importJSON(mvtRes.content);
   } catch (e) {
     showBanner('Failed to load calendar data. Check your internet connection.', 'error');
     return;
@@ -34,6 +37,7 @@ async function appInit() {
   Calendar.init(document.getElementById('calendar-grid'), CFG, CURRENT_DATE);
   Calendar.onEventClick = openViewModal;
   Calendar.onCellClick = (date) => openAddModal(date);
+  Calendar.onMovementClick = openMovementModal;
 
   MapView.init(document.getElementById('map-container'), CFG);
 
@@ -376,6 +380,165 @@ document.addEventListener('map:goto-event', e => {
   updateNavLabel();
   setTimeout(() => openViewModal(id), 100);
 });
+
+/* ── Movement modal ──────────────────────────────────────────── */
+function escHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function openMovementModal(date) {
+  _mvtDate = date;
+  const mn = (CFG.monthNames || [])[date.month - 1] || `Month ${date.month}`;
+  const wn = (CFG.weekNames || [])[date.week - 1] || `Week ${date.week}`;
+  const dayNum = (date.week - 1) * CFG.daysPerWeek + date.day;
+  document.getElementById('mvt-modal-date').textContent =
+    `Year ${date.year} · ${mn} · ${wn} · Day ${dayNum}`;
+
+  document.getElementById('mvt-start-loc').value = Movements.getStartLocation(date, CFG) || '';
+  const existing = Movements.getForDay(date.year, date.month, date.week, date.day);
+  document.getElementById('mvt-end-loc').value = existing?.endLocation || '';
+
+  const table = document.getElementById('mvt-segments-table');
+  table.innerHTML = '';
+  const noMembers = (CFG.partyMembers || []).length === 0;
+  document.getElementById('mvt-no-members-note').classList.toggle('hidden', !noMembers);
+  for (const seg of (existing?.segments || [])) addSegmentRow(seg);
+
+  renderMovementTimeline();
+  openModal('mvt-modal');
+}
+
+function addSegmentRow(seg = {}) {
+  const members = CFG.partyMembers || [];
+  if (members.length === 0) return;
+  const row = document.createElement('div');
+  row.className = 'mvt-seg-row';
+
+  const memberSel = document.createElement('select');
+  memberSel.className = 'seg-member';
+  members.forEach(m => {
+    const opt = document.createElement('option');
+    opt.value = m.id;
+    opt.textContent = m.name;
+    if (m.id === seg.memberId) opt.selected = true;
+    memberSel.appendChild(opt);
+  });
+
+  const labelInp = document.createElement('input');
+  labelInp.type = 'text';
+  labelInp.className = 'seg-label';
+  labelInp.placeholder = 'Activity';
+  labelInp.value = seg.label || '';
+
+  const startSel = document.createElement('select');
+  startSel.className = 'seg-start';
+  for (let h = 0; h < CFG.hoursPerDay; h++) {
+    const opt = document.createElement('option');
+    opt.value = h;
+    opt.textContent = String(h).padStart(2, '0') + ':00';
+    if (h === (seg.startHour || 0)) opt.selected = true;
+    startSel.appendChild(opt);
+  }
+
+  const endSel = document.createElement('select');
+  endSel.className = 'seg-end';
+  for (let h = 1; h <= CFG.hoursPerDay; h++) {
+    const opt = document.createElement('option');
+    opt.value = h;
+    opt.textContent = h === CFG.hoursPerDay ? 'End of Day' : String(h).padStart(2, '0') + ':00';
+    if (h === (seg.endHour != null ? seg.endHour : CFG.hoursPerDay)) opt.selected = true;
+    endSel.appendChild(opt);
+  }
+
+  const rmBtn = document.createElement('button');
+  rmBtn.type = 'button';
+  rmBtn.className = 'mvt-rm-btn';
+  rmBtn.textContent = '×';
+  rmBtn.addEventListener('click', () => { row.remove(); renderMovementTimeline(); });
+
+  [memberSel, startSel, endSel].forEach(el => el.addEventListener('change', renderMovementTimeline));
+  labelInp.addEventListener('input', renderMovementTimeline);
+
+  row.append(memberSel, labelInp, startSel, endSel, rmBtn);
+  document.getElementById('mvt-segments-table').appendChild(row);
+  renderMovementTimeline();
+}
+
+function collectSegmentsFromForm() {
+  return Array.from(document.querySelectorAll('#mvt-segments-table .mvt-seg-row')).map(row => ({
+    memberId:  row.querySelector('.seg-member').value,
+    label:     row.querySelector('.seg-label').value.trim(),
+    startHour: +row.querySelector('.seg-start').value,
+    endHour:   +row.querySelector('.seg-end').value
+  })).filter(s => s.endHour > s.startHour);
+}
+
+function renderMovementTimeline() {
+  const container = document.getElementById('mvt-timeline');
+  if (!container) return;
+  const members = CFG.partyMembers || [];
+  const segments = collectSegmentsFromForm();
+  const hours = CFG.hoursPerDay || 24;
+
+  if (segments.length === 0) {
+    container.innerHTML = '<div style="font-size:.78rem;color:var(--ink-light);padding:6px 4px">Add segments above to preview.</div>';
+    return;
+  }
+
+  const byMember = {};
+  for (const seg of segments) {
+    (byMember[seg.memberId] = byMember[seg.memberId] || []).push(seg);
+  }
+
+  let html = '<div class="mvt-timeline"><div class="tl-hour-labels">';
+  for (let h = 0; h < hours; h++) html += `<div class="tl-hour-tick">${h}</div>`;
+  html += '</div>';
+
+  for (const [memberId, segs] of Object.entries(byMember)) {
+    const mb = members.find(m => m.id === memberId);
+    const name = mb ? mb.name : memberId;
+    const color = mb ? mb.color : '#888';
+    html += `<div class="tl-row"><div class="tl-name" title="${escHtml(name)}">${escHtml(name)}</div><div class="tl-track">`;
+    for (const seg of segs) {
+      const left = (seg.startHour / hours) * 100;
+      const width = ((seg.endHour - seg.startHour) / hours) * 100;
+      html += `<div class="tl-seg" style="left:${left}%;width:${width}%;background:${color}" title="${escHtml(seg.label || name)}"></div>`;
+    }
+    html += '</div></div>';
+  }
+  html += '</div>';
+  container.innerHTML = html;
+}
+
+document.getElementById('mvt-add-seg-btn').addEventListener('click', () => addSegmentRow());
+
+document.getElementById('mvt-save-btn').addEventListener('click', async () => {
+  if (!_mvtDate) return;
+  if (!GithubAPI.getPAT()) { showBanner('Enter your PAT to save movement.', 'error'); openPATPanel(); return; }
+  const segments = collectSegmentsFromForm();
+  const endLoc = document.getElementById('mvt-end-loc').value.trim() || null;
+  try {
+    await Movements.setDay(_mvtDate.year, _mvtDate.month, _mvtDate.week, _mvtDate.day, { segments, endLocation: endLoc });
+    closeModal('mvt-modal');
+    Calendar.render();
+    showBanner('Movement saved!', 'success');
+  } catch (e) { showBanner(e.message, 'error'); }
+});
+
+document.getElementById('mvt-clear-btn').addEventListener('click', async () => {
+  if (!_mvtDate) return;
+  if (!confirm('Clear all movement data for this day?')) return;
+  if (!GithubAPI.getPAT()) { showBanner('Enter your PAT to clear movement.', 'error'); openPATPanel(); return; }
+  try {
+    await Movements.clearDay(_mvtDate.year, _mvtDate.month, _mvtDate.week, _mvtDate.day);
+    closeModal('mvt-modal');
+    Calendar.render();
+    showBanner('Movement cleared.', 'success');
+  } catch (e) { showBanner(e.message, 'error'); }
+});
+
+document.getElementById('mvt-cancel-btn').addEventListener('click', () => closeModal('mvt-modal'));
+document.getElementById('mvt-modal').querySelector('.modal-backdrop').addEventListener('click', () => closeModal('mvt-modal'));
 
 /* ── Modal helpers ──────────────────────────────────────────── */
 function openModal(id) {

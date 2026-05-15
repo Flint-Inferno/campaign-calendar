@@ -7,6 +7,7 @@ const Calendar = (() => {
 
   let onEventClick = null;
   let onCellClick = null;
+  let onMovementClick = null;
 
   const HOUR_HEIGHT = 44;
 
@@ -98,15 +99,27 @@ const Calendar = (() => {
           _currentDate.week === w && _currentDate.day === d;
         const cellEvents = Events.getForDay(_nav.year, _nav.month, w, d, _cfg);
         const cls = ['day-cell', isCurrent ? 'current-day' : ''].filter(Boolean).join(' ');
+        const dayMvt = typeof Movements !== 'undefined' ? Movements.getForDay(_nav.year, _nav.month, w, d) : null;
+        const activeMemberIds = [...new Set((dayMvt?.segments || []).map(s => s.memberId))];
+        const memberDots = activeMemberIds.map(mid => {
+          const mb = (_cfg.partyMembers || []).find(m => m.id === mid);
+          return mb ? `<span class="mvt-dot" style="background:${mb.color}" title="${escHtml(mb.name)}"></span>` : '';
+        }).join('');
+
         html.push(`<div class="${cls}" data-year="${_nav.year}" data-month="${_nav.month}" data-week="${w}" data-day="${d}">`);
         html.push(`<span class="day-number">${(w - 1) * _cfg.daysPerWeek + d}</span>`);
+        if (dayMvt?.endLocation) {
+          html.push(`<div class="day-loc-badge" title="Ends at: ${escHtml(dayMvt.endLocation)}">📍 ${escHtml(dayMvt.endLocation)}</div>`);
+        }
         html.push('<div class="cell-events">');
         for (const ev of cellEvents) {
           const color = ev.color || _cfg.defaultEventColor || '#6B3A2A';
           const bright = isColorLight(color);
           html.push(`<div class="event-chip" data-event-id="${ev.id}" style="background:${color};color:${bright ? '#2c1810' : '#f4e4c1'}" title="${escHtml(ev.title)}">${escHtml(ev.title)}</div>`);
         }
-        html.push('</div></div>');
+        html.push('</div>');
+        html.push(`<div class="movement-strip" data-year="${_nav.year}" data-month="${_nav.month}" data-week="${w}" data-day="${d}" title="Click to annotate movement">${memberDots}<span class="mvt-strip-add">↳</span></div>`);
+        html.push('</div>');
       }
       html.push('</div>');
     }
@@ -167,6 +180,19 @@ const Calendar = (() => {
         const bright = isColorLight(color);
         html.push(`<div class="week-event-block" data-event-id="${ev.id}" style="top:${top}px;height:${height}px;background:${color};color:${bright ? '#2c1810' : '#f4e4c1'}">${escHtml(ev.title)}</div>`);
       }
+      // Movement bands
+      if (typeof Movements !== 'undefined') {
+        const dayMvt = Movements.getForDay(_nav.year, _nav.month, _nav.week, d);
+        for (const seg of (dayMvt?.segments || [])) {
+          const mb = (_cfg.partyMembers || []).find(m => m.id === seg.memberId);
+          if (!mb || seg.endHour <= seg.startHour) continue;
+          const top = seg.startHour * HOUR_HEIGHT;
+          const height = (seg.endHour - seg.startHour) * HOUR_HEIGHT;
+          const label = seg.label ? escHtml(seg.label) : '';
+          html.push(`<div class="week-mvt-band" style="top:${top}px;height:${height}px;border-left:3px solid ${mb.color};background:${mb.color}22" title="${escHtml(mb.name)}${label ? ': ' + label : ''}">${label ? `<span class="week-mvt-label">${label}</span>` : ''}</div>`);
+        }
+        html.push(`<div class="movement-strip wv-mvt-strip" data-year="${_nav.year}" data-month="${_nav.month}" data-week="${_nav.week}" data-day="${d}" title="Annotate movement">↳</div>`);
+      }
       html.push('</div>');
     }
     html.push('</div>');
@@ -189,6 +215,15 @@ const Calendar = (() => {
         if (onEventClick) onEventClick(el.dataset.eventId);
       });
     });
+    _container.querySelectorAll('.movement-strip').forEach(el => {
+      el.addEventListener('click', e => {
+        e.stopPropagation();
+        if (onMovementClick) onMovementClick({
+          year: +el.dataset.year, month: +el.dataset.month,
+          week: +el.dataset.week, day: +el.dataset.day
+        });
+      });
+    });
     _container.querySelectorAll('.day-cell').forEach(el => {
       el.addEventListener('click', () => {
         if (onCellClick) onCellClick({
@@ -204,6 +239,15 @@ const Calendar = (() => {
       el.addEventListener('click', e => {
         e.stopPropagation();
         if (onEventClick) onEventClick(el.dataset.eventId);
+      });
+    });
+    _container.querySelectorAll('.movement-strip').forEach(el => {
+      el.addEventListener('click', e => {
+        e.stopPropagation();
+        if (onMovementClick) onMovementClick({
+          year: +el.dataset.year, month: +el.dataset.month,
+          week: +el.dataset.week, day: +el.dataset.day
+        });
       });
     });
     _container.querySelectorAll('.hour-slot').forEach(el => {
@@ -250,6 +294,7 @@ const Calendar = (() => {
     init, setConfig, setCurrentDate, setView, getView, getNav,
     navigatePrev, navigateNext, goToDate, navLabel, render,
     set onEventClick(fn) { onEventClick = fn; },
-    set onCellClick(fn) { onCellClick = fn; }
+    set onCellClick(fn) { onCellClick = fn; },
+    set onMovementClick(fn) { onMovementClick = fn; }
   };
 })();
