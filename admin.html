@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Calendar Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=IM+Fell+English:ital@0;1&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<header>
+  <h1 id="calendar-name" style="flex:1">Calendar Admin</h1>
+  <div class="pat-control">
+    <button id="pat-toggle">⚙ Connection</button>
+    <div id="pat-panel" class="hidden">
+      <label for="pat-input">GitHub Personal Access Token</label>
+      <input id="pat-input" type="password" placeholder="ghp_…" autocomplete="off">
+      <div style="display:flex;align-items:center;gap:8px">
+        <button id="pat-save">Connect</button>
+        <span id="pat-status"></span>
+      </div>
+    </div>
+  </div>
+</header>
+
+<div id="admin-banner" class="hidden" style="padding:8px 20px;font-size:.88rem"></div>
+
+<div class="admin-wrap">
+  <p class="admin-header">Campaign Calendar — Admin Editor</p>
+  <p class="admin-sub">Changes here are committed directly to the GitHub repository. Not linked from the player page.</p>
+
+  <!-- ── 1. Calendar Structure ────────────────────────────── -->
+  <div class="admin-section">
+    <div class="admin-section-title">1 · Calendar Structure</div>
+    <div class="admin-section-body">
+      <div class="admin-grid-2">
+        <div class="admin-field">
+          <label>Calendar Name</label>
+          <input id="cfg-calendarName" type="text" placeholder="The Reckoning">
+        </div>
+        <div class="admin-field" style="display:flex;align-items:flex-end;gap:8px">
+          <!-- spacer -->
+        </div>
+        <div class="admin-field">
+          <label>Months per Year</label>
+          <input id="cfg-monthsPerYear" type="number" min="1" max="99">
+        </div>
+        <div class="admin-field">
+          <label>Weeks per Month</label>
+          <input id="cfg-weeksPerMonth" type="number" min="1" max="99">
+        </div>
+        <div class="admin-field">
+          <label>Days per Week</label>
+          <input id="cfg-daysPerWeek" type="number" min="1" max="99">
+        </div>
+        <div class="admin-field">
+          <label>Hours per Day</label>
+          <input id="cfg-hoursPerDay" type="number" min="1" max="99">
+        </div>
+      </div>
+      <button class="admin-save-btn" id="save-structure-btn">Save Structure</button>
+    </div>
+  </div>
+
+  <!-- ── 2. Month Names ────────────────────────────────────── -->
+  <div class="admin-section">
+    <div class="admin-section-title">2 · Month Names</div>
+    <div class="admin-section-body">
+      <div class="names-list" id="month-names-list"></div>
+      <button class="add-name-btn" id="add-month-btn">+ Add Month</button>
+      <br>
+      <button class="admin-save-btn" id="save-months-btn">Save Month Names</button>
+    </div>
+  </div>
+
+  <!-- ── 3. Week Names ─────────────────────────────────────── -->
+  <div class="admin-section">
+    <div class="admin-section-title">3 · Week Names <span style="font-size:.75rem;opacity:.7">(these 5 names repeat every month)</span></div>
+    <div class="admin-section-body">
+      <div class="names-list" id="week-names-list"></div>
+      <button class="add-name-btn" id="add-week-btn">+ Add Week</button>
+      <br>
+      <button class="admin-save-btn" id="save-weeks-btn">Save Week Names</button>
+    </div>
+  </div>
+
+  <!-- ── 4. Day Names (optional) ───────────────────────────── -->
+  <div class="admin-section">
+    <div class="admin-section-title">4 · Day Names <span style="font-size:.75rem;opacity:.7">(optional — leave empty to use numbers)</span></div>
+    <div class="admin-section-body">
+      <div class="names-list" id="day-names-list"></div>
+      <button class="add-name-btn" id="add-day-btn">+ Add Day Name</button>
+      <br>
+      <button class="admin-save-btn" id="save-days-btn">Save Day Names</button>
+    </div>
+  </div>
+
+  <!-- ── 5. Default Event Color ────────────────────────────── -->
+  <div class="admin-section">
+    <div class="admin-section-title">5 · Default Event Color</div>
+    <div class="admin-section-body" style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+      <input id="cfg-defaultEventColor" type="color" value="#6B3A2A" style="width:48px;height:36px;border:1px solid var(--border);border-radius:4px;padding:2px;cursor:pointer;background:var(--parchment-dark)">
+      <input id="cfg-defaultEventColorHex" type="text" placeholder="#6B3A2A" maxlength="7"
+        style="width:100px;font-family:monospace;font-size:.88rem;padding:6px 8px;background:var(--parchment-dark);border:1px solid var(--border);border-radius:4px;color:var(--ink)">
+      <div id="color-preview-admin" style="width:36px;height:36px;border-radius:4px;border:1px solid var(--border);background:#6B3A2A"></div>
+      <button class="admin-save-btn" id="save-color-btn" style="margin-top:0">Save Color</button>
+    </div>
+  </div>
+
+  <!-- ── 6. World Map ──────────────────────────────────────── -->
+  <div class="admin-section">
+    <div class="admin-section-title">6 · World Map</div>
+    <div class="admin-section-body">
+      <p style="font-size:.85rem;color:var(--ink-light);margin-bottom:10px">
+        Upload a PNG or JPG image of your world map. It will be committed to <code>data/map.png</code> in the repo.
+        Large files may take a moment.
+      </p>
+      <div style="margin-bottom:12px">
+        <img id="map-preview" src="" alt="" style="max-width:100%;max-height:200px;border:1px solid var(--gold);border-radius:4px;display:none">
+        <p id="map-preview-none" style="font-size:.85rem;color:var(--ink-light)">No map uploaded yet. Upload one below.</p>
+      </div>
+      <input id="map-file-input" type="file" accept="image/png,image/jpeg,image/webp" style="font-size:.85rem;color:var(--ink)">
+      <br>
+      <button class="admin-save-btn" id="upload-map-btn" style="margin-top:10px">Upload Map</button>
+    </div>
+  </div>
+
+  <!-- ── 7. Current Date ───────────────────────────────────── -->
+  <div class="admin-section">
+    <div class="admin-section-title">7 · Current Campaign Date</div>
+    <div class="admin-section-body">
+      <p style="font-size:.85rem;color:var(--ink-light);margin-bottom:10px">
+        Current date shown to players: <strong id="current-date-disp"></strong>
+      </p>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end">
+        <div class="admin-field"><label>Year</label><input id="cd-year" type="number" min="1" value="1" style="width:70px"></div>
+        <div class="admin-field"><label>Month</label><select id="cd-month"></select></div>
+        <div class="admin-field"><label>Week</label><select id="cd-week"></select></div>
+        <div class="admin-field"><label>Day</label><select id="cd-day"></select></div>
+        <div class="admin-field"><label>Hour</label><select id="cd-hour"></select></div>
+        <button class="admin-save-btn" id="save-current-date-btn" style="margin-top:0">Set Current Date</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── 8. Danger Zone ───────────────────────────────────── -->
+  <div class="admin-section danger-zone">
+    <div class="admin-section-title">8 · Danger Zone</div>
+    <div class="admin-section-body">
+      <p style="font-size:.85rem;color:var(--ink-light);margin-bottom:10px">These actions are irreversible (well, the repo has git history).</p>
+      <button class="danger-btn" id="export-csv-btn">Export Events as CSV</button>
+      <label class="danger-btn" style="display:inline-block;cursor:pointer">
+        Import Events from JSON
+        <input id="import-json-input" type="file" accept=".json" style="display:none">
+      </label>
+      <button class="danger-btn" id="clear-events-btn">Clear All Events</button>
+    </div>
+  </div>
+
+  <p style="text-align:center;font-size:.78rem;color:var(--ink-light);margin-top:20px">
+    ← <a href="index.html" style="color:var(--gold)">Back to calendar</a>
+  </p>
+</div>
+
+<!-- ── Scripts ─────────────────────────────────────────────── -->
+<script src="js/repo-config.js"></script>
+<script src="js/github-api.js"></script>
+<script src="js/time-calc.js"></script>
+<script src="js/events.js"></script>
+<script>
+/* ── Admin app ──────────────────────────────────────────────── */
+let CFG = null;
+let CURRENT_DATE = null;
+
+async function adminInit() {
+  showBanner('Loading…', 'info');
+  try {
+    const [cfgRes, cdRes, evRes] = await Promise.all([
+      GithubAPI.readFile('data/config.json'),
+      GithubAPI.readFile('data/current-date.json').catch(() => ({ content: {year:1,month:1,week:1,day:1,hour:0} })),
+      GithubAPI.readFile('data/events.json').catch(() => ({ content: [] }))
+    ]);
+    CFG = cfgRes.content;
+    CURRENT_DATE = cdRes.content;
+    Events.importJSON(evRes.content);
+  } catch (e) {
+    showBanner('Failed to load config: ' + e.message, 'error');
+    return;
+  }
+  document.title = (CFG.calendarName || 'Calendar') + ' — Admin';
+  document.getElementById('calendar-name').textContent = (CFG.calendarName || 'Calendar') + ' — Admin';
+  populateFields();
+  hideBanner();
+  if (GithubAPI.getPAT()) updatePATStatus(GithubAPI.getPAT());
+}
+
+function populateFields() {
+  document.getElementById('cfg-calendarName').value   = CFG.calendarName || '';
+  document.getElementById('cfg-monthsPerYear').value  = CFG.monthsPerYear;
+  document.getElementById('cfg-weeksPerMonth').value  = CFG.weeksPerMonth;
+  document.getElementById('cfg-daysPerWeek').value    = CFG.daysPerWeek;
+  document.getElementById('cfg-hoursPerDay').value    = CFG.hoursPerDay;
+
+  buildNamesList('month-names-list', CFG.monthNames || []);
+  buildNamesList('week-names-list',  CFG.weekNames  || []);
+  buildNamesList('day-names-list',   CFG.dayNames   || []);
+
+  const col = CFG.defaultEventColor || '#6B3A2A';
+  document.getElementById('cfg-defaultEventColor').value    = col;
+  document.getElementById('cfg-defaultEventColorHex').value = col;
+  document.getElementById('color-preview-admin').style.background = col;
+
+  buildSelect('cd-month', CFG.monthNames || [], CURRENT_DATE.month - 1);
+  buildSelect('cd-week',  CFG.weekNames  || [], CURRENT_DATE.week  - 1);
+  buildDaySelect('cd-day',  CFG.daysPerWeek,  CFG.dayNames || [], CURRENT_DATE.day  - 1);
+  buildHourSelect('cd-hour', CFG.hoursPerDay, CURRENT_DATE.hour);
+  document.getElementById('cd-year').value = CURRENT_DATE.year;
+
+  updateCurrentDateDisplay();
+
+  const mapUrl = `https://raw.githubusercontent.com/${REPO_OWNER}/${REPO_NAME}/main/data/map.png?t=${Date.now()}`;
+  const img = document.getElementById('map-preview');
+  img.onload = () => { img.style.display = 'block'; document.getElementById('map-preview-none').style.display = 'none'; };
+  img.onerror = () => { img.style.display = 'none'; document.getElementById('map-preview-none').style.display = 'block'; };
+  img.src = mapUrl;
+}
+
+function buildNamesList(containerId, names) {
+  const el = document.getElementById(containerId);
+  el.innerHTML = '';
+  names.forEach((name, i) => {
+    el.appendChild(makeNameItem(name, i));
+  });
+}
+
+function makeNameItem(value, idx) {
+  const div = document.createElement('div');
+  div.className = 'name-item';
+  const inp = document.createElement('input');
+  inp.type = 'text';
+  inp.value = value;
+  inp.dataset.index = idx;
+  const rm = document.createElement('button');
+  rm.className = 'rm-btn';
+  rm.textContent = '×';
+  rm.addEventListener('click', () => div.remove());
+  div.appendChild(inp);
+  div.appendChild(rm);
+  return div;
+}
+
+function readNamesList(containerId) {
+  return Array.from(document.querySelectorAll(`#${containerId} .name-item input`)).map(i => i.value.trim()).filter(Boolean);
+}
+
+function buildSelect(id, names, selectedIdx) {
+  const sel = document.getElementById(id);
+  if (!sel) return;
+  sel.innerHTML = names.map((n, i) => `<option value="${i+1}"${i===selectedIdx?' selected':''}>${n}</option>`).join('');
+}
+
+function buildDaySelect(id, count, dayNames, selectedIdx) {
+  const sel = document.getElementById(id);
+  if (!sel) return;
+  sel.innerHTML = Array.from({length: count}, (_, i) =>
+    `<option value="${i+1}"${i===selectedIdx?' selected':''}>${dayNames[i] || i+1}</option>`
+  ).join('');
+}
+
+function buildHourSelect(id, count, selectedHour) {
+  const sel = document.getElementById(id);
+  if (!sel) return;
+  sel.innerHTML = Array.from({length: count}, (_, i) =>
+    `<option value="${i}"${i===selectedHour?' selected':''}>${String(i).padStart(2,'0')}:00</option>`
+  ).join('');
+}
+
+function updateCurrentDateDisplay() {
+  if (!CURRENT_DATE || !CFG) return;
+  document.getElementById('current-date-disp').textContent = TimeCalc.format(CURRENT_DATE, CFG);
+}
+
+/* ── PAT ────────────────────────────────────────────────────── */
+document.getElementById('pat-toggle').addEventListener('click', () => {
+  document.getElementById('pat-panel').classList.toggle('hidden');
+});
+document.getElementById('pat-save').addEventListener('click', async () => {
+  const val = document.getElementById('pat-input').value.trim();
+  if (!val) return;
+  try {
+    const login = await GithubAPI.testPAT(val);
+    GithubAPI.setPAT(val);
+    document.getElementById('pat-status').textContent = `✓ ${login}`;
+    document.getElementById('pat-status').className = 'pat-ok';
+    showBanner(`Connected as ${login}`, 'success');
+    document.getElementById('pat-panel').classList.add('hidden');
+  } catch (e) { showBanner(e.message, 'error'); }
+});
+async function updatePATStatus(pat) {
+  document.getElementById('pat-status').textContent = '…';
+  try {
+    const res = await fetch('https://api.github.com/user', {
+      headers: { 'Authorization': `token ${pat}`, 'Accept': 'application/vnd.github.v3+json' }
+    });
+    const u = await res.json();
+    document.getElementById('pat-status').textContent = res.ok ? `✓ ${u.login}` : '✗ Invalid';
+    document.getElementById('pat-status').className = res.ok ? 'pat-ok' : 'pat-error';
+  } catch (_) { document.getElementById('pat-status').textContent = '✗'; }
+}
+
+/* ── Color sync ─────────────────────────────────────────────── */
+document.getElementById('cfg-defaultEventColor').addEventListener('input', e => {
+  document.getElementById('cfg-defaultEventColorHex').value = e.target.value;
+  document.getElementById('color-preview-admin').style.background = e.target.value;
+});
+document.getElementById('cfg-defaultEventColorHex').addEventListener('input', e => {
+  const v = e.target.value;
+  if (/^#[0-9A-Fa-f]{6}$/.test(v)) {
+    document.getElementById('cfg-defaultEventColor').value = v;
+    document.getElementById('color-preview-admin').style.background = v;
+  }
+});
+
+/* ── Save handlers ──────────────────────────────────────────── */
+function requirePAT() {
+  if (!GithubAPI.getPAT()) {
+    showBanner('Enter your GitHub PAT first.', 'error');
+    document.getElementById('pat-panel').classList.remove('hidden');
+    return false;
+  }
+  return true;
+}
+
+async function saveConfig(updates, successMsg) {
+  if (!requirePAT()) return;
+  Object.assign(CFG, updates);
+  try {
+    await GithubAPI.writeJSON('data/config.json', CFG, 'Admin: update calendar config');
+    showBanner(successMsg || 'Saved!', 'success');
+  } catch (e) { showBanner(e.message, 'error'); }
+}
+
+document.getElementById('save-structure-btn').addEventListener('click', () => {
+  saveConfig({
+    calendarName:   document.getElementById('cfg-calendarName').value.trim() || CFG.calendarName,
+    monthsPerYear:  +document.getElementById('cfg-monthsPerYear').value,
+    weeksPerMonth:  +document.getElementById('cfg-weeksPerMonth').value,
+    daysPerWeek:    +document.getElementById('cfg-daysPerWeek').value,
+    hoursPerDay:    +document.getElementById('cfg-hoursPerDay').value
+  }, 'Structure saved!');
+});
+
+document.getElementById('add-month-btn').addEventListener('click', () => {
+  const list = document.getElementById('month-names-list');
+  list.appendChild(makeNameItem('', list.children.length));
+});
+document.getElementById('save-months-btn').addEventListener('click', () => {
+  saveConfig({ monthNames: readNamesList('month-names-list') }, 'Month names saved!');
+});
+
+document.getElementById('add-week-btn').addEventListener('click', () => {
+  const list = document.getElementById('week-names-list');
+  list.appendChild(makeNameItem('', list.children.length));
+});
+document.getElementById('save-weeks-btn').addEventListener('click', () => {
+  saveConfig({ weekNames: readNamesList('week-names-list') }, 'Week names saved!');
+});
+
+document.getElementById('add-day-btn').addEventListener('click', () => {
+  const list = document.getElementById('day-names-list');
+  list.appendChild(makeNameItem('', list.children.length));
+});
+document.getElementById('save-days-btn').addEventListener('click', () => {
+  saveConfig({ dayNames: readNamesList('day-names-list') }, 'Day names saved!');
+});
+
+document.getElementById('save-color-btn').addEventListener('click', () => {
+  saveConfig({ defaultEventColor: document.getElementById('cfg-defaultEventColorHex').value || '#6B3A2A' }, 'Default color saved!');
+});
+
+/* ── Map upload ─────────────────────────────────────────────── */
+document.getElementById('upload-map-btn').addEventListener('click', async () => {
+  if (!requirePAT()) return;
+  const file = document.getElementById('map-file-input').files[0];
+  if (!file) { showBanner('Select an image file first.', 'error'); return; }
+  showBanner('Uploading map image…', 'info');
+  const reader = new FileReader();
+  reader.onload = async ev => {
+    const base64 = ev.target.result.split(',')[1];
+    try {
+      await GithubAPI.writeImage('data/map.png', base64, 'Admin: upload world map');
+      showBanner('Map uploaded! It may take a minute for GitHub Pages to reflect it.', 'success');
+      const img = document.getElementById('map-preview');
+      img.src = `https://raw.githubusercontent.com/${REPO_OWNER}/${REPO_NAME}/main/data/map.png?t=${Date.now()}`;
+      img.style.display = 'block';
+      document.getElementById('map-preview-none').style.display = 'none';
+    } catch (e) { showBanner(e.message, 'error'); }
+  };
+  reader.readAsDataURL(file);
+});
+
+/* ── Current date ───────────────────────────────────────────── */
+document.getElementById('save-current-date-btn').addEventListener('click', async () => {
+  if (!requirePAT()) return;
+  const newDate = {
+    year:  +document.getElementById('cd-year').value,
+    month: +document.getElementById('cd-month').value,
+    week:  +document.getElementById('cd-week').value,
+    day:   +document.getElementById('cd-day').value,
+    hour:  +document.getElementById('cd-hour').value
+  };
+  try {
+    await GithubAPI.writeJSON('data/current-date.json', newDate, `Admin: set current date to ${TimeCalc.format(newDate, CFG)}`);
+    CURRENT_DATE = newDate;
+    updateCurrentDateDisplay();
+    showBanner('Current date updated!', 'success');
+  } catch (e) { showBanner(e.message, 'error'); }
+});
+
+/* ── Danger zone ────────────────────────────────────────────── */
+document.getElementById('export-csv-btn').addEventListener('click', () => {
+  const csv = Events.exportCSV();
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'campaign-events.csv';
+  a.click();
+});
+
+document.getElementById('import-json-input').addEventListener('change', async e => {
+  if (!requirePAT()) return;
+  const file = e.target.files[0];
+  if (!file) return;
+  const text = await file.text();
+  let parsed;
+  try { parsed = JSON.parse(text); } catch (_) { showBanner('Invalid JSON file.', 'error'); return; }
+  if (!confirm(`Import ${Array.isArray(parsed) ? parsed.length : '?'} events? This will REPLACE all existing events.`)) return;
+  try {
+    Events.importJSON(parsed);
+    await Events.save('Admin: import events from JSON');
+    showBanner('Events imported!', 'success');
+  } catch (err) { showBanner(err.message, 'error'); }
+});
+
+document.getElementById('clear-events-btn').addEventListener('click', async () => {
+  if (!requirePAT()) return;
+  if (!confirm('Delete ALL events? This cannot be undone (except via git history).')) return;
+  try {
+    Events.importJSON([]);
+    await Events.save('Admin: clear all events');
+    showBanner('All events cleared.', 'success');
+  } catch (e) { showBanner(e.message, 'error'); }
+});
+
+/* ── Banner ─────────────────────────────────────────────────── */
+let _bt = null;
+function showBanner(msg, type) {
+  const el = document.getElementById('admin-banner');
+  el.textContent = msg;
+  el.className = type === 'success' ? 'admin-banner admin-banner-success' : 'admin-banner admin-banner-error';
+  el.classList.remove('hidden');
+  clearTimeout(_bt);
+  if (type !== 'error') _bt = setTimeout(() => el.classList.add('hidden'), 3000);
+}
+function hideBanner() { document.getElementById('admin-banner').classList.add('hidden'); }
+
+/* ── Boot ───────────────────────────────────────────────────── */
+window.addEventListener('DOMContentLoaded', adminInit);
+</script>
+
+</body>
+</html>

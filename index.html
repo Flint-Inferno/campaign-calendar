@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Campaign Calendar</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=IM+Fell+English:ital@0;1&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    /* Set CSS var for grid columns from JS */
+    .month-header-row, .week-row { --days-per-week: 10; }
+    .week-view-header { --days-per-week: 10; }
+  </style>
+</head>
+<body>
+
+<!-- ── Header ──────────────────────────────────────────────── -->
+<header>
+  <h1 id="calendar-name">Campaign Calendar</h1>
+
+  <nav class="tab-nav">
+    <button class="tab-btn active" data-tab="calendar">Calendar</button>
+    <button class="tab-btn" data-tab="map">World Map</button>
+  </nav>
+
+  <div class="pat-control">
+    <button id="pat-toggle">⚙ Connection</button>
+    <div id="pat-panel" class="hidden">
+      <label for="pat-input">GitHub Personal Access Token</label>
+      <input id="pat-input" type="password" placeholder="ghp_…" autocomplete="off">
+      <div style="display:flex;align-items:center;gap:8px">
+        <button id="pat-save">Connect</button>
+        <span id="pat-status"></span>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- ── Banner ──────────────────────────────────────────────── -->
+<div id="banner" class="banner banner-info hidden"></div>
+
+<!-- ══════════════════════════════════════════════════════════ -->
+<!-- Calendar Tab -->
+<!-- ══════════════════════════════════════════════════════════ -->
+<div id="tab-calendar" class="tab-content">
+
+  <div class="calendar-controls">
+    <div class="view-toggle">
+      <button class="view-btn active" data-view="month">Month</button>
+      <button class="view-btn" data-view="week">Week</button>
+    </div>
+
+    <div class="nav-controls">
+      <button id="prev-btn">◄</button>
+      <span id="nav-label"></span>
+      <button id="next-btn">►</button>
+      <button id="today-btn">Today</button>
+    </div>
+
+    <button id="add-event-btn">+ Add Event</button>
+  </div>
+
+  <div class="calendar-layout">
+    <div id="calendar-grid"></div>
+
+    <aside class="sidebar">
+      <div class="current-date-box">
+        <h3>Current Date</h3>
+        <p id="current-date-display">Loading…</p>
+        <button id="advance-time-toggle">Advance Time ▾</button>
+      </div>
+
+      <div id="time-calc-panel" class="hidden">
+        <h4>Time Calculator</h4>
+        <form id="time-calc-form" onsubmit="return false">
+          <div class="tc-section-label">Start date</div>
+          <div class="tc-date-row">
+            <div>
+              <label>Year</label>
+              <input type="number" name="tc-year" min="1" value="1">
+            </div>
+            <div>
+              <label>Month</label>
+              <select name="tc-month"></select>
+            </div>
+          </div>
+          <div class="tc-date-row">
+            <div>
+              <label>Week</label>
+              <select name="tc-week"></select>
+            </div>
+            <div>
+              <label>Day</label>
+              <select name="tc-day"></select>
+            </div>
+          </div>
+          <div class="tc-date-row">
+            <div>
+              <label>Hour</label>
+              <select name="tc-hour"></select>
+            </div>
+          </div>
+
+          <div class="tc-section-label">Add duration</div>
+          <div class="tc-dur-grid">
+            <div><label>Years</label><input type="number" name="dur-years" value="0"></div>
+            <div><label>Months</label><input type="number" name="dur-months" value="0"></div>
+            <div><label>Weeks</label><input type="number" name="dur-weeks" value="0"></div>
+            <div><label>Days</label><input type="number" name="dur-days" value="0"></div>
+            <div><label>Hours</label><input type="number" name="dur-hours" value="0"></div>
+          </div>
+
+          <button id="calc-btn">Calculate</button>
+
+          <div id="calc-result-row" class="hidden">
+            <div id="calc-result"></div>
+            <button id="set-current-btn" data-result="">Set as Current Date</button>
+          </div>
+        </form>
+      </div>
+    </aside>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════ -->
+<!-- Map Tab -->
+<!-- ══════════════════════════════════════════════════════════ -->
+<div id="tab-map" class="tab-content hidden">
+  <div class="map-controls">
+    <button id="pin-mode-btn">📍 Place Pin</button>
+    <button id="trail-toggle-btn">🗺 Party Trail</button>
+  </div>
+  <div id="map-container">
+    <div id="map-placeholder" class="hidden">
+      <p style="font-size:1.1rem">No world map uploaded.</p>
+      <p style="font-size:0.85rem;color:#5a3a28">Open <strong>/admin.html</strong> to upload your world map image.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════ -->
+<!-- Event Modal -->
+<!-- ══════════════════════════════════════════════════════════ -->
+<div id="event-modal" class="modal hidden" role="dialog" aria-modal="true">
+  <div class="modal-backdrop"></div>
+  <div class="modal-box">
+    <h2 id="modal-title-heading">New Event</h2>
+
+    <form id="event-form" onsubmit="return false">
+
+      <div class="form-row">
+        <label for="ev-title">Title *</label>
+        <input id="ev-title" name="title" type="text" placeholder="What happened?" autocomplete="off" required>
+      </div>
+
+      <div class="form-row">
+        <label for="ev-desc">Description <span style="font-size:0.7em;opacity:.7">(supports [link text](url))</span></label>
+        <textarea id="ev-desc" name="description" placeholder="Details, notes, links…"></textarea>
+      </div>
+
+      <div class="form-row">
+        <label>Start Date &amp; Time</label>
+        <div class="date-picker-row">
+          <div>
+            <label>Year</label>
+            <input name="start-year" type="number" min="1" value="1">
+          </div>
+          <div>
+            <label>Month</label>
+            <select name="start-month"></select>
+          </div>
+          <div>
+            <label>Week</label>
+            <select name="start-week"></select>
+          </div>
+          <div>
+            <label>Day</label>
+            <select name="start-day"></select>
+          </div>
+          <div>
+            <label>Hour</label>
+            <select name="start-hour"></select>
+          </div>
+        </div>
+      </div>
+
+      <div class="has-end-row">
+        <input id="has-end-cb" name="has-end" type="checkbox">
+        <label for="has-end-cb">Has end date/time</label>
+      </div>
+
+      <div id="end-date-row" class="form-row hidden">
+        <label>End Date &amp; Time</label>
+        <div class="date-picker-row">
+          <div>
+            <label>Year</label>
+            <input name="end-year" type="number" min="1" value="1">
+          </div>
+          <div>
+            <label>Month</label>
+            <select name="end-month"></select>
+          </div>
+          <div>
+            <label>Week</label>
+            <select name="end-week"></select>
+          </div>
+          <div>
+            <label>Day</label>
+            <select name="end-day"></select>
+          </div>
+          <div>
+            <label>Hour</label>
+            <select name="end-hour"></select>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <label>Event Color</label>
+        <div class="color-picker-row">
+          <div id="color-swatch-grid"></div>
+          <div id="color-preview" style="background:#6B3A2A"></div>
+          <input id="color-hex-input" name="color" type="text" placeholder="#6B3A2A" maxlength="7">
+        </div>
+      </div>
+
+      <div class="form-row">
+        <label for="ev-tags">Tags <span style="font-size:0.7em;opacity:.7">(comma-separated)</span></label>
+        <input id="ev-tags" name="tags" type="text" placeholder="combat, travel, story">
+      </div>
+
+      <div class="form-row">
+        <label>Map Coordinates <span style="font-size:0.7em;opacity:.7">(set via 📍 on map, or manually)</span></label>
+        <div class="map-coords-row">
+          <div>
+            <label>X</label>
+            <input name="mapX" type="number" placeholder="auto">
+          </div>
+          <div>
+            <label>Y</label>
+            <input name="mapY" type="number" placeholder="auto">
+          </div>
+        </div>
+      </div>
+
+    </form>
+
+    <div class="modal-actions">
+      <button id="delete-event-btn" class="hidden">Delete</button>
+      <button id="cancel-event-btn">Cancel</button>
+      <button id="save-event-btn">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Scripts ─────────────────────────────────────────────── -->
+<script src="js/repo-config.js"></script>
+<script src="js/github-api.js"></script>
+<script src="js/time-calc.js"></script>
+<script src="js/events.js"></script>
+<script src="js/calendar.js"></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="js/map.js"></script>
+<script src="js/app.js"></script>
+
+</body>
+</html>
