@@ -54,5 +54,13 @@
     "playerColor": "#0000c4",
     "action": "waypoints_save",
     "details": "Saved 3 waypoints — Y6531 Psol W2 D9"
+  },
+  {
+    "id": "5fe9e5ff-f4cb-4d3d-b1bc-c12b1803b8e4",
+    "timestamp": "2026-05-15T17:35:56.229Z",
+    "playerName": "Flint (DM)",
+    "playerColor": "#0000c4",
+    "action": "waypoints_save",
+    "details": "Saved 1 waypoint — Y6531 Psol W3 D2"
   }
 ]
