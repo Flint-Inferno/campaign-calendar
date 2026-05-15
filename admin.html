@@ -32,6 +32,24 @@
   <p class="admin-header">Campaign Calendar — Admin Editor</p>
   <p class="admin-sub">Changes here are committed directly to the GitHub repository. Not linked from the player page.</p>
 
+  <!-- ── 0. Player Write Key ──────────────────────────────── -->
+  <div class="admin-section">
+    <div class="admin-section-title">0 · Player Write Key</div>
+    <div class="admin-section-body">
+      <p style="font-size:.85rem;color:var(--ink-light);margin-bottom:10px">
+        Store a GitHub PAT here so players can make edits without entering a token themselves.
+        The key is saved publicly in the repo — use a <strong>fine-grained PAT scoped only to this repo's contents</strong>.
+      </p>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+        <input id="write-key-input" type="password" placeholder="ghp_… (leave empty to disable player writes)"
+          style="flex:1;min-width:200px;font-family:monospace;font-size:.85rem;padding:6px 10px;background:var(--parchment-dark);border:1px solid var(--border);border-radius:4px;color:var(--ink)">
+        <button class="admin-save-btn" id="store-write-key-btn" style="margin-top:0">Store Write Key</button>
+        <button class="danger-btn" id="clear-write-key-btn" style="margin-top:0">Clear Key</button>
+      </div>
+      <p id="write-key-status" style="font-size:.78rem;color:var(--ink-light);margin-top:6px"></p>
+    </div>
+  </div>
+
   <!-- ── 1. Calendar Structure ────────────────────────────── -->
   <div class="admin-section">
     <div class="admin-section-title">1 · Calendar Structure</div>
@@ -235,6 +253,7 @@ function populateFields() {
   document.getElementById('cd-year').value = CURRENT_DATE.year;
 
   updateCurrentDateDisplay();
+  loadWriteKeyStatus();
 
   const mapUrl = `https://raw.githubusercontent.com/${REPO_OWNER}/${REPO_NAME}/main/data/map.png?t=${Date.now()}`;
   const img = document.getElementById('map-preview');
@@ -378,6 +397,41 @@ document.getElementById('cfg-defaultEventColorHex').addEventListener('input', e 
     document.getElementById('cfg-defaultEventColor').value = v;
     document.getElementById('color-preview-admin').style.background = v;
   }
+});
+
+/* ── Write Key ──────────────────────────────────────────────── */
+async function loadWriteKeyStatus() {
+  try {
+    const { content } = await GithubAPI.readFile('data/write-token.json');
+    const t = content?.token || '';
+    document.getElementById('write-key-status').textContent = t
+      ? `Key stored: ${t.slice(0, 8)}…`
+      : 'No write key stored — player edits disabled.';
+  } catch (_) {
+    document.getElementById('write-key-status').textContent = 'No write key stored.';
+  }
+}
+
+document.getElementById('store-write-key-btn').addEventListener('click', async () => {
+  if (!requirePAT()) return;
+  const token = document.getElementById('write-key-input').value.trim();
+  if (!token) { showBanner('Enter a PAT to store.', 'error'); return; }
+  try {
+    await GithubAPI.writeJSON('data/write-token.json', { token }, 'Admin: update write key');
+    document.getElementById('write-key-input').value = '';
+    document.getElementById('write-key-status').textContent = `Key stored: ${token.slice(0, 8)}…`;
+    showBanner('Write key stored! Players can now make edits.', 'success');
+  } catch (e) { showBanner(e.message, 'error'); }
+});
+
+document.getElementById('clear-write-key-btn').addEventListener('click', async () => {
+  if (!requirePAT()) return;
+  if (!confirm('Remove the write key? Players will no longer be able to make edits.')) return;
+  try {
+    await GithubAPI.writeJSON('data/write-token.json', {}, 'Admin: clear write key');
+    document.getElementById('write-key-status').textContent = 'No write key stored — player edits disabled.';
+    showBanner('Write key cleared.', 'success');
+  } catch (e) { showBanner(e.message, 'error'); }
 });
 
 /* ── Save handlers ──────────────────────────────────────────── */

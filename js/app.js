@@ -15,16 +15,21 @@ const COLOR_SWATCHES = [
 async function appInit() {
   showBanner('Loading…', 'info');
   try {
-    const [cfgRes, evRes, cdRes, mvtRes] = await Promise.all([
+    const [cfgRes, evRes, cdRes, mvtRes, wtRes, logRes] = await Promise.all([
       GithubAPI.readFile('data/config.json'),
       GithubAPI.readFile('data/events.json').catch(() => ({ content: [] })),
       GithubAPI.readFile('data/current-date.json').catch(() => ({ content: { year:1,month:1,week:1,day:1,hour:0 } })),
-      GithubAPI.readFile('data/movements.json').catch(() => ({ content: [] }))
+      GithubAPI.readFile('data/movements.json').catch(() => ({ content: [] })),
+      GithubAPI.readFile('data/write-token.json').catch(() => ({ content: {} })),
+      GithubAPI.readFile('data/activity-log.json').catch(() => ({ content: [] }))
     ]);
     CFG = cfgRes.content;
     Events.importJSON(evRes.content);
     CURRENT_DATE = cdRes.content;
     Movements.importJSON(mvtRes.content);
+    ActivityLog.importJSON(logRes.content);
+    const writeToken = wtRes.content?.token || '';
+    if (writeToken) GithubAPI.setPAT(writeToken);
   } catch (e) {
     showBanner('Failed to load calendar data. Check your internet connection.', 'error');
     return;
@@ -46,11 +51,7 @@ async function appInit() {
   updateNavLabel();
   hideBanner();
 
-  const pat = GithubAPI.getPAT();
-  if (pat) {
-    document.getElementById('pat-status').textContent = '✓ Connected';
-    document.getElementById('pat-status').className = 'pat-ok';
-  }
+  updateIdentityDisplay();
 }
 
 /* ── Tab switching ──────────────────────────────────────────── */
@@ -61,6 +62,7 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
     const tab = btn.dataset.tab;
     document.querySelectorAll('.tab-content').forEach(c => c.classList.toggle('hidden', c.id !== `tab-${tab}`));
     if (tab === 'map' && !mapLoaded) initMap();
+    if (tab === 'log') renderLogTab();
   });
 });
 
@@ -221,13 +223,15 @@ function collectModalData() {
 document.getElementById('save-event-btn').addEventListener('click', async () => {
   const data = collectModalData();
   if (!data.title) { showBanner('Title is required.', 'error'); return; }
-  if (!GithubAPI.getPAT()) { showBanner('Enter your PAT to save changes.', 'error'); openPATPanel(); return; }
+  if (!GithubAPI.getPAT()) { showBanner('Write key not set — contact the DM.', 'error'); return; }
   setBusy(true);
   try {
     if (editingEventId) {
       await Events.update(editingEventId, data);
+      appendActivityLog('event_edit', `Edited event: "${data.title}"`);
     } else {
       await Events.add(data);
+      appendActivityLog('event_add', `Added event: "${data.title}"`);
     }
     closeModal('event-modal');
     Calendar.render();
@@ -242,10 +246,12 @@ document.getElementById('save-event-btn').addEventListener('click', async () => 
 document.getElementById('delete-event-btn').addEventListener('click', async () => {
   if (!editingEventId) return;
   if (!confirm('Delete this event?')) return;
-  if (!GithubAPI.getPAT()) { showBanner('Enter your PAT to delete events.', 'error'); openPATPanel(); return; }
+  if (!GithubAPI.getPAT()) { showBanner('Write key not set — contact the DM.', 'error'); return; }
   setBusy(true);
   try {
+    const evTitle = Events.getAll().find(e => e.id === editingEventId)?.title || 'Unknown';
     await Events.remove(editingEventId);
+    appendActivityLog('event_delete', `Deleted event: "${evTitle}"`);
     closeModal('event-modal');
     Calendar.render();
     if (mapLoaded) { MapView.renderPins(Events.getAll()); MapView.renderTrail(Events.getAll()); }
@@ -290,10 +296,11 @@ document.getElementById('calc-btn').addEventListener('click', () => {
 document.getElementById('set-current-btn').addEventListener('click', async () => {
   const result = JSON.parse(document.getElementById('set-current-btn').dataset.result || 'null');
   if (!result) return;
-  if (!GithubAPI.getPAT()) { showBanner('Enter your PAT to advance the current date.', 'error'); openPATPanel(); return; }
+  if (!GithubAPI.getPAT()) { showBanner('Write key not set — contact the DM.', 'error'); return; }
   setBusy(true);
   try {
     await GithubAPI.writeJSON('data/current-date.json', result, `Advance time to ${TimeCalc.format(result, CFG)}`);
+    appendActivityLog('date_advance', `Advanced date to ${TimeCalc.format(result, CFG)}`);
     CURRENT_DATE = result;
     Calendar.setCurrentDate(CURRENT_DATE);
     Calendar.render();
@@ -322,34 +329,49 @@ function updateCurrentDateDisplay() {
   document.getElementById('current-date-display').textContent = TimeCalc.format(CURRENT_DATE, CFG);
 }
 
-/* ── PAT panel ──────────────────────────────────────────────── */
-document.getElementById('pat-toggle').addEventListener('click', () => {
-  document.getElementById('pat-panel').classList.toggle('hidden');
-});
-
-function openPATPanel() {
-  document.getElementById('pat-panel').classList.remove('hidden');
+/* ── Identity panel ─────────────────────────────────────────── */
+function getPlayerIdentity() {
+  return JSON.parse(localStorage.getItem('campaign_identity') || '{"name":"","color":"#8B2E2E"}');
 }
 
-document.getElementById('pat-save').addEventListener('click', async () => {
-  const val = document.getElementById('pat-input').value.trim();
-  if (!val) return;
-  try {
-    const login = await GithubAPI.testPAT(val);
-    GithubAPI.setPAT(val);
-    document.getElementById('pat-status').textContent = `✓ ${login}`;
-    document.getElementById('pat-status').className = 'pat-ok';
-    showBanner(`Connected as ${login}`, 'success');
-    document.getElementById('pat-panel').classList.add('hidden');
-  } catch (e) {
-    showBanner(e.message, 'error');
-  }
+function setPlayerIdentity(name, color) {
+  localStorage.setItem('campaign_identity', JSON.stringify({ name, color }));
+  updateIdentityDisplay();
+}
+
+function updateIdentityDisplay() {
+  const { name, color } = getPlayerIdentity();
+  const display = document.getElementById('identity-name-display');
+  if (display) display.textContent = name || 'Set Identity';
+  const btn = document.getElementById('identity-toggle');
+  if (btn) btn.style.borderColor = name ? color : '';
+}
+
+document.getElementById('identity-toggle').addEventListener('click', () => {
+  const { name, color } = getPlayerIdentity();
+  if (name) document.getElementById('identity-name-input').value = name;
+  document.getElementById('identity-color-input').value = color || '#8B2E2E';
+  document.getElementById('identity-preview-swatch').style.background = color || '#8B2E2E';
+  document.getElementById('identity-panel').classList.toggle('hidden');
+});
+
+document.getElementById('identity-color-input').addEventListener('input', e => {
+  document.getElementById('identity-preview-swatch').style.background = e.target.value;
+});
+
+document.getElementById('identity-save').addEventListener('click', () => {
+  const name = document.getElementById('identity-name-input').value.trim();
+  const color = document.getElementById('identity-color-input').value;
+  if (!name) { showBanner('Enter your character name.', 'error'); return; }
+  setPlayerIdentity(name, color);
+  document.getElementById('identity-panel').classList.add('hidden');
+  showBanner(`Identity set: ${name}`, 'success');
 });
 
 
 /* ── Map controls ────────────────────────────────────────────── */
 document.getElementById('pin-mode-btn').addEventListener('click', () => {
-  if (!GithubAPI.getPAT()) { showBanner('Enter your PAT to place pins.', 'error'); openPATPanel(); return; }
+  if (!GithubAPI.getPAT()) { showBanner('Write key not set — contact the DM.', 'error'); return; }
   if (MapView.isPinMode()) {
     MapView.disablePinMode();
     document.getElementById('pin-mode-btn').classList.remove('active');
@@ -514,11 +536,12 @@ document.getElementById('mvt-add-seg-btn').addEventListener('click', () => addSe
 
 document.getElementById('mvt-save-btn').addEventListener('click', async () => {
   if (!_mvtDate) return;
-  if (!GithubAPI.getPAT()) { showBanner('Enter your PAT to save movement.', 'error'); openPATPanel(); return; }
+  if (!GithubAPI.getPAT()) { showBanner('Write key not set — contact the DM.', 'error'); return; }
   const segments = collectSegmentsFromForm();
   const endLoc = document.getElementById('mvt-end-loc').value.trim() || null;
   try {
     await Movements.setDay(_mvtDate.year, _mvtDate.month, _mvtDate.week, _mvtDate.day, { segments, endLocation: endLoc });
+    appendActivityLog('movement_save', `Movement: Y${_mvtDate.year} M${_mvtDate.month} W${_mvtDate.week} D${(_mvtDate.week-1)*CFG.daysPerWeek+_mvtDate.day}`);
     closeModal('mvt-modal');
     Calendar.render();
     showBanner('Movement saved!', 'success');
@@ -528,9 +551,10 @@ document.getElementById('mvt-save-btn').addEventListener('click', async () => {
 document.getElementById('mvt-clear-btn').addEventListener('click', async () => {
   if (!_mvtDate) return;
   if (!confirm('Clear all movement data for this day?')) return;
-  if (!GithubAPI.getPAT()) { showBanner('Enter your PAT to clear movement.', 'error'); openPATPanel(); return; }
+  if (!GithubAPI.getPAT()) { showBanner('Write key not set — contact the DM.', 'error'); return; }
   try {
     await Movements.clearDay(_mvtDate.year, _mvtDate.month, _mvtDate.week, _mvtDate.day);
+    appendActivityLog('movement_clear', `Cleared movement: Y${_mvtDate.year} M${_mvtDate.month} W${_mvtDate.week} D${(_mvtDate.week-1)*CFG.daysPerWeek+_mvtDate.day}`);
     closeModal('mvt-modal');
     Calendar.render();
     showBanner('Movement cleared.', 'success');
@@ -539,6 +563,48 @@ document.getElementById('mvt-clear-btn').addEventListener('click', async () => {
 
 document.getElementById('mvt-cancel-btn').addEventListener('click', () => closeModal('mvt-modal'));
 document.getElementById('mvt-modal').querySelector('.modal-backdrop').addEventListener('click', () => closeModal('mvt-modal'));
+
+/* ── Activity Log ───────────────────────────────────────────── */
+function appendActivityLog(action, details) {
+  const { name, color } = getPlayerIdentity();
+  ActivityLog.append({
+    id: crypto.randomUUID(),
+    timestamp: new Date().toISOString(),
+    playerName: name || 'Unknown',
+    playerColor: color || '#888',
+    action,
+    details
+  });
+  ActivityLog.save().catch(() => {});
+}
+
+function renderLogTab() {
+  const entries = ActivityLog.getAll();
+  const list = document.getElementById('log-list');
+  if (!list) return;
+  if (entries.length === 0) {
+    list.innerHTML = '<p class="log-empty">No activity recorded yet.</p>';
+    return;
+  }
+  list.innerHTML = entries.map(e => {
+    const ts = new Date(e.timestamp).toLocaleString();
+    const color = e.playerColor || '#888';
+    return `<div class="log-entry">
+      <span class="log-dot" style="background:${color}"></span>
+      <span class="log-player" style="color:${color}">${escHtml(e.playerName)}</span>
+      <span class="log-details">${escHtml(e.details)}</span>
+      <span class="log-time">${escHtml(ts)}</span>
+    </div>`;
+  }).join('');
+}
+
+document.getElementById('refresh-log-btn').addEventListener('click', async () => {
+  try {
+    const { content } = await GithubAPI.readFile('data/activity-log.json');
+    ActivityLog.importJSON(content);
+    renderLogTab();
+  } catch (e) { showBanner('Failed to refresh log.', 'error'); }
+});
 
 /* ── Modal helpers ──────────────────────────────────────────── */
 function openModal(id) {

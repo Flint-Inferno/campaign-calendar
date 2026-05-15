@@ -24,17 +24,20 @@
   <nav class="tab-nav">
     <button class="tab-btn active" data-tab="calendar">Calendar</button>
     <button class="tab-btn" data-tab="map">World Map</button>
+    <button class="tab-btn" data-tab="log">Log</button>
   </nav>
 
-  <div class="pat-control">
-    <button id="pat-toggle">⚙ Connection</button>
-    <div id="pat-panel" class="hidden">
-      <label for="pat-input">GitHub Personal Access Token</label>
-      <input id="pat-input" type="password" placeholder="ghp_…" autocomplete="off">
-      <div style="display:flex;align-items:center;gap:8px">
-        <button id="pat-save">Connect</button>
-        <span id="pat-status"></span>
+  <div class="identity-control">
+    <button id="identity-toggle">⚔ <span id="identity-name-display">Set Identity</span></button>
+    <div id="identity-panel" class="hidden">
+      <label for="identity-name-input">Character Name</label>
+      <input id="identity-name-input" type="text" placeholder="Aragorn…" autocomplete="off">
+      <label>Color</label>
+      <div class="identity-color-row">
+        <input id="identity-color-input" type="color" value="#8B2E2E">
+        <div id="identity-preview-swatch" style="background:#8B2E2E"></div>
       </div>
+      <button id="identity-save">Set Identity</button>
     </div>
   </div>
 </header>
@@ -257,6 +260,17 @@
 </div>
 
 <!-- ══════════════════════════════════════════════════════════ -->
+<!-- Log Tab -->
+<!-- ══════════════════════════════════════════════════════════ -->
+<div id="tab-log" class="tab-content hidden">
+  <div class="log-header">
+    <span>Activity Log</span>
+    <button id="refresh-log-btn">↺ Refresh</button>
+  </div>
+  <div id="log-list"></div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════ -->
 <!-- Movement Modal -->
 <!-- ══════════════════════════════════════════════════════════ -->
 <div id="mvt-modal" class="modal hidden" role="dialog" aria-modal="true">
@@ -303,6 +317,7 @@
 <script src="js/time-calc.js"></script>
 <script src="js/events.js"></script>
 <script src="js/movements.js"></script>
+<script src="js/activity-log.js"></script>
 <script src="js/calendar.js"></script>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="js/map.js"></script>
