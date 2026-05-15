@@ -12,5 +12,19 @@
     "mapX": null,
     "mapY": null,
     "id": "c5944a8c-5ed6-489d-a070-5711ade659ca"
+  },
+  {
+    "title": "A thing lol",
+    "description": "",
+    "year": 6531,
+    "month": 8,
+    "week": 3,
+    "day": 1,
+    "hour": 0,
+    "color": "#2E5A1C",
+    "tags": [],
+    "mapX": 1981,
+    "mapY": 1048,
+    "id": "b46de287-730a-4d72-92f8-42a8831c216b"
   }
 ]
