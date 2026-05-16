@@ -87,6 +87,7 @@ async function initMap() {
     if (!_scrubDate) _scrubDate = { year: 1, month: 1, week: 1, day: 1, hour: 0 };
     updateScrubLabel();
     MapView.renderScrubbed(Events.getAll(), Movements.getAll(), _scrubDate, CFG);
+    MapView.renderCurrentLocation(CURRENT_DATE);
     mapLoaded = true;
     hideBanner();
     if (_pendingMapPin) { enablePinForEvent(_pendingMapPin); _pendingMapPin = null; }
@@ -366,8 +367,20 @@ document.getElementById('advance-confirm-ok')?.addEventListener('click', async (
   const reason = [preset, details].filter(Boolean).join(': ');
   const location = document.getElementById('advance-location-text').value.trim();
   const result = { ..._pendingAdvanceResult };
-  if (location) result.currentLocation = location;
-  else delete result.currentLocation;
+  if (location) {
+    result.currentLocation = location;
+    if (location === CURRENT_DATE?.currentLocation) {
+      if (CURRENT_DATE.locationX != null) result.locationX = CURRENT_DATE.locationX;
+      if (CURRENT_DATE.locationY != null) result.locationY = CURRENT_DATE.locationY;
+    } else {
+      delete result.locationX;
+      delete result.locationY;
+    }
+  } else {
+    delete result.currentLocation;
+    delete result.locationX;
+    delete result.locationY;
+  }
 
   const btn = document.getElementById('advance-confirm-ok');
   btn.disabled = true;
@@ -382,6 +395,7 @@ document.getElementById('advance-confirm-ok')?.addEventListener('click', async (
     _scrubDate = { year: result.year, month: result.month, week: result.week, day: result.day, hour: 0 };
     updateScrubLabel();
     if (mapLoaded) MapView.renderScrubbed(Events.getAll(), Movements.getAll(), _scrubDate, CFG);
+    if (mapLoaded) MapView.renderCurrentLocation(CURRENT_DATE);
     closeModal('advance-confirm-modal');
     _pendingAdvanceResult = null;
     showBanner('Time advanced!', 'success');

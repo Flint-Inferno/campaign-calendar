@@ -3,5 +3,8 @@
   "month": 7,
   "week": 5,
   "day": 7,
-  "hour": 0
+  "hour": 0,
+  "currentLocation": "Willowshade",
+  "locationX": 1921,
+  "locationY": 1812
 }

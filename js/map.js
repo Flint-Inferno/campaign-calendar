@@ -13,6 +13,7 @@ const MapView = (() => {
   let _pendingWaypoints = [];
   let _pendingColor = '#8b6914';
   let _trailVisible = false;
+  let _locationLayer = null;
 
   const MAP_URL = `https://raw.githubusercontent.com/${REPO_OWNER}/${REPO_NAME}/main/data/map.png`;
 
@@ -208,6 +209,22 @@ const MapView = (() => {
     if (!_wpModeActive) renderAllWaypoints(movements, scrubDate);
   }
 
+  /* ── Current party location marker ────────────────────────── */
+  function renderCurrentLocation(currentDate) {
+    if (_locationLayer) { _map.removeLayer(_locationLayer); _locationLayer = null; }
+    if (!_map || !currentDate || currentDate.locationX == null || currentDate.locationY == null) return;
+    const icon = L.divIcon({
+      html: `<div class="loc-marker"><span class="loc-pulse"></span>⚑</div>`,
+      className: 'loc-marker-wrap',
+      iconSize: [28, 28],
+      iconAnchor: [14, 14]
+    });
+    _locationLayer = L.marker([currentDate.locationY, currentDate.locationX], { icon, zIndexOffset: 1000 }).addTo(_map);
+    if (currentDate.currentLocation) {
+      _locationLayer.bindTooltip(escHtml(currentDate.currentLocation), { permanent: true, direction: 'top', offset: [0, -14], className: 'loc-tooltip' });
+    }
+  }
+
   /* ── Pin mode ──────────────────────────────────────────────── */
   function enablePinMode(callback) {
     _pinModeActive = true;
@@ -285,7 +302,7 @@ const MapView = (() => {
   return {
     init, setConfig, loadMap,
     renderPins, renderTrail, toggleTrail,
-    renderAllWaypoints, renderScrubbed,
+    renderAllWaypoints, renderScrubbed, renderCurrentLocation,
     enablePinMode, disablePinMode, isPinMode,
     enableWaypointMode, disableWaypointMode, isWaypointMode,
     undoLastWaypoint, clearPendingWaypoints, getPendingWaypoints,
