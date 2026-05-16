@@ -1,1 +1,18 @@
-[]
+[
+  {
+    "title": "test",
+    "description": "",
+    "location": "",
+    "markerType": "waypoint",
+    "year": 6532,
+    "month": 8,
+    "week": 1,
+    "day": 3,
+    "hour": 10,
+    "color": "#6B3A2A",
+    "tags": [],
+    "mapX": null,
+    "mapY": null,
+    "id": "21d5668e-56e1-4243-b5f2-5c30091657ef"
+  }
+]
