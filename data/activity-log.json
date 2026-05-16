@@ -126,5 +126,13 @@
     "playerColor": "#0000c4",
     "action": "date_advance",
     "details": "Advanced to Year 6532 · Falm · Ravethen · Day 7 · 01:00"
+  },
+  {
+    "id": "9be39344-8bb2-476f-8dfb-1ec360c588c5",
+    "timestamp": "2026-05-16T01:22:21.086Z",
+    "playerName": "Flint (DM)",
+    "playerColor": "#0000c4",
+    "action": "date_advance",
+    "details": "Advanced to Year 6532 · Falm · Ravethen · Day 7 · 02:00"
   }
 ]
