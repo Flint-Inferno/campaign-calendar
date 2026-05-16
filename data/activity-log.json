@@ -110,5 +110,13 @@
     "playerColor": "#0000c4",
     "action": "event_delete",
     "details": "Deleted event: \"Siege of Varlen Keep\""
+  },
+  {
+    "id": "83aa5ccb-5b4d-40f6-a063-524c8f8a8d3f",
+    "timestamp": "2026-05-16T22:58:44.194Z",
+    "playerName": "Flint (DM)",
+    "playerColor": "#0000c4",
+    "action": "event_edit",
+    "details": "Edited event: \"Departed Solmere\""
   }
 ]
