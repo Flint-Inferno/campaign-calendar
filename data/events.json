@@ -64,27 +64,6 @@
     "tags": []
   },
   {
-    "id": "93100401-088c-4893-ac8e-dd442c61122b",
-    "title": "Siege of Varlen Keep",
-    "description": "The party joined the defense of Varlen Keep against an extended assault by Hollow-Eyed forces. Three days of brutal fighting.",
-    "location": "Varlen Keep",
-    "year": 6532,
-    "month": 7,
-    "week": 3,
-    "day": 1,
-    "hour": 0,
-    "endYear": 6532,
-    "endMonth": 7,
-    "endWeek": 4,
-    "endDay": 10,
-    "endHour": 23,
-    "color": "#6b3a2a",
-    "markerType": "event",
-    "mapX": 1380,
-    "mapY": 1700,
-    "tags": []
-  },
-  {
     "id": "b2361ed4-0600-45bc-aece-bfc460f8722a",
     "title": "Ancient Shrine Discovered",
     "description": "Hidden beneath a collapsed tower, an intact shrine to an unnamed god. Ivory recognized the script as pre-Shattering.",
