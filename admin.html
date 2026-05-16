@@ -211,7 +211,7 @@ async function adminInit() {
   showBanner('Loading…', 'info');
   try {
     const [cfgRes, cdRes, evRes] = await Promise.all([
-      GithubAPI.readFile('data/config.json'),
+      GithubAPI.readFile('data/config.json').catch(e => { throw new Error('Failed to load config: ' + e.message); }),
       GithubAPI.readFile('data/current-date.json').catch(() => ({ content: {year:1,month:1,week:1,day:1,hour:0} })),
       GithubAPI.readFile('data/events.json').catch(() => ({ content: [] }))
     ]);
@@ -367,7 +367,7 @@ document.getElementById('pat-save').addEventListener('click', async () => {
   if (!val) return;
   try {
     const login = await GithubAPI.testPAT(val);
-    GithubAPI.setPAT(val);
+    GithubAPI.setPersonalPAT(val);
     document.getElementById('pat-status').textContent = `✓ ${login}`;
     document.getElementById('pat-status').className = 'pat-ok';
     showBanner(`Connected as ${login}`, 'success');
@@ -436,7 +436,7 @@ document.getElementById('clear-write-key-btn').addEventListener('click', async (
 
 /* ── Save handlers ──────────────────────────────────────────── */
 function requirePAT() {
-  if (!GithubAPI.getPAT()) {
+  if (!GithubAPI.getPersonalPAT() && !GithubAPI.getPAT()) {
     showBanner('Enter your GitHub PAT first.', 'error');
     document.getElementById('pat-panel').classList.remove('hidden');
     return false;

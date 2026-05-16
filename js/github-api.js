@@ -78,7 +78,7 @@ const GithubAPI = (() => {
       }
     } catch (_) {}
 
-    const pat = getPAT();
+    const pat = getPersonalPAT() || getPAT();
     if (!pat) throw new Error('No PAT set.');
 
     const body = { message, content: base64Data };
