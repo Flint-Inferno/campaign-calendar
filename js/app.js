@@ -73,7 +73,10 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
     document.getElementById('app-sidebar')?.classList.toggle('hidden', tab === 'log');
     if (tab === 'map') {
       if (!mapLoaded) initMap();
-      else if (_pendingMapPin) { enablePinForEvent(_pendingMapPin); _pendingMapPin = null; }
+      else {
+        if (_pendingMapPin) { enablePinForEvent(_pendingMapPin); _pendingMapPin = null; }
+        MapView.renderCurrentLocation(CURRENT_DATE);
+      }
     }
     if (tab === 'timeline') initTimeline();
     if (tab === 'log') renderLogTab();
@@ -136,6 +139,7 @@ function openAddModal(prefill = {}, mapCoords = null) {
   });
   document.getElementById('modal-title-heading').textContent = 'New Event';
   document.getElementById('delete-event-btn').classList.add('hidden');
+  document.getElementById('reposition-pin-btn').classList.add('hidden');
   openModal('event-modal');
 }
 
@@ -146,6 +150,7 @@ function openViewModal(id) {
   populateModal(ev);
   document.getElementById('modal-title-heading').textContent = 'Edit Event';
   document.getElementById('delete-event-btn').classList.remove('hidden');
+  document.getElementById('reposition-pin-btn').classList.remove('hidden');
   openModal('event-modal');
 }
 
@@ -584,74 +589,102 @@ document.getElementById('scrub-next-btn')?.addEventListener('click', () => {
   if (mapLoaded) MapView.renderScrubbed(Events.getAll(), Movements.getAll(), _scrubDate, CFG);
 });
 
-/* ── Waypoint mode ───────────────────────────────────────────── */
-function renderWaypointList() {
-  const list = document.getElementById('wp-list');
-  if (!list) return;
-  const wps = MapView.getPendingWaypoints();
-  if (wps.length === 0) {
-    list.innerHTML = '<div class="wp-list-empty">Click the map to place waypoints</div>';
-    return;
-  }
-  list.innerHTML = wps.map((wp, i) =>
-    `<div class="wp-list-item">
-      <span class="wp-list-num">${i + 1}</span>
-      <input class="wp-label-input" type="text" placeholder="Label (optional)" value="${escHtml(wp.label || '')}">
-    </div>`
-  ).join('');
-}
+/* ── Add Pin mode (map waypoint button) ─────────────────────── */
+let _addPinCoords = null;
+let _qpSelectedColor = '#6B3A2A';
 
 document.getElementById('waypoint-mode-btn')?.addEventListener('click', () => {
-  if (!_scrubDate || !mapLoaded) return;
-  if (MapView.isWaypointMode()) {
-    exitWaypointModeIfActive();
-    MapView.renderScrubbed(Events.getAll(), Movements.getAll(), _scrubDate, CFG);
+  if (!mapLoaded) return;
+  if (!canWrite()) { showBanner('Set your identity to a recognized player name to edit.', 'error'); return; }
+  if (MapView.isPinMode()) {
+    MapView.disablePinMode();
+    document.getElementById('waypoint-mode-btn').classList.remove('active');
+    hideBanner();
   } else {
-    const dayMvt = Movements.getForDay(_scrubDate.year, _scrubDate.month, _scrubDate.week, _scrubDate.day);
-    const existing = dayMvt?.waypoints || [];
-    const existingColor = dayMvt?.waypointColor || '#8b6914';
-    MapView.enableWaypointMode(existing, existingColor, () => renderWaypointList());
-    const colorInput = document.getElementById('wp-color-input');
-    if (colorInput) colorInput.value = existingColor;
-    document.getElementById('waypoint-mode-btn')?.classList.add('active');
-    document.getElementById('waypoint-panel')?.classList.remove('hidden');
-    renderWaypointList();
+    MapView.enablePinMode((x, y) => {
+      MapView.disablePinMode();
+      document.getElementById('waypoint-mode-btn').classList.remove('active');
+      _addPinCoords = { x, y };
+      openQuickPinModal();
+    });
+    document.getElementById('waypoint-mode-btn').classList.add('active');
+    showBanner('Click the map to place a new pin.', 'info');
   }
 });
 
-document.getElementById('wp-color-input')?.addEventListener('input', e => {
-  MapView.setPendingColor(e.target.value);
+function openQuickPinModal() {
+  document.getElementById('qp-title').value = '';
+  document.getElementById('qp-desc').value = '';
+  const d = CURRENT_DATE || { year: 1, month: 1, week: 1, day: 1, hour: 0 };
+  document.querySelector('[name=qp-year]').value = d.year;
+  setSelectValue(document.querySelector('[name=qp-month]'), d.month);
+  setSelectValue(document.querySelector('[name=qp-week]'), d.week);
+  setSelectValue(document.querySelector('[name=qp-day]'), d.day);
+  setSelectValue(document.querySelector('[name=qp-hour]'), d.hour || 0);
+  setQpColor((CFG && CFG.defaultEventColor) || '#6B3A2A');
+  openModal('quick-pin-modal');
+}
+
+function setQpColor(hex) {
+  _qpSelectedColor = hex;
+  document.getElementById('qp-color-preview').style.background = hex;
+  document.querySelectorAll('#qp-swatch-grid .color-swatch').forEach(s =>
+    s.classList.toggle('selected', s.dataset.color === hex)
+  );
+}
+
+document.getElementById('qp-cancel-btn')?.addEventListener('click', () => {
+  closeModal('quick-pin-modal');
+  _addPinCoords = null;
+});
+document.getElementById('quick-pin-modal')?.querySelector('.modal-backdrop')?.addEventListener('click', () => {
+  closeModal('quick-pin-modal');
+  _addPinCoords = null;
 });
 
-document.getElementById('wp-undo-btn')?.addEventListener('click', () => {
-  MapView.undoLastWaypoint();
-});
-
-document.getElementById('wp-clear-btn')?.addEventListener('click', () => {
-  MapView.clearPendingWaypoints();
-});
-
-document.getElementById('wp-cancel-btn')?.addEventListener('click', () => {
-  exitWaypointModeIfActive();
-  if (mapLoaded && _scrubDate) MapView.renderScrubbed(Events.getAll(), Movements.getAll(), _scrubDate, CFG);
-});
-
-document.getElementById('wp-save-btn')?.addEventListener('click', async () => {
-  if (!_scrubDate) return;
+document.getElementById('qp-save-btn')?.addEventListener('click', async () => {
+  const title = document.getElementById('qp-title').value.trim();
+  if (!title) { showBanner('Title is required.', 'error'); return; }
   if (!canWrite()) { showBanner('Set your identity to a recognized player name to edit.', 'error'); return; }
-  const inputs = document.querySelectorAll('#wp-list .wp-label-input');
-  const waypoints = MapView.getPendingWaypoints().map((wp, i) => ({
-    ...wp, label: inputs[i]?.value.trim() || ''
-  }));
-  const waypointColor = MapView.getPendingColor();
+  const btn = document.getElementById('qp-save-btn');
+  btn.disabled = true; btn.textContent = 'Saving…';
   try {
-    await Movements.setDay(_scrubDate.year, _scrubDate.month, _scrubDate.week, _scrubDate.day, { waypoints, waypointColor });
-    const mn = (CFG.monthNames || [])[_scrubDate.month - 1] || `M${_scrubDate.month}`;
-    appendActivityLog('waypoints_save', `Saved ${waypoints.length} waypoint${waypoints.length !== 1 ? 's' : ''} — Y${_scrubDate.year} ${mn} W${_scrubDate.week} D${_scrubDate.day}`);
-    exitWaypointModeIfActive();
-    MapView.renderScrubbed(Events.getAll(), Movements.getAll(), _scrubDate, CFG);
-    showBanner(`${waypoints.length} waypoint${waypoints.length !== 1 ? 's' : ''} saved!`, 'success');
+    const data = {
+      title,
+      description: document.getElementById('qp-desc').value.trim(),
+      year: +document.querySelector('[name=qp-year]').value,
+      month: +document.querySelector('[name=qp-month]').value,
+      week: +document.querySelector('[name=qp-week]').value,
+      day: +document.querySelector('[name=qp-day]').value,
+      hour: +document.querySelector('[name=qp-hour]').value,
+      color: _qpSelectedColor,
+      tags: [],
+      mapX: _addPinCoords?.x ?? null,
+      mapY: _addPinCoords?.y ?? null
+    };
+    await Events.add(data);
+    appendActivityLog('event_add', `Added pin: "${title}"`);
+    closeModal('quick-pin-modal');
+    _addPinCoords = null;
+    Calendar.render();
+    if (mapLoaded && _scrubDate) MapView.renderScrubbed(Events.getAll(), Movements.getAll(), _scrubDate, CFG);
+    refreshTimeline();
+    showBanner('Pin added!', 'success');
   } catch (e) { showBanner(e.message, 'error'); }
+  btn.disabled = false; btn.textContent = 'Add Pin';
+});
+
+/* ── Reposition Pin (from edit modal) ───────────────────────── */
+document.getElementById('reposition-pin-btn')?.addEventListener('click', () => {
+  if (!editingEventId) return;
+  closeModal('event-modal');
+  _pendingMapPin = editingEventId;
+  document.querySelector('.tab-btn[data-tab="map"]')?.click();
+});
+
+/* ── Edit event from map popup ──────────────────────────────── */
+document.addEventListener('map:edit-event', e => {
+  openViewModal(e.detail.id);
 });
 
 /* ── Movement modal ──────────────────────────────────────────── */
@@ -988,12 +1021,16 @@ function buildSelects() {
   if (!CFG) return;
   buildMonthSelect('start-month');
   buildMonthSelect('end-month');
+  buildMonthSelect('qp-month');
   buildWeekSelect('start-week');
   buildWeekSelect('end-week');
+  buildWeekSelect('qp-week');
   buildDaySelect('start-day');
   buildDaySelect('end-day');
+  buildDaySelect('qp-day');
   buildHourSelect('start-hour');
   buildHourSelect('end-hour');
+  buildHourSelect('qp-hour');
 }
 
 function buildMonthSelect(name) {
@@ -1037,5 +1074,13 @@ function buildColorSwatches() {
   ).join('');
   grid.querySelectorAll('.color-swatch').forEach(s => {
     s.addEventListener('click', () => setModalColor(s.dataset.color));
+  });
+  const qpGrid = document.getElementById('qp-swatch-grid');
+  if (!qpGrid) return;
+  qpGrid.innerHTML = COLOR_SWATCHES.map(c =>
+    `<div class="color-swatch" data-color="${c}" style="background:${c}" title="${c}"></div>`
+  ).join('');
+  qpGrid.querySelectorAll('.color-swatch').forEach(s => {
+    s.addEventListener('click', () => setQpColor(s.dataset.color));
   });
 }

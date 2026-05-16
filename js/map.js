@@ -83,7 +83,10 @@ const MapView = (() => {
           <strong>${escHtml(ev.title)}</strong>
           <div class="popup-date">${dateStr}</div>
           ${desc ? `<div class="popup-desc">${desc}</div>` : ''}
-          <button class="popup-goto-btn" data-event-id="${ev.id}">View on Calendar</button>
+          <div class="popup-actions">
+            <button class="popup-goto-btn" data-event-id="${ev.id}">View on Calendar</button>
+            <button class="popup-edit-btn" data-event-id="${ev.id}">Edit</button>
+          </div>
         </div>
       `);
       marker.on('popupopen', () => {
@@ -91,6 +94,12 @@ const MapView = (() => {
           btn.addEventListener('click', () => {
             const id = btn.dataset.eventId;
             document.dispatchEvent(new CustomEvent('map:goto-event', { detail: { id } }));
+          });
+        });
+        document.querySelectorAll('.popup-edit-btn').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const id = btn.dataset.eventId;
+            document.dispatchEvent(new CustomEvent('map:edit-event', { detail: { id } }));
           });
         });
       });

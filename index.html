@@ -88,26 +88,14 @@
     <!-- ══════════════════════════════════════════════════════ -->
     <div id="tab-map" class="tab-content hidden">
       <div class="map-controls">
-        <button id="pin-mode-btn">📍 Place Pin</button>
+        <button id="pin-mode-btn" style="display:none">📍 Place Pin</button>
         <button id="trail-toggle-btn">🗺 Party Trail</button>
         <div class="map-scrubber">
           <button id="scrub-prev-btn">◄</button>
           <span id="scrub-date-label">—</span>
           <button id="scrub-next-btn">►</button>
         </div>
-        <button id="waypoint-mode-btn">✦ Waypoints</button>
-      </div>
-      <div id="waypoint-panel" class="waypoint-panel hidden">
-        <div id="wp-list" class="wp-list"></div>
-        <div class="wp-panel-bottom">
-          <label class="wp-color-label">Color <input id="wp-color-input" type="color" value="#8b6914"></label>
-          <div class="wp-panel-actions">
-            <button id="wp-undo-btn">↩ Undo</button>
-            <button id="wp-clear-btn">✕ Clear</button>
-            <button id="wp-cancel-btn">Cancel</button>
-            <button id="wp-save-btn">Save Waypoints</button>
-          </div>
-        </div>
+        <button id="waypoint-mode-btn">📍 Add Pin</button>
       </div>
       <div id="map-container">
         <div id="map-placeholder" class="hidden">
@@ -288,6 +276,7 @@
 
     <div class="modal-actions">
       <button id="delete-event-btn" class="hidden">Delete</button>
+      <button id="reposition-pin-btn" class="hidden">📍 Reposition Pin</button>
       <button id="cancel-event-btn">Cancel</button>
       <button id="save-event-btn">Save</button>
     </div>
@@ -365,6 +354,45 @@
     <div class="modal-actions">
       <button id="advance-confirm-cancel">Cancel</button>
       <button id="advance-confirm-ok">Advance Time →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════ -->
+<!-- Quick Pin Modal -->
+<!-- ══════════════════════════════════════════════════════════ -->
+<div id="quick-pin-modal" class="modal hidden" role="dialog" aria-modal="true">
+  <div class="modal-backdrop"></div>
+  <div class="modal-box" style="width:min(460px,95vw)">
+    <h2>Add Map Pin</h2>
+    <div class="form-row">
+      <label for="qp-title">Title *</label>
+      <input id="qp-title" type="text" placeholder="What happened here?" autocomplete="off">
+    </div>
+    <div class="form-row">
+      <label for="qp-desc">Description <span style="font-size:.7em;opacity:.7">(optional)</span></label>
+      <textarea id="qp-desc" placeholder="Details…" rows="2"></textarea>
+    </div>
+    <div class="form-row">
+      <label>Date &amp; Time</label>
+      <div class="date-picker-row">
+        <div><label>Year</label><input name="qp-year" type="number" min="1" autocomplete="off"></div>
+        <div><label>Month</label><select name="qp-month"></select></div>
+        <div><label>Week</label><select name="qp-week"></select></div>
+        <div><label>Day</label><select name="qp-day"></select></div>
+        <div><label>Hour</label><select name="qp-hour"></select></div>
+      </div>
+    </div>
+    <div class="form-row">
+      <label>Color</label>
+      <div class="color-picker-row">
+        <div id="qp-swatch-grid"></div>
+        <div id="qp-color-preview" style="background:#6B3A2A"></div>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button id="qp-cancel-btn">Cancel</button>
+      <button id="qp-save-btn">Add Pin</button>
     </div>
   </div>
 </div>

@@ -1044,17 +1044,18 @@ header {
 .popup-date { font-size: 0.75rem; color: var(--ink-light); margin-bottom: 4px; }
 .popup-desc { font-size: 0.82rem; color: var(--ink); margin-bottom: 6px; max-height: 80px; overflow: auto; }
 .popup-desc a { color: var(--gold); }
-.popup-goto-btn {
+.popup-actions { display: flex; gap: 6px; margin-top: 2px; }
+.popup-goto-btn, .popup-edit-btn {
   font-family: 'Cinzel', serif;
   font-size: 0.75rem;
-  background: var(--crimson);
-  color: var(--parchment);
   border: none;
   padding: 4px 10px;
   cursor: pointer;
   border-radius: var(--radius);
-  width: 100%;
+  flex: 1;
 }
+.popup-goto-btn { background: var(--crimson); color: var(--parchment); }
+.popup-edit-btn { background: var(--gold); color: var(--ink); }
 
 /* ── Event modal ──────────────────────────────────────────────── */
 .modal {
