@@ -1480,3 +1480,80 @@ header {
   .week-label { font-size: 0.62rem; padding: 4px 2px; }
   .day-cell { height: 60px; }
 }
+
+/* ── Event popover ───────────────────────────────────────────── */
+.event-popover {
+  position: fixed;
+  z-index: 2000;
+  width: 240px;
+  max-width: calc(100vw - 16px);
+  background: var(--parchment);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: 0 4px 20px rgba(44,24,16,0.28);
+  font-family: 'IM Fell English', serif;
+  overflow: hidden;
+}
+.event-popover.hidden { display: none; }
+
+.popover-body { padding: 12px 14px 8px; }
+
+.popover-title {
+  font-family: 'Cinzel', serif;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--ink);
+  margin-bottom: 4px;
+  padding-right: 18px;
+}
+.popover-date {
+  font-size: 0.74rem;
+  color: var(--ink-light);
+  margin-bottom: 2px;
+}
+.popover-location {
+  font-size: 0.73rem;
+  color: var(--ink-light);
+  font-style: italic;
+  margin-bottom: 2px;
+}
+.popover-desc {
+  font-size: 0.78rem;
+  color: var(--ink);
+  margin-top: 6px;
+  max-height: 72px;
+  overflow-y: auto;
+  line-height: 1.4;
+  white-space: pre-wrap;
+}
+
+.popover-close {
+  position: absolute;
+  top: 6px; right: 8px;
+  background: none;
+  border: none;
+  font-size: 1.1rem;
+  color: var(--ink-light);
+  cursor: pointer;
+  line-height: 1;
+  padding: 2px 4px;
+}
+.popover-close:hover { color: var(--ink); }
+
+.popover-footer {
+  padding: 6px 14px 10px;
+  border-top: 1px solid rgba(44,24,16,0.12);
+}
+.popover-edit-btn {
+  width: 100%;
+  font-family: 'Cinzel', serif;
+  font-size: 0.72rem;
+  padding: 5px 0;
+  background: var(--crimson);
+  color: var(--parchment);
+  border: none;
+  border-radius: 3px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.popover-edit-btn:hover { background: #7a4535; }

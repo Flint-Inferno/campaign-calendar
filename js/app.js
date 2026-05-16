@@ -47,7 +47,7 @@ async function appInit() {
   document.documentElement.style.setProperty('--days-per-week', CFG.daysPerWeek);
 
   Calendar.init(document.getElementById('calendar-grid'), CFG, CURRENT_DATE);
-  Calendar.onEventClick = openViewModal;
+  Calendar.onEventClick = (id, el) => openEventPopover(id, el);
   Calendar.onCellClick = (date) => openAddModal(date);
 
   MapView.init(document.getElementById('map-container'), CFG);
@@ -144,6 +144,66 @@ function openAddModal(prefill = {}, mapCoords = null) {
   document.getElementById('reposition-pin-btn').classList.add('hidden');
   openModal('event-modal');
 }
+
+/* ── Event popover ──────────────────────────────────────────── */
+let _popoverEventId = null;
+
+function openEventPopover(id, anchorEl) {
+  const ev = Events.getAll().find(e => e.id === id);
+  if (!ev) return;
+  _popoverEventId = id;
+
+  document.getElementById('popover-ev-title').textContent = ev.title;
+  document.getElementById('popover-ev-date').textContent = CFG ? TimeCalc.format(ev, CFG) : '';
+
+  const locEl = document.getElementById('popover-ev-location');
+  if (ev.location) { locEl.textContent = ev.location; locEl.classList.remove('hidden'); }
+  else locEl.classList.add('hidden');
+
+  const descEl = document.getElementById('popover-ev-desc');
+  if (ev.description) { descEl.textContent = ev.description; descEl.classList.remove('hidden'); }
+  else descEl.classList.add('hidden');
+
+  const popover = document.getElementById('event-popover');
+  popover.classList.remove('hidden');
+  _positionPopover(popover, anchorEl);
+}
+
+function closeEventPopover() {
+  document.getElementById('event-popover').classList.add('hidden');
+  _popoverEventId = null;
+}
+
+function _positionPopover(popover, anchorEl) {
+  if (!anchorEl) return;
+  const rect = anchorEl.getBoundingClientRect();
+  const margin = 8;
+  const pw = 240;
+  const ph = 180;
+  let left = rect.left;
+  let top  = rect.bottom + margin;
+  if (left + pw > window.innerWidth - margin) left = window.innerWidth - pw - margin;
+  if (left < margin) left = margin;
+  if (top + ph > window.innerHeight - margin) top = Math.max(margin, rect.top - ph - margin);
+  popover.style.left = left + 'px';
+  popover.style.top  = top  + 'px';
+}
+
+document.getElementById('popover-close-btn').addEventListener('click', closeEventPopover);
+document.getElementById('popover-edit-btn').addEventListener('click', () => {
+  const id = _popoverEventId;
+  closeEventPopover();
+  if (id) openViewModal(id);
+});
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeEventPopover();
+});
+document.addEventListener('click', e => {
+  const popover = document.getElementById('event-popover');
+  if (!popover.classList.contains('hidden') && !popover.contains(e.target)) {
+    closeEventPopover();
+  }
+}, true);
 
 function openViewModal(id) {
   const ev = Events.getAll().find(e => e.id === id);
@@ -682,7 +742,10 @@ document.addEventListener('map:goto-event', e => {
   Calendar.goToDate(ev);
   Calendar.render();
   updateNavLabel();
-  setTimeout(() => openViewModal(id), 100);
+  setTimeout(() => {
+    const chip = document.querySelector(`[data-event-id="${id}"]`);
+    openEventPopover(id, chip);
+  }, 100);
 });
 
 /* ── Map scrubber ────────────────────────────────────────────── */
@@ -903,7 +966,7 @@ function initTimeline() {
       document.getElementById('timeline-scroll'),
       CFG,
       date => { _openedFromTimeline = true; openAddModal({ ...date }); },
-      id => openViewModal(id)
+      (id, el) => openEventPopover(id, el)
     );
     timelineLoaded = true;
   }

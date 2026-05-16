@@ -236,7 +236,7 @@ const Calendar = (() => {
     _container.querySelectorAll('.event-chip, .span-bar').forEach(el => {
       el.addEventListener('click', e => {
         e.stopPropagation();
-        if (onEventClick) onEventClick(el.dataset.eventId);
+        if (onEventClick) onEventClick(el.dataset.eventId, el);
       });
     });
     _container.querySelectorAll('.day-cell').forEach(el => {
@@ -253,7 +253,7 @@ const Calendar = (() => {
     _container.querySelectorAll('.week-event-block').forEach(el => {
       el.addEventListener('click', e => {
         e.stopPropagation();
-        if (onEventClick) onEventClick(el.dataset.eventId);
+        if (onEventClick) onEventClick(el.dataset.eventId, el);
       });
     });
     _container.querySelectorAll('.hour-slot').forEach(el => {

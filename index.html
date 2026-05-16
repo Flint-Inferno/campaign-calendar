@@ -425,6 +425,22 @@
 <script src="js/time-calc.js"></script>
 <script src="js/events.js"></script>
 <script src="js/activity-log.js"></script>
+<!-- ══════════════════════════════════════════════════════════ -->
+<!-- Event Popover -->
+<!-- ══════════════════════════════════════════════════════════ -->
+<div id="event-popover" class="event-popover hidden" role="dialog">
+  <button class="popover-close" id="popover-close-btn" aria-label="Close">×</button>
+  <div class="popover-body">
+    <div class="popover-title" id="popover-ev-title"></div>
+    <div class="popover-date"  id="popover-ev-date"></div>
+    <div class="popover-location hidden" id="popover-ev-location"></div>
+    <div class="popover-desc   hidden" id="popover-ev-desc"></div>
+  </div>
+  <div class="popover-footer">
+    <button class="popover-edit-btn" id="popover-edit-btn">Edit</button>
+  </div>
+</div>
+
 <script src="js/calendar.js"></script>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="js/map.js"></script>

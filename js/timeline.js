@@ -118,7 +118,7 @@ const TimelineView = (() => {
       chip.className = 'tl-chip';
       chip.style.setProperty('--chip-color', color);
       chip.innerHTML = `<div class="tl-chip-title">${_esc(ev.title)}</div><div class="tl-chip-date">${_esc(TimeCalc.formatShort(ev, _cfg))}</div>`;
-      chip.addEventListener('click', e => { e.stopPropagation(); if (_onEventClick) _onEventClick(ev.id); });
+      chip.addEventListener('click', e => { e.stopPropagation(); if (_onEventClick) _onEventClick(ev.id, chip); });
       wrap.appendChild(chip);
 
       inner.appendChild(wrap);
