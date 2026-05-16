@@ -34,6 +34,37 @@
     "#2c1810",
     "#e1e100"
   ],
-  "partyMembers": [],
+  "partyMembers": [
+    {
+      "id": "fb14bf98-2f51-42de-85ff-ae885af876b7",
+      "name": "Valvys",
+      "color": "#8b2e2e"
+    },
+    {
+      "id": "66d4fc23-3c3e-49b1-ac0e-e3bdde4eed72",
+      "name": "Verro",
+      "color": "#8b2e2e"
+    },
+    {
+      "id": "96b7c628-d01b-4626-b0bc-0f1b50fc2f04",
+      "name": "Leaf",
+      "color": "#8b2e2e"
+    },
+    {
+      "id": "cd9c0e22-7fe0-40e5-8fe6-b1c388beb7e9",
+      "name": "Luka",
+      "color": "#8b2e2e"
+    },
+    {
+      "id": "d424eb15-ee77-4dc8-b136-2d51c2023b15",
+      "name": "Ivory",
+      "color": "#8b2e2e"
+    },
+    {
+      "id": "822acc8b-e239-4fd5-a82d-29a0c055b132",
+      "name": "Zidreyi",
+      "color": "#8b2e2e"
+    }
+  ],
   "defaultEventColor": "#6B3A2A"
 }
