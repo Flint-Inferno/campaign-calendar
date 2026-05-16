@@ -27,7 +27,10 @@ const GithubAPI = (() => {
 
   async function readFile(path) {
     const url = `${BASE}/repos/${REPO_OWNER}/${REPO_NAME}/contents/${path}`;
-    const res = await fetch(url, { headers: authHeaders() });
+    let res = await fetch(url, { headers: authHeaders() });
+    if (res.status === 401) {
+      res = await fetch(url, { headers: { 'Accept': 'application/vnd.github.v3+json' } });
+    }
     if (!res.ok) {
       if (res.status === 404) throw Object.assign(new Error(`Not found: ${path}`), { status: 404 });
       throw new Error(`GitHub read failed (${res.status}): ${path}`);
