@@ -1131,8 +1131,11 @@ header {
 .has-end-row input[type=checkbox] { width: auto; }
 
 /* color picker */
-.color-picker-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-#color-swatch-grid, #qp-swatch-grid, #advance-color-swatch-grid { display: flex; flex-wrap: wrap; gap: 5px; }
+.color-picker-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+#color-swatch-grid, #qp-swatch-grid, #advance-color-swatch-grid {
+  display: flex; flex-wrap: wrap; gap: 5px;
+  flex: 1 1 100%;   /* own full-width row, preview+hex sit below */
+}
 .color-swatch {
   width: 22px; height: 22px;
   border-radius: 3px;
@@ -1150,7 +1153,8 @@ header {
   flex-shrink: 0;
 }
 #color-hex-input, #qp-hex-input, #advance-hex-input {
-  width: 90px;
+  flex: 1;
+  min-width: 70px;
   font-family: monospace;
   font-size: 0.82rem;
 }
