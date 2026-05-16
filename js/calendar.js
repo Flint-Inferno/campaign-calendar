@@ -72,13 +72,6 @@ const Calendar = (() => {
   }
 
   function renderMonth() {
-    const eventsForMonth = [];
-    for (let w = 1; w <= _cfg.weeksPerMonth; w++) {
-      for (let d = 1; d <= _cfg.daysPerWeek; d++) {
-        eventsForMonth.push({ week: w, day: d, events: Events.getForDay(_nav.year, _nav.month, w, d, _cfg) });
-      }
-    }
-
     const html = [];
     html.push('<div class="month-view">');
     html.push('<div class="month-header-row">');
@@ -90,13 +83,68 @@ const Calendar = (() => {
 
     for (let w = 1; w <= _cfg.weeksPerMonth; w++) {
       const wn = (_cfg.weekNames || [])[w - 1] || `Week ${w}`;
+      const weekAbsStart = TimeCalc.toAbsolute({ year: _nav.year, month: _nav.month, week: w, day: 1, hour: 0 }, _cfg);
+      const weekAbsEnd = weekAbsStart + _cfg.daysPerWeek * _cfg.hoursPerDay - 1;
+
+      // Identify spanning events (multi-day, with endYear set) for this week
+      const weekAllEvents = Events.getForWeek(_nav.year, _nav.month, w, _cfg);
+      const spanningIds = new Set();
+      const spanItems = [];
+
+      for (const ev of weekAllEvents) {
+        if (ev.endYear == null) continue;
+        const evStart = TimeCalc.toAbsolute(ev, _cfg);
+        const evEnd = TimeCalc.toAbsolute({ year: ev.endYear, month: ev.endMonth, week: ev.endWeek, day: ev.endDay, hour: ev.endHour || 0 }, _cfg);
+        if (Math.floor(evEnd / _cfg.hoursPerDay) <= Math.floor(evStart / _cfg.hoursPerDay)) continue; // same calendar day
+        spanningIds.add(ev.id);
+
+        const startDayInWeek = Math.max(1, Math.floor((evStart - weekAbsStart) / _cfg.hoursPerDay) + 1);
+        const endDayInWeek   = Math.min(_cfg.daysPerWeek, Math.floor((evEnd - weekAbsStart) / _cfg.hoursPerDay) + 1);
+        spanItems.push({
+          ev,
+          startDay: startDayInWeek,
+          endDay:   endDayInWeek,
+          capLeft:  evStart >= weekAbsStart,
+          capRight: evEnd   <= weekAbsEnd
+        });
+      }
+
+      // Greedy lane assignment so overlapping spans don't collide
+      const laneEnds = [];
+      for (const s of spanItems) {
+        let placed = false;
+        for (let i = 0; i < laneEnds.length; i++) {
+          if (laneEnds[i] < s.startDay) { s.lane = i; laneEnds[i] = s.endDay; placed = true; break; }
+        }
+        if (!placed) { s.lane = laneEnds.length; laneEnds.push(s.endDay); }
+      }
+
+      // Span band (only rendered when there are spanning events)
+      if (spanItems.length > 0) {
+        html.push('<div class="span-band">');
+        for (const { ev, startDay, endDay, capLeft, capRight, lane } of spanItems) {
+          const color = ev.color || _cfg.defaultEventColor || '#6B3A2A';
+          const bright = isColorLight(color);
+          const caps = [capLeft ? 'cap-left' : '', capRight ? 'cap-right' : ''].filter(Boolean).join(' ');
+          // grid col 1 = week-label spacer; day d → col d+1; end is exclusive
+          const gc = `${startDay + 1}/${endDay + 2}`;
+          const gr = lane + 1;
+          html.push(`<div class="span-bar${caps ? ' ' + caps : ''}" data-event-id="${ev.id}"
+            style="grid-column:${gc};grid-row:${gr};background:${color};color:${bright ? '#2c1810' : '#f4e4c1'}"
+            title="${escHtml(ev.title)}">${capLeft ? escHtml(ev.title) : ''}</div>`);
+        }
+        html.push('</div>');
+      }
+
+      // Regular week row (spanning events excluded from chips)
       html.push('<div class="week-row">');
       html.push(`<div class="week-label">${wn}</div>`);
       for (let d = 1; d <= _cfg.daysPerWeek; d++) {
         const isCurrent = _currentDate &&
           _currentDate.year === _nav.year && _currentDate.month === _nav.month &&
           _currentDate.week === w && _currentDate.day === d;
-        const cellEvents = Events.getForDay(_nav.year, _nav.month, w, d, _cfg);
+        const cellEvents = Events.getForDay(_nav.year, _nav.month, w, d, _cfg)
+          .filter(ev => !spanningIds.has(ev.id));
         const cls = ['day-cell', isCurrent ? 'current-day' : ''].filter(Boolean).join(' ');
 
         html.push(`<div class="${cls}" data-year="${_nav.year}" data-month="${_nav.month}" data-week="${w}" data-day="${d}">`);
@@ -185,7 +233,7 @@ const Calendar = (() => {
   }
 
   function attachMonthListeners() {
-    _container.querySelectorAll('.event-chip').forEach(el => {
+    _container.querySelectorAll('.event-chip, .span-bar').forEach(el => {
       el.addEventListener('click', e => {
         e.stopPropagation();
         if (onEventClick) onEventClick(el.dataset.eventId);

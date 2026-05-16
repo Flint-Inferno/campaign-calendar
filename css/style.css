@@ -522,10 +522,34 @@ header {
   overflow: hidden;
 }
 
-.month-header-row, .week-row {
+.month-header-row, .week-row, .span-band {
   display: grid;
   grid-template-columns: 110px repeat(var(--days-per-week, 10), 1fr);
 }
+
+.span-band {
+  background: rgba(var(--mc-rgb, 44, 24, 16), 0.04);
+  padding: 2px 0 1px;
+}
+
+.span-bar {
+  height: 18px;
+  line-height: 18px;
+  font-size: 0.70rem;
+  font-family: 'IM Fell English', serif;
+  padding: 0 5px;
+  margin: 1px 1px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  cursor: pointer;
+  border-radius: 0;
+  transition: opacity 0.1s;
+}
+.span-bar.cap-left  { border-radius: 3px 0 0 3px; }
+.span-bar.cap-right { border-radius: 0 3px 3px 0; }
+.span-bar.cap-left.cap-right { border-radius: 3px; }
+.span-bar:hover { opacity: 0.85; }
 
 .week-label-header, .day-header {
   background: rgba(var(--mc-rgb, 44, 24, 16), 0.92);
