@@ -110,5 +110,13 @@
     "playerColor": "#0000c4",
     "action": "waypoints_save",
     "details": "Saved 3 waypoints — Y6532 Falm W5 D7"
+  },
+  {
+    "id": "23efe9b8-f64a-4d60-8ded-5da45ff648dc",
+    "timestamp": "2026-05-16T01:08:14.230Z",
+    "playerName": "Flint (DM)",
+    "playerColor": "#0000c4",
+    "action": "waypoints_save",
+    "details": "Saved 0 waypoints — Y6532 Falm W5 D7"
   }
 ]
