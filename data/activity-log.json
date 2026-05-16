@@ -56,11 +56,27 @@
     "details": "Toggled \"Met Silas the Informant\" to waypoint"
   },
   {
-    "id": "b272ddd7-0a4a-44f6-b104-ed1e9ceb462b",
-    "timestamp": "2026-05-16T22:31:45.698Z",
+    "id": "08335c25-524b-4629-b7d5-f2770b262017",
+    "timestamp": "2026-05-16T22:32:23.019Z",
     "playerName": "Flint (DM)",
     "playerColor": "#0000c4",
     "action": "date_advance",
-    "details": "Advanced to Year 6532 · Psol · Pelora · Day 1 · 10:00"
+    "details": "Advanced to Year 6532 · Psol · Pelora · Day 1 · 14:00"
+  },
+  {
+    "id": "d6647a11-41c4-49d2-9ad8-54efd2fcc421",
+    "timestamp": "2026-05-16T22:32:23.681Z",
+    "playerName": "Flint (DM)",
+    "playerColor": "#0000c4",
+    "action": "event_add",
+    "details": "Auto-created time skip: \"asdfg\""
+  },
+  {
+    "id": "28157ce7-bd13-4d3d-a940-450539e6e7a0",
+    "timestamp": "2026-05-16T22:32:57.889Z",
+    "playerName": "Flint (DM)",
+    "playerColor": "#0000c4",
+    "action": "date_advance",
+    "details": "Advanced to Year 6532 · Psol · Pelora · Day 1 · 14:00"
   }
 ]
