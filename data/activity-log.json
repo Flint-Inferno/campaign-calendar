@@ -24,19 +24,11 @@
     "details": "Deleted event: \"qwert\""
   },
   {
-    "id": "597827e4-1623-4ebb-9d1c-22b7783eb53a",
-    "timestamp": "2026-05-16T21:39:30.246Z",
+    "id": "259e4b6a-c1eb-45b5-92b3-e4a7faf751a6",
+    "timestamp": "2026-05-16T21:40:52.894Z",
     "playerName": "Flint (DM)",
     "playerColor": "#0000c4",
-    "action": "date_advance",
-    "details": "Advanced to Year 6532 · Falm · Ravethen · Day 8 · 12:00 — a TEST"
-  },
-  {
-    "id": "03f7d8a4-4866-4cc2-be3c-63a4bdeeeaef",
-    "timestamp": "2026-05-16T21:39:30.906Z",
-    "playerName": "Flint (DM)",
-    "playerColor": "#0000c4",
-    "action": "event_add",
-    "details": "Auto-created time skip: \"Time Skip → Year 6532 · Falm · Ravethen · Day 8 · 12:00\""
+    "action": "event_delete",
+    "details": "Deleted event: \"Time Skip → Year 6532 · Falm · Ravethen · Day 8 · 12:00\""
   }
 ]
