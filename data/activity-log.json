@@ -118,5 +118,13 @@
     "playerColor": "#0000c4",
     "action": "waypoints_save",
     "details": "Saved 0 waypoints — Y6532 Falm W5 D7"
+  },
+  {
+    "id": "80534aa7-a810-45e0-9e61-94a2a89c81c1",
+    "timestamp": "2026-05-16T01:10:20.381Z",
+    "playerName": "Flint (DM)",
+    "playerColor": "#0000c4",
+    "action": "date_advance",
+    "details": "Advanced to Year 6532 · Falm · Ravethen · Day 7 · 01:00"
   }
 ]
