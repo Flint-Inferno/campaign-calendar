@@ -46,5 +46,13 @@
     "playerColor": "#0000c4",
     "action": "event_edit",
     "details": "Toggled \"Ambush on the Road\" to waypoint"
+  },
+  {
+    "id": "f2510b9d-ec9b-4985-8490-54b6e30e0599",
+    "timestamp": "2026-05-16T22:09:26.844Z",
+    "playerName": "Flint (DM)",
+    "playerColor": "#0000c4",
+    "action": "event_edit",
+    "details": "Toggled \"Met Silas the Informant\" to waypoint"
   }
 ]
