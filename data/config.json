@@ -36,33 +36,38 @@
   ],
   "partyMembers": [
     {
-      "id": "fb14bf98-2f51-42de-85ff-ae885af876b7",
+      "id": "126e802d-5750-46ea-99c0-16fc1012d73a",
       "name": "Valvys",
       "color": "#8b2e2e"
     },
     {
-      "id": "66d4fc23-3c3e-49b1-ac0e-e3bdde4eed72",
+      "id": "bb88f07c-c055-4b20-97c5-d3d303beed89",
       "name": "Verro",
       "color": "#8b2e2e"
     },
     {
-      "id": "96b7c628-d01b-4626-b0bc-0f1b50fc2f04",
+      "id": "447c05b8-ea2f-448b-b1ca-0bb5f6d89d29",
       "name": "Leaf",
       "color": "#8b2e2e"
     },
     {
-      "id": "cd9c0e22-7fe0-40e5-8fe6-b1c388beb7e9",
+      "id": "c40a87a1-03da-4ffd-9796-8f46657bdbde",
       "name": "Luka",
       "color": "#8b2e2e"
     },
     {
-      "id": "d424eb15-ee77-4dc8-b136-2d51c2023b15",
+      "id": "57882117-73a5-4bf1-beea-3a140045cd7a",
       "name": "Ivory",
       "color": "#8b2e2e"
     },
     {
-      "id": "822acc8b-e239-4fd5-a82d-29a0c055b132",
+      "id": "59a95d21-e66a-42ff-90e1-8bd9eefc6591",
       "name": "Zidreyi",
+      "color": "#8b2e2e"
+    },
+    {
+      "id": "ed48a435-98bd-49b8-8333-92a8dbe73910",
+      "name": "Flint (DM)",
       "color": "#8b2e2e"
     }
   ],
