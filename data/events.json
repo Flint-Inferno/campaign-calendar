@@ -147,5 +147,21 @@
     "mapX": null,
     "mapY": null,
     "tags": []
+  },
+  {
+    "title": "asdfg",
+    "description": "",
+    "year": 6532,
+    "month": 8,
+    "week": 1,
+    "day": 1,
+    "hour": 14,
+    "color": "#5A4A2A",
+    "markerType": "waypoint",
+    "location": "Willowshade",
+    "mapX": 2602,
+    "mapY": 1647,
+    "tags": [],
+    "id": "0a299c9a-6bf7-4526-adff-390660f12527"
   }
 ]
