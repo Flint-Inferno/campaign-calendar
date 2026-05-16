@@ -97,6 +97,18 @@
         </div>
         <button id="waypoint-mode-btn">📍 Add Pin</button>
       </div>
+      <div id="waypoint-panel" class="waypoint-panel hidden">
+        <div id="wp-list" class="wp-list"></div>
+        <div class="wp-panel-bottom">
+          <label class="wp-color-label">Color <input id="wp-color-input" type="color" value="#8b6914"></label>
+          <div class="wp-panel-actions">
+            <button id="wp-undo-btn">↩ Undo</button>
+            <button id="wp-clear-btn">✕ Clear</button>
+            <button id="wp-cancel-btn">Cancel</button>
+            <button id="wp-save-btn">Save Waypoints</button>
+          </div>
+        </div>
+      </div>
       <div id="map-container">
         <div id="map-placeholder" class="hidden">
           <p style="font-size:1.1rem">No world map uploaded.</p>
@@ -294,6 +306,8 @@
       <button id="reposition-pin-btn" class="hidden">📍 Reposition Pin</button>
       <button id="cancel-event-btn">Cancel</button>
       <button id="save-event-btn">Save</button>
+      <button id="save-and-marker-btn">Save + Marker</button>
+      <button id="save-and-waypoint-btn">Save + Waypoint</button>
     </div>
   </div>
 </div>

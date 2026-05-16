@@ -8,6 +8,8 @@ let _mvtDate = null;
 let _scrubDate = null;
 let _pendingMapPin = null;
 let _openedFromTimeline = false;
+let _saveAndAddMarker = false;
+let _saveAndAddWaypoint = false;
 
 const COLOR_SWATCHES = [
   '#8B2E2E','#6B3A2A','#8B6914','#2E5A1C','#1C3D5A',
@@ -74,8 +76,9 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
     if (tab === 'map') {
       if (!mapLoaded) initMap();
       else {
-        if (_pendingMapPin) { enablePinForEvent(_pendingMapPin); _pendingMapPin = null; }
+        MapView.invalidateSize();
         MapView.renderCurrentLocation(CURRENT_DATE);
+        if (_pendingMapPin) { enablePinForEvent(_pendingMapPin); _pendingMapPin = null; }
       }
     }
     if (tab === 'timeline') initTimeline();
@@ -98,6 +101,7 @@ async function initMap() {
   } catch (e) {
     document.getElementById('map-placeholder').classList.remove('hidden');
     hideBanner();
+    if (_pendingLocationPick) { _pendingLocationPick = false; openAdvanceConfirmModal(); }
   }
   MapView.invalidateSize();
 }
@@ -249,29 +253,43 @@ document.getElementById('save-event-btn').addEventListener('click', async () => 
   if (!canWrite()) { showBanner('Set your identity to a recognized player name to edit.', 'error'); return; }
   setBusy(true);
   try {
+    let savedId = editingEventId;
     if (editingEventId) {
       await Events.update(editingEventId, data);
       appendActivityLog('event_edit', `Edited event: "${data.title}"`);
-      closeModal('event-modal');
-      Calendar.render();
-      if (mapLoaded && _scrubDate) MapView.renderScrubbed(Events.getAll(), Movements.getAll(), _scrubDate, CFG);
-      refreshTimeline();
-      showBanner('Saved!', 'success');
     } else {
       const newEvent = await Events.add(data);
       appendActivityLog('event_add', `Added event: "${data.title}"`);
-      closeModal('event-modal');
-      Calendar.render();
-      refreshTimeline();
-      if (_openedFromTimeline) {
-        _openedFromTimeline = false;
-        _pendingMapPin = newEvent.id;
-        document.querySelector('.tab-btn[data-tab="map"]')?.click();
-        showBanner('Event saved! Click the map to place a pin.', 'success');
-      } else {
-        if (mapLoaded && _scrubDate) MapView.renderScrubbed(Events.getAll(), Movements.getAll(), _scrubDate, CFG);
-        showBanner('Saved!', 'success');
-      }
+      savedId = newEvent.id;
+    }
+    closeModal('event-modal');
+    Calendar.render();
+    refreshTimeline();
+    const marker = _saveAndAddMarker; _saveAndAddMarker = false;
+    const waypoint = _saveAndAddWaypoint; _saveAndAddWaypoint = false;
+    const fromTimeline = _openedFromTimeline; _openedFromTimeline = false;
+    if (marker || fromTimeline) {
+      _pendingMapPin = savedId;
+      document.querySelector('.tab-btn[data-tab="map"]')?.click();
+      showBanner('Event saved! Click the map to place a pin.', 'success');
+    } else if (waypoint) {
+      const evDate = { year: data.year, month: data.month, week: data.week, day: data.day };
+      _scrubDate = { ...evDate, hour: 0 };
+      updateScrubLabel();
+      document.querySelector('.tab-btn[data-tab="map"]')?.click();
+      setTimeout(() => {
+        if (!mapLoaded) return;
+        const dayMvt = Movements.getForDay(evDate.year, evDate.month, evDate.week, evDate.day);
+        MapView.enableWaypointMode(dayMvt?.waypoints || [], dayMvt?.waypointColor || '#8b6914', () => renderWaypointList());
+        const colorInput = document.getElementById('wp-color-input');
+        if (colorInput) colorInput.value = dayMvt?.waypointColor || '#8b6914';
+        document.getElementById('waypoint-panel')?.classList.remove('hidden');
+        renderWaypointList();
+        showBanner('Event saved! Add waypoints for this day.', 'success');
+      }, 0);
+    } else {
+      if (mapLoaded && _scrubDate) MapView.renderScrubbed(Events.getAll(), Movements.getAll(), _scrubDate, CFG);
+      showBanner('Saved!', 'success');
     }
   } catch (e) {
     showBanner(e.message, 'error');
@@ -383,11 +401,10 @@ document.getElementById('set-current-btn').addEventListener('click', () => {
   _pendingAdvanceResult = result;
   _pendingLocationCoords = null;
   document.querySelector('.tab-btn[data-tab="map"]')?.click();
-  if (mapLoaded) {
-    enterLocationPickMode();
-  } else {
-    _pendingLocationPick = true;
-  }
+  setTimeout(() => {
+    if (mapLoaded) enterLocationPickMode();
+    else _pendingLocationPick = true;
+  }, 0);
 });
 
 document.querySelectorAll('.reason-btn').forEach(btn => {
@@ -757,9 +774,49 @@ document.getElementById('reposition-pin-btn')?.addEventListener('click', () => {
   document.querySelector('.tab-btn[data-tab="map"]')?.click();
 });
 
+document.getElementById('save-and-marker-btn')?.addEventListener('click', () => {
+  _saveAndAddMarker = true;
+  document.getElementById('save-event-btn').click();
+});
+document.getElementById('save-and-waypoint-btn')?.addEventListener('click', () => {
+  _saveAndAddWaypoint = true;
+  document.getElementById('save-event-btn').click();
+});
+
 /* ── Edit event from map popup ──────────────────────────────── */
 document.addEventListener('map:edit-event', e => {
   openViewModal(e.detail.id);
+});
+
+/* ── Waypoint panel controls (shown via Save + Waypoint) ────── */
+document.getElementById('wp-color-input')?.addEventListener('input', e => {
+  MapView.setPendingColor(e.target.value);
+});
+document.getElementById('wp-undo-btn')?.addEventListener('click', () => {
+  MapView.undoLastWaypoint();
+});
+document.getElementById('wp-clear-btn')?.addEventListener('click', () => {
+  MapView.clearPendingWaypoints();
+});
+document.getElementById('wp-cancel-btn')?.addEventListener('click', () => {
+  exitWaypointModeIfActive();
+  if (mapLoaded && _scrubDate) MapView.renderScrubbed(Events.getAll(), Movements.getAll(), _scrubDate, CFG);
+});
+document.getElementById('wp-save-btn')?.addEventListener('click', async () => {
+  if (!_scrubDate) return;
+  if (!canWrite()) { showBanner('Set your identity to a recognized player name to edit.', 'error'); return; }
+  const inputs = document.querySelectorAll('#wp-list .wp-label-input');
+  const waypoints = MapView.getPendingWaypoints().map((wp, i) => ({
+    ...wp, label: inputs[i]?.value.trim() || ''
+  }));
+  const waypointColor = MapView.getPendingColor();
+  try {
+    await Movements.setDay(_scrubDate.year, _scrubDate.month, _scrubDate.week, _scrubDate.day, { waypoints, waypointColor });
+    appendActivityLog('waypoints_save', `Saved ${waypoints.length} waypoint(s)`);
+    exitWaypointModeIfActive();
+    MapView.renderScrubbed(Events.getAll(), Movements.getAll(), _scrubDate, CFG);
+    showBanner(`${waypoints.length} waypoint(s) saved!`, 'success');
+  } catch (e) { showBanner(e.message, 'error'); }
 });
 
 /* ── Movement modal ──────────────────────────────────────────── */

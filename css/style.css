@@ -1200,6 +1200,12 @@ header {
 #cancel-event-btn:hover { background: var(--parchment-deep); }
 #delete-event-btn { background: #4a1c1c; color: #f0b0b0; border-color: #6a2c2c; margin-right: auto; }
 #delete-event-btn:hover { background: #6a2c2c; }
+#save-and-marker-btn { background: var(--gold); color: var(--ink); border-color: var(--gold); }
+#save-and-marker-btn:hover { background: var(--gold-light); border-color: var(--gold-light); }
+#save-and-waypoint-btn { background: #2a5c3a; color: var(--parchment); border-color: #3a7a50; }
+#save-and-waypoint-btn:hover { background: #3a7a50; }
+#reposition-pin-btn { background: var(--parchment-dark); color: var(--ink); border-color: var(--border); }
+#reposition-pin-btn:hover { background: var(--parchment-deep); }
 #advance-confirm-ok { background: var(--crimson); color: var(--parchment); border-color: var(--crimson); }
 #advance-confirm-ok:hover { opacity: 0.88; }
 #advance-confirm-ok:disabled { opacity: 0.5; cursor: default; }
