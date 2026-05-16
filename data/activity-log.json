@@ -54,5 +54,13 @@
     "playerColor": "#0000c4",
     "action": "event_edit",
     "details": "Toggled \"Met Silas the Informant\" to waypoint"
+  },
+  {
+    "id": "b272ddd7-0a4a-44f6-b104-ed1e9ceb462b",
+    "timestamp": "2026-05-16T22:31:45.698Z",
+    "playerName": "Flint (DM)",
+    "playerColor": "#0000c4",
+    "action": "date_advance",
+    "details": "Advanced to Year 6532 · Psol · Pelora · Day 1 · 10:00"
   }
 ]
