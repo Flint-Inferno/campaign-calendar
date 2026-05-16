@@ -20,12 +20,16 @@ const COLOR_SWATCHES = [
 async function appInit() {
   showBanner('Loading…', 'info');
   try {
-    const [cfgRes, evRes, cdRes, mvtRes, wtRes, logRes] = await Promise.all([
+    GithubAPI.setPAT('');
+    const wtRes = await GithubAPI.readFile('data/write-token.json').catch(() => ({ content: {} }));
+    const writeToken = wtRes.content?.token || '';
+    if (writeToken) { try { GithubAPI.setPAT(atob(writeToken)); } catch (_) { GithubAPI.setPAT(writeToken); } }
+
+    const [cfgRes, evRes, cdRes, mvtRes, logRes] = await Promise.all([
       GithubAPI.readFile('data/config.json').catch(e => { throw new Error('Failed to load config: ' + e.message); }),
       GithubAPI.readFile('data/events.json').catch(() => ({ content: [] })),
       GithubAPI.readFile('data/current-date.json').catch(() => ({ content: { year:1,month:1,week:1,day:1,hour:0 } })),
       GithubAPI.readFile('data/movements.json').catch(() => ({ content: [] })),
-      GithubAPI.readFile('data/write-token.json').catch(() => ({ content: {} })),
       GithubAPI.readFile('data/activity-log.json').catch(() => ({ content: [] }))
     ]);
     CFG = cfgRes.content;
@@ -36,8 +40,6 @@ async function appInit() {
       : { year: 1, month: 1, week: 1, day: 1, hour: 0 };
     Movements.importJSON(mvtRes.content);
     ActivityLog.importJSON(logRes.content);
-    const writeToken = wtRes.content?.token || '';
-    if (writeToken) { try { GithubAPI.setPAT(atob(writeToken)); } catch (_) { GithubAPI.setPAT(writeToken); } }
   } catch (e) {
     showBanner(e.message || 'Failed to load calendar data. Check your internet connection.', 'error');
     return;
