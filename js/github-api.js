@@ -37,33 +37,31 @@ const GithubAPI = (() => {
     return { content: JSON.parse(text), sha: data.sha };
   }
 
+  const _queues = {};
+
   async function writeJSON(path, content, message) {
-    let sha;
-    try {
-      const existing = await readFile(path);
-      sha = existing.sha;
-    } catch (e) {
-      if (e.status !== 404) throw e;
-    }
-
-    const pat = getPAT();
-    if (!pat) throw new Error('No PAT set — enter your GitHub PAT to save changes.');
-
-    const encoded = btoa(unescape(encodeURIComponent(JSON.stringify(content, null, 2))));
-    const body = { message, content: encoded };
-    if (sha) body.sha = sha;
-
-    const res = await fetch(`${BASE}/repos/${REPO_OWNER}/${REPO_NAME}/contents/${path}`, {
-      method: 'PUT',
-      headers: { ...authHeaders(), 'Content-Type': 'application/json' },
-      body: JSON.stringify(body)
+    const prev = _queues[path] || Promise.resolve();
+    const next = prev.then(async () => {
+      let sha;
+      try { sha = (await readFile(path)).sha; } catch (e) { if (e.status !== 404) throw e; }
+      const pat = getPersonalPAT() || getPAT();
+      if (!pat) throw new Error('No write access — contact the DM.');
+      const encoded = btoa(unescape(encodeURIComponent(JSON.stringify(content, null, 2))));
+      const body = { message, content: encoded };
+      if (sha) body.sha = sha;
+      const res = await fetch(`${BASE}/repos/${REPO_OWNER}/${REPO_NAME}/contents/${path}`, {
+        method: 'PUT',
+        headers: { ...authHeaders(), 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.message || `GitHub write failed (${res.status})`);
+      }
+      return res.json();
     });
-
-    if (!res.ok) {
-      const err = await res.json().catch(() => ({}));
-      throw new Error(err.message || `GitHub write failed (${res.status})`);
-    }
-    return res.json();
+    _queues[path] = next.catch(() => {});
+    return next;
   }
 
   async function writeImage(path, base64Data, message) {

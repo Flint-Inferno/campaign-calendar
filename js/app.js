@@ -57,6 +57,7 @@ async function appInit() {
 
   updateIdentityDisplay();
   updateScrubLabel();
+  startUpdatePoll();
 }
 
 /* ── Tab switching ──────────────────────────────────────────── */
@@ -112,8 +113,7 @@ function updateNavLabel() {
 
 /* ── Add Event button ───────────────────────────────────────── */
 document.getElementById('add-event-btn').addEventListener('click', () => {
-  const nav = Calendar.getNav();
-  openAddModal({ year: nav.year, month: nav.month, week: nav.week, day: 1, hour: 0 });
+  openAddModal(CURRENT_DATE ? { ...CURRENT_DATE } : { year: 1, month: 1, week: 1, day: 1, hour: 0 });
 });
 
 /* ── Event modal ─────────────────────────────────────────────── */
@@ -279,15 +279,8 @@ document.getElementById('advance-time-toggle').addEventListener('click', () => {
 });
 
 document.getElementById('calc-btn').addEventListener('click', () => {
-  if (!CFG) return;
+  if (!CFG || !CURRENT_DATE) return;
   const f = document.getElementById('time-calc-form');
-  const base = {
-    year:  +f.querySelector('[name=tc-year]').value  || 1,
-    month: +f.querySelector('[name=tc-month]').value || 1,
-    week:  +f.querySelector('[name=tc-week]').value  || 1,
-    day:   +f.querySelector('[name=tc-day]').value   || 1,
-    hour:  +f.querySelector('[name=tc-hour]').value  || 0
-  };
   const dur = {
     years:  +f.querySelector('[name=dur-years]').value  || 0,
     months: +f.querySelector('[name=dur-months]').value || 0,
@@ -295,46 +288,79 @@ document.getElementById('calc-btn').addEventListener('click', () => {
     days:   +f.querySelector('[name=dur-days]').value   || 0,
     hours:  +f.querySelector('[name=dur-hours]').value  || 0
   };
-  const result = TimeCalc.add(base, dur, CFG);
+  const result = TimeCalc.add(CURRENT_DATE, dur, CFG);
   document.getElementById('calc-result').textContent = TimeCalc.format(result, CFG);
   document.getElementById('calc-result-row').classList.remove('hidden');
   document.getElementById('set-current-btn').dataset.result = JSON.stringify(result);
 });
 
-document.getElementById('set-current-btn').addEventListener('click', async () => {
+let _pendingAdvanceResult = null;
+
+document.getElementById('set-current-btn').addEventListener('click', () => {
   const result = JSON.parse(document.getElementById('set-current-btn').dataset.result || 'null');
   if (!result) return;
   if (!canWrite()) { showBanner('Set your identity to a recognized player name to edit.', 'error'); return; }
-  setBusy(true);
+  _pendingAdvanceResult = result;
+  document.getElementById('advance-confirm-to').textContent = `→ ${TimeCalc.format(result, CFG)}`;
+  document.getElementById('advance-location-text').value = CURRENT_DATE?.currentLocation || '';
+  document.getElementById('advance-reason-text').value = '';
+  document.querySelectorAll('.reason-btn').forEach(b => b.classList.remove('active'));
+  openModal('advance-confirm-modal');
+});
+
+document.querySelectorAll('.reason-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.reason-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+  });
+});
+
+document.getElementById('advance-confirm-ok')?.addEventListener('click', async () => {
+  if (!_pendingAdvanceResult) return;
+  const preset = document.querySelector('.reason-btn.active')?.dataset.reason || '';
+  const details = document.getElementById('advance-reason-text').value.trim();
+  const reason = [preset, details].filter(Boolean).join(': ');
+  const location = document.getElementById('advance-location-text').value.trim();
+  const result = { ..._pendingAdvanceResult };
+  if (location) result.currentLocation = location;
+  else delete result.currentLocation;
+
+  const btn = document.getElementById('advance-confirm-ok');
+  btn.disabled = true;
   try {
     await GithubAPI.writeJSON('data/current-date.json', result, `Advance time to ${TimeCalc.format(result, CFG)}`);
-    appendActivityLog('date_advance', `Advanced date to ${TimeCalc.format(result, CFG)}`);
+    const logMsg = reason ? `Advanced to ${TimeCalc.format(result, CFG)} — ${reason}` : `Advanced to ${TimeCalc.format(result, CFG)}`;
+    appendActivityLog('date_advance', logMsg);
     CURRENT_DATE = result;
     Calendar.setCurrentDate(CURRENT_DATE);
     Calendar.render();
     updateCurrentDateDisplay();
-    showBanner('Current date updated!', 'success');
+    _scrubDate = { year: result.year, month: result.month, week: result.week, day: result.day, hour: 0 };
+    updateScrubLabel();
+    if (mapLoaded) MapView.renderScrubbed(Events.getAll(), Movements.getAll(), _scrubDate, CFG);
+    closeModal('advance-confirm-modal');
+    _pendingAdvanceResult = null;
+    showBanner('Time advanced!', 'success');
   } catch (e) {
     showBanner(e.message, 'error');
   }
-  setBusy(false);
+  btn.disabled = false;
 });
 
-function fillTimecalcFromCurrent() {
-  if (!CURRENT_DATE) return;
-  const f = document.getElementById('time-calc-form');
-  f.querySelector('[name=tc-year]').value  = CURRENT_DATE.year;
-  f.querySelector('[name=tc-month]').value = CURRENT_DATE.month;
-  f.querySelector('[name=tc-week]').value  = CURRENT_DATE.week;
-  f.querySelector('[name=tc-day]').value   = CURRENT_DATE.day;
-  f.querySelector('[name=tc-hour]').value  = CURRENT_DATE.hour || 0;
-}
-
-document.getElementById('advance-time-toggle').addEventListener('click', fillTimecalcFromCurrent);
+document.getElementById('advance-confirm-cancel')?.addEventListener('click', () => {
+  closeModal('advance-confirm-modal');
+  _pendingAdvanceResult = null;
+});
+document.getElementById('advance-confirm-modal')?.querySelector('.modal-backdrop')?.addEventListener('click', () => {
+  closeModal('advance-confirm-modal');
+  _pendingAdvanceResult = null;
+});
 
 function updateCurrentDateDisplay() {
   if (!CURRENT_DATE || !CFG) return;
   document.getElementById('current-date-display').textContent = TimeCalc.format(CURRENT_DATE, CFG);
+  const locEl = document.getElementById('current-location-display');
+  if (locEl) locEl.textContent = CURRENT_DATE.currentLocation || '';
 }
 
 /* ── Identity panel ─────────────────────────────────────────── */
@@ -501,12 +527,20 @@ document.getElementById('scrub-next-btn')?.addEventListener('click', () => {
 });
 
 /* ── Waypoint mode ───────────────────────────────────────────── */
-function updateWaypointPanelLabel(count) {
-  const el = document.getElementById('wp-panel-label');
-  if (!el || !_scrubDate || !CFG) return;
-  const mn = (CFG.monthNames || [])[_scrubDate.month - 1] || `M${_scrubDate.month}`;
-  const wn = (CFG.weekNames || [])[_scrubDate.week - 1] || `W${_scrubDate.week}`;
-  el.textContent = `Waypoints for Y${_scrubDate.year} · ${mn} · ${wn} · D${_scrubDate.day} — ${count} placed`;
+function renderWaypointList() {
+  const list = document.getElementById('wp-list');
+  if (!list) return;
+  const wps = MapView.getPendingWaypoints();
+  if (wps.length === 0) {
+    list.innerHTML = '<div class="wp-list-empty">Click the map to place waypoints</div>';
+    return;
+  }
+  list.innerHTML = wps.map((wp, i) =>
+    `<div class="wp-list-item">
+      <span class="wp-list-num">${i + 1}</span>
+      <input class="wp-label-input" type="text" placeholder="Label (optional)" value="${escHtml(wp.label || '')}">
+    </div>`
+  ).join('');
 }
 
 document.getElementById('waypoint-mode-btn')?.addEventListener('click', () => {
@@ -518,12 +552,12 @@ document.getElementById('waypoint-mode-btn')?.addEventListener('click', () => {
     const dayMvt = Movements.getForDay(_scrubDate.year, _scrubDate.month, _scrubDate.week, _scrubDate.day);
     const existing = dayMvt?.waypoints || [];
     const existingColor = dayMvt?.waypointColor || '#8b6914';
-    MapView.enableWaypointMode(existing, existingColor, waypoints => updateWaypointPanelLabel(waypoints.length));
+    MapView.enableWaypointMode(existing, existingColor, () => renderWaypointList());
     const colorInput = document.getElementById('wp-color-input');
     if (colorInput) colorInput.value = existingColor;
     document.getElementById('waypoint-mode-btn')?.classList.add('active');
     document.getElementById('waypoint-panel')?.classList.remove('hidden');
-    updateWaypointPanelLabel(existing.length);
+    renderWaypointList();
   }
 });
 
@@ -547,7 +581,10 @@ document.getElementById('wp-cancel-btn')?.addEventListener('click', () => {
 document.getElementById('wp-save-btn')?.addEventListener('click', async () => {
   if (!_scrubDate) return;
   if (!canWrite()) { showBanner('Set your identity to a recognized player name to edit.', 'error'); return; }
-  const waypoints = MapView.getPendingWaypoints();
+  const inputs = document.querySelectorAll('#wp-list .wp-label-input');
+  const waypoints = MapView.getPendingWaypoints().map((wp, i) => ({
+    ...wp, label: inputs[i]?.value.trim() || ''
+  }));
   const waypointColor = MapView.getPendingColor();
   try {
     await Movements.setDay(_scrubDate.year, _scrubDate.month, _scrubDate.week, _scrubDate.day, { waypoints, waypointColor });
@@ -762,6 +799,58 @@ document.getElementById('refresh-log-btn')?.addEventListener('click', async () =
   } catch (e) { showBanner('Failed to refresh log.', 'error'); }
 });
 
+/* ── Map scrub-to-day (click waypoint/trail on other day) ─────── */
+document.addEventListener('map:scrub-to-day', e => {
+  exitWaypointModeIfActive();
+  _scrubDate = { ...e.detail, hour: 0 };
+  updateScrubLabel();
+  if (mapLoaded) MapView.renderScrubbed(Events.getAll(), Movements.getAll(), _scrubDate, CFG);
+});
+
+/* ── Live update poll ───────────────────────────────────────── */
+let _lastKnownSHAs = {};
+
+async function checkForUpdates() {
+  if (!CFG) return;
+  try {
+    const files = ['data/events.json', 'data/current-date.json', 'data/movements.json'];
+    const results = await Promise.all(files.map(f =>
+      fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${f}`, {
+        headers: { 'Accept': 'application/vnd.github.v3+json' }
+      }).then(r => r.ok ? r.json() : null).catch(() => null)
+    ));
+    let changed = false;
+    results.forEach((data, i) => {
+      if (!data) return;
+      const key = files[i];
+      if (_lastKnownSHAs[key] && _lastKnownSHAs[key] !== data.sha) changed = true;
+      _lastKnownSHAs[key] = data.sha;
+    });
+    if (changed) showUpdateBanner();
+  } catch (_) {}
+}
+
+function showUpdateBanner() {
+  const el = document.getElementById('banner');
+  el.textContent = '📜 Updates available — click to refresh';
+  el.className = 'banner banner-info';
+  el.classList.remove('hidden');
+  el.style.cursor = 'pointer';
+  el.onclick = () => { el.style.cursor = ''; el.onclick = null; location.reload(); };
+}
+
+function startUpdatePoll() {
+  const files = ['data/events.json', 'data/current-date.json', 'data/movements.json'];
+  Promise.all(files.map(f =>
+    fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${f}`, {
+      headers: { 'Accept': 'application/vnd.github.v3+json' }
+    }).then(r => r.ok ? r.json() : null).catch(() => null)
+  )).then(results => {
+    results.forEach((data, i) => { if (data) _lastKnownSHAs[files[i]] = data.sha; });
+  });
+  setInterval(checkForUpdates, 30000);
+}
+
 /* ── Modal helpers ──────────────────────────────────────────── */
 function openModal(id) {
   document.getElementById(id).classList.remove('hidden');
@@ -803,10 +892,6 @@ function buildSelects() {
   buildDaySelect('end-day');
   buildHourSelect('start-hour');
   buildHourSelect('end-hour');
-  buildMonthSelect('tc-month');
-  buildWeekSelect('tc-week');
-  buildDaySelect('tc-day');
-  buildHourSelect('tc-hour');
 }
 
 function buildMonthSelect(name) {

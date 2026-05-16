@@ -557,8 +557,15 @@ header {
 #current-date-display {
   font-size: 0.82rem;
   color: var(--ink-light);
-  margin-bottom: 8px;
+  margin-bottom: 4px;
   line-height: 1.5;
+}
+.current-location-display {
+  font-size: 0.78rem;
+  color: var(--ink-light);
+  font-style: italic;
+  margin-bottom: 8px;
+  min-height: 0;
 }
 
 #advance-time-toggle {
@@ -716,19 +723,56 @@ header {
 /* Waypoint panel */
 .waypoint-panel {
   display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 6px 20px;
+  flex-direction: column;
+  gap: 6px;
+  padding: 8px 20px;
   background: rgba(139,105,20,0.12);
   border-bottom: 1px solid var(--gold);
-  flex-wrap: wrap;
 }
-#wp-panel-label {
-  font-family: 'Cinzel', serif;
-  font-size: 0.8rem;
-  color: var(--ink);
-  flex: 1;
+.wp-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-height: 120px;
+  overflow-y: auto;
+}
+.wp-list-empty {
+  font-size: 0.78rem;
+  color: var(--ink-light);
   font-style: italic;
+  padding: 2px 0;
+}
+.wp-list-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.wp-list-num {
+  font-family: 'Cinzel', serif;
+  font-size: 0.72rem;
+  font-weight: 700;
+  background: var(--gold);
+  color: var(--ink);
+  width: 20px; height: 20px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.wp-label-input {
+  flex: 1;
+  padding: 3px 7px;
+  font-size: 0.8rem;
+  font-family: 'IM Fell English', serif;
+  background: var(--parchment);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--ink);
+}
+.wp-panel-bottom {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
 }
 .wp-panel-actions { display: flex; gap: 6px; flex-wrap: wrap; }
 .wp-panel-actions button {
@@ -950,6 +994,41 @@ header {
 #cancel-event-btn:hover { background: var(--parchment-deep); }
 #delete-event-btn { background: #4a1c1c; color: #f0b0b0; border-color: #6a2c2c; margin-right: auto; }
 #delete-event-btn:hover { background: #6a2c2c; }
+#advance-confirm-ok { background: var(--crimson); color: var(--parchment); border-color: var(--crimson); }
+#advance-confirm-ok:hover { opacity: 0.88; }
+#advance-confirm-ok:disabled { opacity: 0.5; cursor: default; }
+#advance-confirm-cancel { background: var(--parchment-dark); color: var(--ink); border-color: var(--border); }
+#advance-confirm-cancel:hover { background: var(--parchment-deep); }
+.advance-confirm-to {
+  font-family: 'Cinzel', serif;
+  font-size: 1rem;
+  color: var(--crimson);
+  margin-bottom: 12px;
+  font-weight: 600;
+}
+.reason-presets {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+.reason-btn {
+  font-family: 'Cinzel', serif;
+  font-size: 0.75rem;
+  padding: 5px 12px;
+  background: var(--parchment-dark);
+  border: 1px solid var(--border);
+  color: var(--ink);
+  border-radius: var(--radius);
+  cursor: pointer;
+}
+.reason-btn:hover { background: var(--parchment-deep); }
+.reason-btn.active {
+  background: var(--gold);
+  border-color: var(--gold);
+  color: var(--ink);
+  font-weight: 600;
+}
 
 /* ── Admin styles ─────────────────────────────────────────────── */
 .admin-wrap {

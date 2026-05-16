@@ -98,30 +98,41 @@ const MapView = (() => {
   }
 
   /* ── Movement waypoint trail (per-day colored segments) ─────── */
+  function _dayKey(m) { return `${m.year}-${m.month}-${m.week}-${m.day}`; }
+  function _scrubKey(s) { return s ? `${s.year}-${s.month}-${s.week}-${s.day}` : ''; }
+
+  function _dispatchScrubTo(day) {
+    document.dispatchEvent(new CustomEvent('map:scrub-to-day', {
+      detail: { year: day.year, month: day.month, week: day.week, day: day.day }
+    }));
+  }
+
   function renderTrail(movements, scrubDate, cfg) {
     _trailLayers.forEach(l => _map.removeLayer(l));
     _trailLayers = [];
-    if (!_map || !_trailVisible || !scrubDate || !cfg) return;
+    if (!_map || !_trailVisible || !cfg) return;
 
-    const scrubAbs = TimeCalc.toAbsolute({ ...scrubDate, hour: 23 }, cfg);
     const sorted = [...movements]
-      .filter(m => m.waypoints && m.waypoints.length > 0 &&
-        TimeCalc.toAbsolute({ year: m.year, month: m.month, week: m.week, day: m.day, hour: 0 }, cfg) <= scrubAbs
-      )
+      .filter(m => m.waypoints && m.waypoints.length > 0)
       .sort((a, b) =>
         TimeCalc.toAbsolute({ year: a.year, month: a.month, week: a.week, day: a.day, hour: 0 }, cfg) -
         TimeCalc.toAbsolute({ year: b.year, month: b.month, week: b.week, day: b.day, hour: 0 }, cfg)
       );
 
+    const activeKey = _scrubKey(scrubDate);
+
     for (let i = 0; i < sorted.length; i++) {
       const day = sorted[i];
-      const color = day.waypointColor || '#8b6914';
+      const isActive = _dayKey(day) === activeKey;
+      const color = isActive ? (day.waypointColor || '#8b6914') : '#888';
+      const opacity = isActive ? 0.9 : 0.25;
+      const weight = isActive ? 2.5 : 1.5;
 
       if (day.waypoints.length >= 2) {
         const latlngs = day.waypoints.map(wp => [wp.y, wp.x]);
-        _trailLayers.push(
-          L.polyline(latlngs, { color, weight: 2.5, opacity: 0.9 }).addTo(_map)
-        );
+        const line = L.polyline(latlngs, { color, weight, opacity }).addTo(_map);
+        if (!isActive) line.on('click', () => _dispatchScrubTo(day));
+        _trailLayers.push(line);
       }
 
       if (i < sorted.length - 1) {
@@ -129,10 +140,7 @@ const MapView = (() => {
         const next = sorted[i + 1].waypoints[0];
         _trailLayers.push(
           L.polyline([[last.y, last.x], [next.y, next.x]], {
-            color: '#999',
-            weight: 1,
-            dashArray: '4,7',
-            opacity: 0.45
+            color: '#999', weight: 1, dashArray: '4,7', opacity: 0.45
           }).addTo(_map)
         );
       }
@@ -169,18 +177,23 @@ const MapView = (() => {
     });
   }
 
-  function renderDayWaypoints(waypoints, color) {
+  function renderAllWaypoints(movements, scrubDate) {
     _waypointLayers.forEach(l => _map.removeLayer(l));
     _waypointLayers = [];
-    if (!_map || !waypoints || waypoints.length === 0) return;
-    waypoints.forEach((wp, i) => {
-      const m = L.marker([wp.y, wp.x], {
-        icon: _makeWpIcon(i + 1, color || '#8b6914'),
-        interactive: !!wp.label
-      }).addTo(_map);
-      if (wp.label) m.bindTooltip(escHtml(wp.label));
-      _waypointLayers.push(m);
-    });
+    if (!_map) return;
+    const activeKey = _scrubKey(scrubDate);
+    const days = movements.filter(m => m.waypoints && m.waypoints.length > 0);
+    for (const day of days) {
+      const isActive = _dayKey(day) === activeKey;
+      const color = isActive ? (day.waypointColor || '#8b6914') : '#aaa';
+      day.waypoints.forEach((wp, i) => {
+        const icon = _makeWpIcon(i + 1, color);
+        const m = L.marker([wp.y, wp.x], { icon, interactive: true, opacity: isActive ? 1 : 0.35 }).addTo(_map);
+        if (wp.label) m.bindTooltip(escHtml(wp.label));
+        if (!isActive) m.on('click', () => _dispatchScrubTo(day));
+        _waypointLayers.push(m);
+      });
+    }
   }
 
   /* ── Full scrubbed render ──────────────────────────────────── */
@@ -192,13 +205,7 @@ const MapView = (() => {
     );
     renderPins(visible);
     renderTrail(movements, scrubDate, cfg);
-    if (!_wpModeActive) {
-      const dayMvt = movements.find(m =>
-        m.year === scrubDate.year && m.month === scrubDate.month &&
-        m.week === scrubDate.week && m.day === scrubDate.day
-      );
-      renderDayWaypoints(dayMvt?.waypoints || [], dayMvt?.waypointColor);
-    }
+    if (!_wpModeActive) renderAllWaypoints(movements, scrubDate);
   }
 
   /* ── Pin mode ──────────────────────────────────────────────── */
@@ -278,7 +285,7 @@ const MapView = (() => {
   return {
     init, setConfig, loadMap,
     renderPins, renderTrail, toggleTrail,
-    renderDayWaypoints, renderScrubbed,
+    renderAllWaypoints, renderScrubbed,
     enablePinMode, disablePinMode, isPinMode,
     enableWaypointMode, disableWaypointMode, isWaypointMode,
     undoLastWaypoint, clearPendingWaypoints, getPendingWaypoints,
