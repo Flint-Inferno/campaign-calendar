@@ -100,7 +100,7 @@ const MapView = (() => {
     _pinLayers = [];
     if (!_map) return;
 
-    const pinned = events.filter(ev => ev.mapX != null && ev.mapY != null);
+    const pinned = events.filter(ev => ev.mapX != null && ev.mapY != null && ev.markerType !== 'none');
 
     // Group by exact pixel location
     const groups = new Map();

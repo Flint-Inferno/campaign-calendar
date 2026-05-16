@@ -767,12 +767,17 @@ document.getElementById('waypoint-mode-btn')?.addEventListener('click', () => {
 function openQuickWaypointModal() {
   document.getElementById('qp-title').value = '';
   document.getElementById('qp-desc').value = '';
+  const locEl = document.getElementById('qp-location');
+  if (locEl) locEl.value = '';
   const d = CURRENT_DATE || { year: 1, month: 1, week: 1, day: 1, hour: 0 };
   document.querySelector('[name=qp-year]').value = d.year;
   setSelectValue(document.querySelector('[name=qp-month]'), d.month);
   setSelectValue(document.querySelector('[name=qp-week]'), d.week);
   setSelectValue(document.querySelector('[name=qp-day]'), d.day);
   setSelectValue(document.querySelector('[name=qp-hour]'), d.hour || 0);
+  document.querySelectorAll('#qp-mtype-row .mtype-btn').forEach(b =>
+    b.classList.toggle('active', b.dataset.mtype === 'waypoint')
+  );
   setQpColor((CFG && CFG.defaultEventColor) || '#6B3A2A');
   openModal('quick-waypoint-modal');
 }
