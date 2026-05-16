@@ -1132,7 +1132,7 @@ header {
 
 /* color picker */
 .color-picker-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-#color-swatch-grid { display: flex; flex-wrap: wrap; gap: 5px; }
+#color-swatch-grid, #qp-swatch-grid, #advance-color-swatch-grid { display: flex; flex-wrap: wrap; gap: 5px; }
 .color-swatch {
   width: 22px; height: 22px;
   border-radius: 3px;
@@ -1143,13 +1143,13 @@ header {
 .color-swatch:hover { transform: scale(1.2); }
 .color-swatch.selected { border-color: var(--ink); }
 
-#color-preview {
+#color-preview, #qp-color-preview, #advance-color-preview {
   width: 28px; height: 28px;
   border-radius: 3px;
   border: 1px solid var(--border);
   flex-shrink: 0;
 }
-#color-hex-input {
+#color-hex-input, #qp-hex-input, #advance-hex-input {
   width: 90px;
   font-family: monospace;
   font-size: 0.82rem;
@@ -1187,6 +1187,11 @@ header {
 #save-and-waypoint-btn:hover { background: var(--gold-light); border-color: var(--gold-light); }
 #reposition-pin-btn { background: var(--parchment-dark); color: var(--ink); border-color: var(--border); }
 #reposition-pin-btn:hover { background: var(--parchment-deep); }
+#qp-save-btn { background: var(--crimson); color: var(--parchment); border-color: var(--crimson); }
+#qp-save-btn:hover { opacity: 0.88; }
+#qp-save-btn:disabled { opacity: 0.5; cursor: default; }
+#qp-cancel-btn { background: var(--parchment-dark); color: var(--ink); border-color: var(--border); }
+#qp-cancel-btn:hover { background: var(--parchment-deep); }
 #advance-confirm-ok { background: var(--crimson); color: var(--parchment); border-color: var(--crimson); }
 #advance-confirm-ok:hover { opacity: 0.88; }
 #advance-confirm-ok:disabled { opacity: 0.5; cursor: default; }
