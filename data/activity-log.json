@@ -6,5 +6,13 @@
     "playerColor": "#8b2e2e",
     "action": "date_advance",
     "details": "Advanced to Year 6532 · Falm · Ravethen · Day 8 · 12:00 — Other: Party is formed"
+  },
+  {
+    "id": "673ede9b-3d13-421c-8487-b17ed2d34150",
+    "timestamp": "2026-05-16T20:59:34.983Z",
+    "playerName": "Flint (DM)",
+    "playerColor": "#8b2e2e",
+    "action": "event_add",
+    "details": "Added event: \"qwert\""
   }
 ]
