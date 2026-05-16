@@ -222,13 +222,14 @@ const MapView = (() => {
   function renderCurrentLocation(currentDate) {
     if (_locationLayer) { _map.removeLayer(_locationLayer); _locationLayer = null; }
     if (!_map || !currentDate || currentDate.locationX == null || currentDate.locationY == null) return;
-    const icon = L.divIcon({
-      html: `<div class="loc-marker"><span class="loc-pulse"></span>⚑</div>`,
-      className: 'loc-marker-wrap',
-      iconSize: [28, 28],
-      iconAnchor: [14, 14]
-    });
-    _locationLayer = L.marker([currentDate.locationY, currentDate.locationX], { icon, zIndexOffset: 1000 }).addTo(_map);
+    _locationLayer = L.circleMarker([currentDate.locationY, currentDate.locationX], {
+      radius: 11,
+      fillColor: '#00CED1',
+      color: '#004a4a',
+      weight: 2,
+      fillOpacity: 0.95,
+      zIndexOffset: 1000
+    }).addTo(_map);
     if (currentDate.currentLocation) {
       _locationLayer.bindTooltip(escHtml(currentDate.currentLocation), { permanent: true, direction: 'top', offset: [0, -14], className: 'loc-tooltip' });
     }
