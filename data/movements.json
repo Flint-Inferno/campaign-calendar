@@ -5,23 +5,7 @@
     "month": 7,
     "week": 5,
     "day": 7,
-    "waypoints": [
-      {
-        "x": 1952,
-        "y": 1725,
-        "label": ""
-      },
-      {
-        "x": 1971,
-        "y": 1662,
-        "label": ""
-      },
-      {
-        "x": 2054,
-        "y": 1654,
-        "label": ""
-      }
-    ],
+    "waypoints": [],
     "waypointColor": "#8b6914"
   }
 ]
