@@ -2,9 +2,12 @@
 let CFG = null;
 let CURRENT_DATE = null;
 let mapLoaded = false;
+let timelineLoaded = false;
 let editingEventId = null;
 let _mvtDate = null;
 let _scrubDate = null;
+let _pendingMapPin = null;
+let _openedFromTimeline = false;
 
 const COLOR_SWATCHES = [
   '#8B2E2E','#6B3A2A','#8B6914','#2E5A1C','#1C3D5A',
@@ -68,7 +71,11 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
     const tab = btn.dataset.tab;
     document.querySelectorAll('.tab-content').forEach(c => c.classList.toggle('hidden', c.id !== `tab-${tab}`));
     document.getElementById('app-sidebar')?.classList.toggle('hidden', tab === 'log');
-    if (tab === 'map' && !mapLoaded) initMap();
+    if (tab === 'map') {
+      if (!mapLoaded) initMap();
+      else if (_pendingMapPin) { enablePinForEvent(_pendingMapPin); _pendingMapPin = null; }
+    }
+    if (tab === 'timeline') initTimeline();
     if (tab === 'log') renderLogTab();
   });
 });
@@ -82,6 +89,7 @@ async function initMap() {
     MapView.renderScrubbed(Events.getAll(), Movements.getAll(), _scrubDate, CFG);
     mapLoaded = true;
     hideBanner();
+    if (_pendingMapPin) { enablePinForEvent(_pendingMapPin); _pendingMapPin = null; }
   } catch (e) {
     document.getElementById('map-placeholder').classList.remove('hidden');
     hideBanner();
@@ -237,14 +245,27 @@ document.getElementById('save-event-btn').addEventListener('click', async () => 
     if (editingEventId) {
       await Events.update(editingEventId, data);
       appendActivityLog('event_edit', `Edited event: "${data.title}"`);
+      closeModal('event-modal');
+      Calendar.render();
+      if (mapLoaded && _scrubDate) MapView.renderScrubbed(Events.getAll(), Movements.getAll(), _scrubDate, CFG);
+      refreshTimeline();
+      showBanner('Saved!', 'success');
     } else {
-      await Events.add(data);
+      const newEvent = await Events.add(data);
       appendActivityLog('event_add', `Added event: "${data.title}"`);
+      closeModal('event-modal');
+      Calendar.render();
+      refreshTimeline();
+      if (_openedFromTimeline) {
+        _openedFromTimeline = false;
+        _pendingMapPin = newEvent.id;
+        document.querySelector('.tab-btn[data-tab="map"]')?.click();
+        showBanner('Event saved! Click the map to place a pin.', 'success');
+      } else {
+        if (mapLoaded && _scrubDate) MapView.renderScrubbed(Events.getAll(), Movements.getAll(), _scrubDate, CFG);
+        showBanner('Saved!', 'success');
+      }
     }
-    closeModal('event-modal');
-    Calendar.render();
-    if (mapLoaded && _scrubDate) MapView.renderScrubbed(Events.getAll(), Movements.getAll(), _scrubDate, CFG);
-    showBanner('Saved!', 'success');
   } catch (e) {
     showBanner(e.message, 'error');
   }
@@ -263,6 +284,7 @@ document.getElementById('delete-event-btn').addEventListener('click', async () =
     closeModal('event-modal');
     Calendar.render();
     if (mapLoaded && _scrubDate) MapView.renderScrubbed(Events.getAll(), Movements.getAll(), _scrubDate, CFG);
+    refreshTimeline();
     showBanner('Event deleted.', 'success');
   } catch (e) {
     showBanner(e.message, 'error');
@@ -270,12 +292,21 @@ document.getElementById('delete-event-btn').addEventListener('click', async () =
   setBusy(false);
 });
 
-document.getElementById('cancel-event-btn').addEventListener('click', () => closeModal('event-modal'));
-document.getElementById('event-modal').querySelector('.modal-backdrop').addEventListener('click', () => closeModal('event-modal'));
+document.getElementById('cancel-event-btn').addEventListener('click', () => { _openedFromTimeline = false; closeModal('event-modal'); });
+document.getElementById('event-modal').querySelector('.modal-backdrop').addEventListener('click', () => { _openedFromTimeline = false; closeModal('event-modal'); });
 
 /* ── Time calculator ────────────────────────────────────────── */
 document.getElementById('advance-time-toggle').addEventListener('click', () => {
-  document.getElementById('time-calc-panel').classList.toggle('hidden');
+  const panel = document.getElementById('time-calc-panel');
+  const opening = panel.classList.contains('hidden');
+  panel.classList.toggle('hidden');
+  if (opening) {
+    ['dur-years','dur-months','dur-weeks','dur-days','dur-hours'].forEach(n => {
+      const el = document.querySelector(`[name=${n}]`);
+      if (el) el.value = '0';
+    });
+    document.getElementById('calc-result-row')?.classList.add('hidden');
+  }
 });
 
 document.getElementById('calc-btn').addEventListener('click', () => {
@@ -798,6 +829,50 @@ document.getElementById('refresh-log-btn')?.addEventListener('click', async () =
     renderLogTab();
   } catch (e) { showBanner('Failed to refresh log.', 'error'); }
 });
+
+/* ── Timeline tab ───────────────────────────────────────────── */
+function initTimeline() {
+  if (!timelineLoaded) {
+    TimelineView.init(
+      document.getElementById('timeline-scroll'),
+      CFG,
+      date => { _openedFromTimeline = true; openAddModal({ ...date }); },
+      id => openViewModal(id)
+    );
+    timelineLoaded = true;
+  }
+  TimelineView.setData(Events.getAll(), CURRENT_DATE);
+  TimelineView.render();
+  TimelineView.scrollToNow();
+}
+
+function refreshTimeline() {
+  if (!timelineLoaded) return;
+  TimelineView.setData(Events.getAll(), CURRENT_DATE);
+  TimelineView.render();
+}
+
+document.getElementById('tl-zoom-in')?.addEventListener('click', () => TimelineView.zoom(1.6));
+document.getElementById('tl-zoom-out')?.addEventListener('click', () => TimelineView.zoom(1 / 1.6));
+document.getElementById('tl-scroll-now')?.addEventListener('click', () => TimelineView.scrollToNow());
+
+/* ── Pin-for-event mode (from timeline → map flow) ──────────── */
+function enablePinForEvent(eventId) {
+  MapView.enablePinMode(async (x, y) => {
+    MapView.disablePinMode();
+    document.getElementById('pin-mode-btn')?.classList.remove('active');
+    try {
+      const ev = Events.getAll().find(e => e.id === eventId);
+      if (ev) {
+        await Events.update(eventId, { ...ev, mapX: x, mapY: y });
+        if (mapLoaded && _scrubDate) MapView.renderScrubbed(Events.getAll(), Movements.getAll(), _scrubDate, CFG);
+        showBanner('Map pin placed!', 'success');
+      }
+    } catch (e) { showBanner(e.message, 'error'); }
+  });
+  document.getElementById('pin-mode-btn')?.classList.add('active');
+  showBanner('Click the map to place the event pin, or press Escape to skip.', 'info');
+}
 
 /* ── Map scrub-to-day (click waypoint/trail on other day) ─────── */
 document.addEventListener('map:scrub-to-day', e => {

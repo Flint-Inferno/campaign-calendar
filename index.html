@@ -27,6 +27,7 @@
   <nav class="tab-nav">
     <button class="tab-btn active" data-tab="calendar">Calendar</button>
     <button class="tab-btn" data-tab="map">World Map</button>
+    <button class="tab-btn" data-tab="timeline">Timeline</button>
     <button class="tab-btn" data-tab="log">Log</button>
   </nav>
 
@@ -121,6 +122,19 @@
     </div>
 
     <!-- ══════════════════════════════════════════════════════ -->
+    <!-- Timeline Tab -->
+    <!-- ══════════════════════════════════════════════════════ -->
+    <div id="tab-timeline" class="tab-content hidden">
+      <div class="timeline-controls">
+        <span class="tl-controls-label">Timeline</span>
+        <button id="tl-zoom-in" title="Zoom in">+</button>
+        <button id="tl-zoom-out" title="Zoom out">−</button>
+        <button id="tl-scroll-now">↓ Now</button>
+      </div>
+      <div id="timeline-scroll" class="timeline-scroll"></div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════ -->
     <!-- Log Tab -->
     <!-- ══════════════════════════════════════════════════════ -->
     <div id="tab-log" class="tab-content hidden">
@@ -147,11 +161,11 @@
       <form id="time-calc-form" onsubmit="return false">
         <div class="tc-section-label">Add duration from now</div>
         <div class="tc-dur-grid">
-          <div><label>Years</label><input type="number" name="dur-years" value="0"></div>
-          <div><label>Months</label><input type="number" name="dur-months" value="0"></div>
-          <div><label>Weeks</label><input type="number" name="dur-weeks" value="0"></div>
-          <div><label>Days</label><input type="number" name="dur-days" value="0"></div>
-          <div><label>Hours</label><input type="number" name="dur-hours" value="0"></div>
+          <div><label>Years</label><input type="number" name="dur-years" value="0" min="0" autocomplete="off"></div>
+          <div><label>Months</label><input type="number" name="dur-months" value="0" min="0" autocomplete="off"></div>
+          <div><label>Weeks</label><input type="number" name="dur-weeks" value="0" min="0" autocomplete="off"></div>
+          <div><label>Days</label><input type="number" name="dur-days" value="0" min="0" autocomplete="off"></div>
+          <div><label>Hours</label><input type="number" name="dur-hours" value="0" min="0" autocomplete="off"></div>
         </div>
 
         <button id="calc-btn">Calculate</button>
@@ -366,6 +380,7 @@
 <script src="js/calendar.js"></script>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="js/map.js"></script>
+<script src="js/timeline.js"></script>
 <script src="js/app.js"></script>
 
 </body>
