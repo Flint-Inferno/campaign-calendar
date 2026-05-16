@@ -28,7 +28,7 @@ const GithubAPI = (() => {
   async function readFile(path) {
     const url = `${BASE}/repos/${REPO_OWNER}/${REPO_NAME}/contents/${path}`;
     let res = await fetch(url, { headers: authHeaders() });
-    if (res.status === 401) {
+    if (res.status === 401 || res.status === 403) {
       res = await fetch(url, { headers: { 'Accept': 'application/vnd.github.v3+json' } });
     }
     if (!res.ok) {
