@@ -391,9 +391,18 @@ function openAdvanceConfirmModal() {
   document.getElementById('advance-location-text').value = CURRENT_DATE?.currentLocation || '';
   document.getElementById('advance-reason-text').value = '';
   document.querySelectorAll('.reason-btn').forEach(b => b.classList.remove('active'));
+  const skipFields = document.getElementById('advance-skip-fields');
   const colorRow = document.getElementById('advance-color-row');
+  if (skipFields) skipFields.classList.toggle('hidden', !_pendingAdvanceForward);
   if (colorRow) colorRow.classList.toggle('hidden', !_pendingAdvanceForward);
-  if (_pendingAdvanceForward) setAdvanceColor(getLastChainColor());
+  if (_pendingAdvanceForward) {
+    setAdvanceColor(getLastChainColor());
+    const titleEl = document.getElementById('advance-title-text');
+    if (titleEl) titleEl.placeholder = `Time Skip → ${TimeCalc.format(_pendingAdvanceResult, CFG)}`;
+    if (titleEl) titleEl.value = '';
+    const descEl = document.getElementById('advance-desc-text');
+    if (descEl) descEl.value = '';
+  }
   openModal('advance-confirm-modal');
 }
 
@@ -471,9 +480,12 @@ document.getElementById('advance-confirm-ok')?.addEventListener('click', async (
 
     // Create a time skip waypoint event for forward advances
     if (_pendingAdvanceForward) {
+      const autoTitle = `Time Skip → ${TimeCalc.format(_pendingAdvanceResult, CFG)}`;
+      const skipTitle = document.getElementById('advance-title-text')?.value.trim() || autoTitle;
+      const skipDesc = document.getElementById('advance-desc-text')?.value.trim() || '';
       const skipData = {
-        title: `Time Skip → ${TimeCalc.format(_pendingAdvanceResult, CFG)}`,
-        description: reason || '',
+        title: skipTitle,
+        description: skipDesc || reason || '',
         year: _pendingAdvanceResult.year,
         month: _pendingAdvanceResult.month,
         week: _pendingAdvanceResult.week,
