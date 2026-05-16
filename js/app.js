@@ -424,6 +424,43 @@ function updateCurrentDateDisplay() {
   document.getElementById('current-date-display').textContent = TimeCalc.format(CURRENT_DATE, CFG);
   const locEl = document.getElementById('current-location-display');
   if (locEl) locEl.textContent = CURRENT_DATE.currentLocation || '';
+  updateClock(CURRENT_DATE.hour || 0);
+}
+
+function initClock() {
+  const g = document.getElementById('clock-markers');
+  if (!g) return;
+  let html = '';
+  for (let i = 0; i < 12; i++) {
+    const rad = (i * 30 - 90) * Math.PI / 180;
+    const isMajor = i % 3 === 0;
+    const r1 = isMajor ? 35 : 38;
+    const r2 = 43;
+    const x1 = (50 + r1 * Math.cos(rad)).toFixed(2);
+    const y1 = (50 + r1 * Math.sin(rad)).toFixed(2);
+    const x2 = (50 + r2 * Math.cos(rad)).toFixed(2);
+    const y2 = (50 + r2 * Math.sin(rad)).toFixed(2);
+    html += `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${isMajor ? '#c8a55a' : '#6b4a1a'}" stroke-width="${isMajor ? 2.5 : 1.2}"/>`;
+  }
+  const numerals = [['XII', 0], ['III', 90], ['VI', 180], ['IX', 270]];
+  for (const [n, deg] of numerals) {
+    const rad = (deg - 90) * Math.PI / 180;
+    const x = (50 + 28 * Math.cos(rad)).toFixed(2);
+    const y = (50 + 28 * Math.sin(rad) + 2.5).toFixed(2);
+    html += `<text x="${x}" y="${y}" text-anchor="middle" font-family="serif" font-size="8" fill="#c8a55a" font-style="italic">${n}</text>`;
+  }
+  g.innerHTML = html;
+}
+
+function updateClock(hour24) {
+  const angle = (hour24 % 12) * 30;
+  const hand = document.getElementById('clock-hour-hand');
+  if (hand) hand.setAttribute('transform', `rotate(${angle}, 50, 50)`);
+  const label = document.getElementById('clock-time-label');
+  if (label) {
+    const h = hour24 % 12 || 12;
+    label.textContent = `${h}:00 ${hour24 < 12 ? 'AM' : 'PM'}`;
+  }
 }
 
 /* ── Identity panel ─────────────────────────────────────────── */
@@ -1062,6 +1099,7 @@ function buildHourSelect(name) {
 /* ── Boot ───────────────────────────────────────────────────── */
 window.addEventListener('DOMContentLoaded', async () => {
   buildColorSwatches();
+  initClock();
   await appInit();
   buildSelects();
 });
