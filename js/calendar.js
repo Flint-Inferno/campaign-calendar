@@ -205,7 +205,7 @@ const Calendar = (() => {
         const evStart = TimeCalc.toAbsolute(ev, _cfg);
         const evEnd = ev.endYear != null
           ? TimeCalc.toAbsolute({ year: ev.endYear, month: ev.endMonth, week: ev.endWeek, day: ev.endDay, hour: ev.endHour || 0 }, _cfg)
-          : evStart + _cfg.hoursPerDay - 1;
+          : evStart + 1;
         const blockStart = Math.max(evStart, dayStart);
         const blockEnd = Math.min(evEnd, dayEnd - 1);
         if (blockStart > blockEnd) continue;

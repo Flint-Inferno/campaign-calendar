@@ -46,7 +46,7 @@ const Events = (() => {
       const evStart = TimeCalc.toAbsolute(ev, cfg);
       const evEnd = ev.endYear != null
         ? TimeCalc.toAbsolute({ year: ev.endYear, month: ev.endMonth, week: ev.endWeek, day: ev.endDay, hour: ev.endHour || 0 }, cfg)
-        : evStart;
+        : evStart + 1;
       return evStart <= dayEnd && evEnd >= dayStart;
     });
   }
@@ -58,7 +58,7 @@ const Events = (() => {
       const evStart = TimeCalc.toAbsolute(ev, cfg);
       const evEnd = ev.endYear != null
         ? TimeCalc.toAbsolute({ year: ev.endYear, month: ev.endMonth, week: ev.endWeek, day: ev.endDay, hour: ev.endHour || 0 }, cfg)
-        : evStart;
+        : evStart + 1;
       return evStart <= weekEnd && evEnd >= weekStart;
     });
   }
