@@ -94,6 +94,7 @@ async function initMap() {
     mapLoaded = true;
     hideBanner();
     if (_pendingMapPin) { enablePinForEvent(_pendingMapPin); _pendingMapPin = null; }
+    else if (_pendingLocationPick) { _pendingLocationPick = false; enterLocationPickMode(); }
   } catch (e) {
     document.getElementById('map-placeholder').classList.remove('hidden');
     hideBanner();
@@ -345,17 +346,48 @@ document.getElementById('calc-btn').addEventListener('click', () => {
 });
 
 let _pendingAdvanceResult = null;
+let _pendingLocationCoords = null;
+let _pendingLocationPick = false;
+
+function openAdvanceConfirmModal() {
+  document.getElementById('advance-confirm-to').textContent = `→ ${TimeCalc.format(_pendingAdvanceResult, CFG)}`;
+  document.getElementById('advance-location-text').value = CURRENT_DATE?.currentLocation || '';
+  document.getElementById('advance-reason-text').value = '';
+  document.querySelectorAll('.reason-btn').forEach(b => b.classList.remove('active'));
+  openModal('advance-confirm-modal');
+}
+
+function enterLocationPickMode() {
+  MapView.enablePinMode((x, y) => {
+    MapView.disablePinMode();
+    hideBanner();
+    _pendingLocationCoords = { x, y };
+    openAdvanceConfirmModal();
+  });
+  const el = document.getElementById('banner');
+  el.innerHTML = 'Click the map to mark your destination &nbsp;<button id="skip-location-btn" class="banner-skip-btn">Skip →</button>';
+  el.className = 'banner banner-info';
+  el.classList.remove('hidden');
+  clearTimeout(bannerTimer);
+  document.getElementById('skip-location-btn')?.addEventListener('click', () => {
+    MapView.disablePinMode();
+    hideBanner();
+    openAdvanceConfirmModal();
+  });
+}
 
 document.getElementById('set-current-btn').addEventListener('click', () => {
   const result = JSON.parse(document.getElementById('set-current-btn').dataset.result || 'null');
   if (!result) return;
   if (!canWrite()) { showBanner('Set your identity to a recognized player name to edit.', 'error'); return; }
   _pendingAdvanceResult = result;
-  document.getElementById('advance-confirm-to').textContent = `→ ${TimeCalc.format(result, CFG)}`;
-  document.getElementById('advance-location-text').value = CURRENT_DATE?.currentLocation || '';
-  document.getElementById('advance-reason-text').value = '';
-  document.querySelectorAll('.reason-btn').forEach(b => b.classList.remove('active'));
-  openModal('advance-confirm-modal');
+  _pendingLocationCoords = null;
+  document.querySelector('.tab-btn[data-tab="map"]')?.click();
+  if (mapLoaded) {
+    enterLocationPickMode();
+  } else {
+    _pendingLocationPick = true;
+  }
 });
 
 document.querySelectorAll('.reason-btn').forEach(btn => {
@@ -374,7 +406,10 @@ document.getElementById('advance-confirm-ok')?.addEventListener('click', async (
   const result = { ..._pendingAdvanceResult };
   if (location) {
     result.currentLocation = location;
-    if (location === CURRENT_DATE?.currentLocation) {
+    if (_pendingLocationCoords) {
+      result.locationX = _pendingLocationCoords.x;
+      result.locationY = _pendingLocationCoords.y;
+    } else if (location === CURRENT_DATE?.currentLocation) {
       if (CURRENT_DATE.locationX != null) result.locationX = CURRENT_DATE.locationX;
       if (CURRENT_DATE.locationY != null) result.locationY = CURRENT_DATE.locationY;
     } else {
@@ -403,6 +438,7 @@ document.getElementById('advance-confirm-ok')?.addEventListener('click', async (
     if (mapLoaded) MapView.renderCurrentLocation(CURRENT_DATE);
     closeModal('advance-confirm-modal');
     _pendingAdvanceResult = null;
+    _pendingLocationCoords = null;
     showBanner('Time advanced!', 'success');
   } catch (e) {
     showBanner(e.message, 'error');
@@ -413,10 +449,12 @@ document.getElementById('advance-confirm-ok')?.addEventListener('click', async (
 document.getElementById('advance-confirm-cancel')?.addEventListener('click', () => {
   closeModal('advance-confirm-modal');
   _pendingAdvanceResult = null;
+  _pendingLocationCoords = null;
 });
 document.getElementById('advance-confirm-modal')?.querySelector('.modal-backdrop')?.addEventListener('click', () => {
   closeModal('advance-confirm-modal');
   _pendingAdvanceResult = null;
+  _pendingLocationCoords = null;
 });
 
 function updateCurrentDateDisplay() {
