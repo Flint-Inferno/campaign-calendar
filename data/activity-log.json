@@ -78,5 +78,13 @@
     "playerColor": "#0000c4",
     "action": "date_advance",
     "details": "Advanced to Year 6532 · Psol · Pelora · Day 1 · 14:00"
+  },
+  {
+    "id": "e3428a47-fba0-46e7-9ac9-5ce58fc717cf",
+    "timestamp": "2026-05-16T22:35:40.454Z",
+    "playerName": "Flint (DM)",
+    "playerColor": "#0000c4",
+    "action": "event_delete",
+    "details": "Deleted event: \"wesdrftgyhj\""
   }
 ]
