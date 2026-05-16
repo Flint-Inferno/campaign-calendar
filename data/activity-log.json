@@ -118,5 +118,13 @@
     "playerColor": "#0000c4",
     "action": "event_edit",
     "details": "Edited event: \"Departed Solmere\""
+  },
+  {
+    "id": "f8e52728-0259-4d93-bfd8-39a2bdae1e9d",
+    "timestamp": "2026-05-16T23:15:35.674Z",
+    "playerName": "Flint (DM)",
+    "playerColor": "#0000c4",
+    "action": "date_advance",
+    "details": "Advanced to Year 6532 · Falm · Pelora · Day 6 · 00:00"
   }
 ]
