@@ -26,7 +26,7 @@
     "day": 5,
     "hour": 14,
     "color": "#8B2E2E",
-    "markerType": "event",
+    "markerType": "waypoint",
     "mapX": 850,
     "mapY": 1490,
     "tags": []
