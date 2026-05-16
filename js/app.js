@@ -37,7 +37,7 @@ async function appInit() {
     Movements.importJSON(mvtRes.content);
     ActivityLog.importJSON(logRes.content);
     const writeToken = wtRes.content?.token || '';
-    if (writeToken) GithubAPI.setPAT(writeToken);
+    if (writeToken) { try { GithubAPI.setPAT(atob(writeToken)); } catch (_) { GithubAPI.setPAT(writeToken); } }
   } catch (e) {
     showBanner('Failed to load calendar data. Check your internet connection.', 'error');
     return;

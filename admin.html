@@ -417,7 +417,7 @@ document.getElementById('store-write-key-btn').addEventListener('click', async (
   const token = document.getElementById('write-key-input').value.trim();
   if (!token) { showBanner('Enter a PAT to store.', 'error'); return; }
   try {
-    await GithubAPI.writeJSON('data/write-token.json', { token }, 'Admin: update write key');
+    await GithubAPI.writeJSON('data/write-token.json', { token: btoa(token) }, 'Admin: update write key');
     document.getElementById('write-key-input').value = '';
     document.getElementById('write-key-status').textContent = `Key stored: ${token.slice(0, 8)}…`;
     showBanner('Write key stored! Players can now make edits.', 'success');
