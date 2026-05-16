@@ -1544,6 +1544,63 @@ header {
 #mvt-clear-btn { background: #4a1c1c; color: #f0b0b0; border-color: #6a2c2c; margin-right: auto; }
 #mvt-clear-btn:hover { background: #6a2c2c; }
 
+/* ── Marker type toggle (mtype-btn) ─────────────────────────── */
+.mtype-row {
+  display: flex;
+  gap: 6px;
+  margin-top: 2px;
+}
+.mtype-btn {
+  flex: 1;
+  font-family: 'Cinzel', serif;
+  font-size: 0.7rem;
+  padding: 4px 6px;
+  background: var(--parchment-dark);
+  color: var(--ink-light);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+.mtype-btn.active {
+  background: var(--gold);
+  color: var(--ink);
+  border-color: var(--gold);
+}
+
+/* ── Map popup additions ─────────────────────────────────────── */
+.popup-location { font-size: 0.75rem; color: var(--ink-light); font-style: italic; margin-bottom: 4px; }
+.popup-divider { border: none; border-top: 1px solid var(--parchment-deep); margin: 6px 0; }
+.popup-stack-item + .popup-divider { margin-top: 8px; }
+.popup-toggle-type-btn {
+  font-family: 'Cinzel', serif;
+  font-size: 0.68rem;
+  padding: 3px 6px;
+  border: none;
+  cursor: pointer;
+  border-radius: var(--radius);
+  background: var(--parchment-deep);
+  color: var(--ink);
+  flex: 1;
+}
+.popup-toggle-type-btn:hover { background: var(--gold-light); }
+
+/* ── Diamond markers (waypoints + current location) ──────────── */
+.map-diamond {
+  transform: rotate(45deg);
+  border: 1.5px solid #2c1810;
+  box-sizing: border-box;
+  position: absolute;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.4);
+}
+.loc-diamond {
+  transform: rotate(45deg);
+  border: 2px solid #004a4a;
+  box-sizing: border-box;
+  position: absolute;
+  box-shadow: 0 1px 5px rgba(0,0,0,0.5);
+}
+
 /* ── Utilities ───────────────────────────────────────────────── */
 .hidden { display: none !important; }
 .mt-8 { margin-top: 8px; }

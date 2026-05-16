@@ -215,6 +215,11 @@
       </div>
 
       <div class="form-row">
+        <label for="ev-location">Location <span style="font-size:0.7em;opacity:.7">(optional)</span></label>
+        <input id="ev-location" name="location" type="text" placeholder="e.g. Thornwall Inn">
+      </div>
+
+      <div class="form-row">
         <label>Start Date &amp; Time</label>
         <div class="date-picker-row">
           <div>
@@ -277,6 +282,14 @@
           <div id="color-swatch-grid"></div>
           <div id="color-preview" style="background:#6B3A2A"></div>
           <input id="color-hex-input" name="color" type="text" placeholder="#6B3A2A" maxlength="7">
+        </div>
+      </div>
+
+      <div class="form-row">
+        <label>Marker Type</label>
+        <div class="mtype-row" id="ev-mtype-row">
+          <button type="button" class="mtype-btn active" data-mtype="event" id="mtype-event-btn">Event</button>
+          <button type="button" class="mtype-btn" data-mtype="waypoint" id="mtype-waypoint-btn">Waypoint</button>
         </div>
       </div>
 
@@ -379,6 +392,15 @@
       <input id="advance-location-text" type="text" placeholder="e.g. Thornwall Inn, Forest Road…">
     </div>
 
+    <div id="advance-color-row" class="form-row hidden">
+      <label>Time Skip Color <span style="font-size:.7em;opacity:.7">(inherits last chain waypoint)</span></label>
+      <div class="color-picker-row">
+        <div id="advance-color-swatch-grid"></div>
+        <div id="advance-color-preview" style="background:#8b6914"></div>
+        <input id="advance-hex-input" type="text" placeholder="#8b6914" maxlength="7">
+      </div>
+    </div>
+
     <div class="modal-actions">
       <button id="advance-confirm-cancel">Cancel</button>
       <button id="advance-confirm-ok">Advance Time →</button>
@@ -402,6 +424,10 @@
       <textarea id="qp-desc" placeholder="Details…" rows="2"></textarea>
     </div>
     <div class="form-row">
+      <label for="qp-location">Location <span style="font-size:.7em;opacity:.7">(optional)</span></label>
+      <input id="qp-location" type="text" placeholder="e.g. Thornwall Inn">
+    </div>
+    <div class="form-row">
       <label>Date &amp; Time</label>
       <div class="date-picker-row">
         <div><label>Year</label><input name="qp-year" type="number" min="1" autocomplete="off"></div>
@@ -412,10 +438,18 @@
       </div>
     </div>
     <div class="form-row">
+      <label>Marker Type</label>
+      <div class="mtype-row" id="qp-mtype-row">
+        <button type="button" class="mtype-btn active" data-mtype="waypoint" id="qp-mtype-waypoint">Waypoint</button>
+        <button type="button" class="mtype-btn" data-mtype="event" id="qp-mtype-event">Event</button>
+      </div>
+    </div>
+    <div class="form-row">
       <label>Color</label>
       <div class="color-picker-row">
         <div id="qp-swatch-grid"></div>
         <div id="qp-color-preview" style="background:#6B3A2A"></div>
+        <input id="qp-hex-input" type="text" placeholder="#6B3A2A" maxlength="7">
       </div>
     </div>
     <div class="modal-actions">

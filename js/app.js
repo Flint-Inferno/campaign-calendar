@@ -93,7 +93,7 @@ async function initMap() {
     await MapView.loadMap();
     if (!_scrubDate) _scrubDate = { year: 1, month: 1, week: 1, day: 1, hour: 0 };
     updateScrubLabel();
-    MapView.renderScrubbed(Events.getAll(), Movements.getAll(), _scrubDate, CFG);
+    MapView.renderScrubbed(Events.getAll(), Movements.getAll(), _scrubDate, CFG, CURRENT_DATE);
     MapView.renderCurrentLocation(CURRENT_DATE);
     mapLoaded = true;
     hideBanner();
@@ -164,6 +164,8 @@ function populateModal(data) {
   const f = document.getElementById('event-form');
   f.querySelector('[name=title]').value = data.title || '';
   f.querySelector('[name=description]').value = data.description || '';
+  const locInput = document.getElementById('ev-location');
+  if (locInput) locInput.value = data.location || '';
   fillDatePickers('start', data);
   const hasEnd = data.endYear != null;
   f.querySelector('[name=has-end]').checked = hasEnd;
@@ -173,6 +175,10 @@ function populateModal(data) {
   f.querySelector('[name=mapX]').value = data.mapX != null ? data.mapX : '';
   f.querySelector('[name=mapY]').value = data.mapY != null ? data.mapY : '';
   setModalColor(data.color || (CFG && CFG.defaultEventColor) || '#6B3A2A');
+  const mtype = data.markerType || 'event';
+  document.querySelectorAll('#ev-mtype-row .mtype-btn').forEach(b =>
+    b.classList.toggle('active', b.dataset.mtype === mtype)
+  );
 }
 
 function fillDatePickers(prefix, d) {
@@ -226,9 +232,12 @@ function collectModalData() {
   const hasEnd = get('has-end').checked;
   const mapXVal = get('mapX').value.trim();
   const mapYVal = get('mapY').value.trim();
+  const activeType = document.querySelector('#ev-mtype-row .mtype-btn.active')?.dataset.mtype || 'event';
   return {
     title: get('title').value.trim(),
     description: get('description').value.trim(),
+    location: (document.getElementById('ev-location')?.value || '').trim(),
+    markerType: activeType,
     year: +get('start-year').value,
     month: +get('start-month').value,
     week: +get('start-week').value,
@@ -273,7 +282,7 @@ document.getElementById('save-event-btn').addEventListener('click', async () => 
       document.querySelector('.tab-btn[data-tab="map"]')?.click();
       showBanner('Event saved! Click the map to place a waypoint.', 'success');
     } else {
-      if (mapLoaded && _scrubDate) MapView.renderScrubbed(Events.getAll(), Movements.getAll(), _scrubDate, CFG);
+      if (mapLoaded && _scrubDate) MapView.renderScrubbed(Events.getAll(), Movements.getAll(), _scrubDate, CFG, CURRENT_DATE);
       showBanner('Saved!', 'success');
     }
   } catch (e) {
@@ -293,7 +302,7 @@ document.getElementById('delete-event-btn').addEventListener('click', async () =
     appendActivityLog('event_delete', `Deleted event: "${evTitle}"`);
     closeModal('event-modal');
     Calendar.render();
-    if (mapLoaded && _scrubDate) MapView.renderScrubbed(Events.getAll(), Movements.getAll(), _scrubDate, CFG);
+    if (mapLoaded && _scrubDate) MapView.renderScrubbed(Events.getAll(), Movements.getAll(), _scrubDate, CFG, CURRENT_DATE);
     refreshTimeline();
     showBanner('Event deleted.', 'success');
   } catch (e) {
@@ -351,12 +360,40 @@ document.getElementById('calc-btn').addEventListener('click', () => {
 let _pendingAdvanceResult = null;
 let _pendingLocationCoords = null;
 let _pendingLocationPick = false;
+let _pendingAdvanceForward = true;
+let _advanceColor = '#8b6914';
+
+function getLastChainColor() {
+  if (!CFG) return '#8b6914';
+  const chain = Events.getAll()
+    .filter(e => e.markerType === 'waypoint' && e.mapX != null)
+    .sort((a, b) => TimeCalc.toAbsolute(a, CFG) - TimeCalc.toAbsolute(b, CFG));
+  return chain.length ? (chain[chain.length - 1].color || '#8b6914') : ((CFG && CFG.defaultEventColor) || '#8b6914');
+}
+
+function setAdvanceColor(hex) {
+  _advanceColor = hex;
+  const preview = document.getElementById('advance-color-preview');
+  const input = document.getElementById('advance-hex-input');
+  if (preview) preview.style.background = hex;
+  if (input) input.value = hex;
+  document.querySelectorAll('#advance-color-swatch-grid .color-swatch').forEach(s =>
+    s.classList.toggle('selected', s.dataset.color === hex)
+  );
+}
+
+function readAdvanceColor() {
+  return document.getElementById('advance-hex-input')?.value || _advanceColor;
+}
 
 function openAdvanceConfirmModal() {
   document.getElementById('advance-confirm-to').textContent = `→ ${TimeCalc.format(_pendingAdvanceResult, CFG)}`;
   document.getElementById('advance-location-text').value = CURRENT_DATE?.currentLocation || '';
   document.getElementById('advance-reason-text').value = '';
   document.querySelectorAll('.reason-btn').forEach(b => b.classList.remove('active'));
+  const colorRow = document.getElementById('advance-color-row');
+  if (colorRow) colorRow.classList.toggle('hidden', !_pendingAdvanceForward);
+  if (_pendingAdvanceForward) setAdvanceColor(getLastChainColor());
   openModal('advance-confirm-modal');
 }
 
@@ -383,6 +420,7 @@ document.getElementById('set-current-btn').addEventListener('click', () => {
   const result = JSON.parse(document.getElementById('set-current-btn').dataset.result || 'null');
   if (!result) return;
   if (!canWrite()) { showBanner('Set your identity to a recognized player name to edit.', 'error'); return; }
+  _pendingAdvanceForward = !document.getElementById('tc-dir-btn-back').classList.contains('active');
   _pendingAdvanceResult = result;
   _pendingLocationCoords = null;
   document.querySelector('.tab-btn[data-tab="map"]')?.click();
@@ -430,13 +468,36 @@ document.getElementById('advance-confirm-ok')?.addEventListener('click', async (
     await GithubAPI.writeJSON('data/current-date.json', result, `Advance time to ${TimeCalc.format(result, CFG)}`);
     const logMsg = reason ? `Advanced to ${TimeCalc.format(result, CFG)} — ${reason}` : `Advanced to ${TimeCalc.format(result, CFG)}`;
     appendActivityLog('date_advance', logMsg);
+
+    // Create a time skip waypoint event for forward advances
+    if (_pendingAdvanceForward) {
+      const skipData = {
+        title: `Time Skip → ${TimeCalc.format(_pendingAdvanceResult, CFG)}`,
+        description: reason || '',
+        year: _pendingAdvanceResult.year,
+        month: _pendingAdvanceResult.month,
+        week: _pendingAdvanceResult.week,
+        day: _pendingAdvanceResult.day,
+        hour: _pendingAdvanceResult.hour || 0,
+        color: readAdvanceColor(),
+        markerType: 'waypoint',
+        location: location || '',
+        mapX: _pendingLocationCoords?.x ?? null,
+        mapY: _pendingLocationCoords?.y ?? null,
+        tags: []
+      };
+      await Events.add(skipData);
+      appendActivityLog('event_add', `Auto-created time skip: "${skipData.title}"`);
+    }
+
     CURRENT_DATE = result;
     Calendar.setCurrentDate(CURRENT_DATE);
     Calendar.render();
+    refreshTimeline();
     updateCurrentDateDisplay();
     _scrubDate = { year: result.year, month: result.month, week: result.week, day: result.day, hour: 0 };
     updateScrubLabel();
-    if (mapLoaded) MapView.renderScrubbed(Events.getAll(), Movements.getAll(), _scrubDate, CFG);
+    if (mapLoaded) MapView.renderScrubbed(Events.getAll(), Movements.getAll(), _scrubDate, CFG, CURRENT_DATE);
     if (mapLoaded) MapView.renderCurrentLocation(CURRENT_DATE);
     closeModal('advance-confirm-modal');
     _pendingAdvanceResult = null;
@@ -657,7 +718,7 @@ document.getElementById('scrub-prev-btn')?.addEventListener('click', () => {
   exitWaypointModeIfActive();
   _scrubDate = { ...TimeCalc.add({ ..._scrubDate, hour: 0 }, { days: -1 }, CFG), hour: 0 };
   updateScrubLabel();
-  if (mapLoaded) MapView.renderScrubbed(Events.getAll(), Movements.getAll(), _scrubDate, CFG);
+  if (mapLoaded) MapView.renderScrubbed(Events.getAll(), Movements.getAll(), _scrubDate, CFG, CURRENT_DATE);
 });
 
 document.getElementById('scrub-next-btn')?.addEventListener('click', () => {
@@ -665,7 +726,7 @@ document.getElementById('scrub-next-btn')?.addEventListener('click', () => {
   exitWaypointModeIfActive();
   _scrubDate = { ...TimeCalc.add({ ..._scrubDate, hour: 0 }, { days: 1 }, CFG), hour: 0 };
   updateScrubLabel();
-  if (mapLoaded) MapView.renderScrubbed(Events.getAll(), Movements.getAll(), _scrubDate, CFG);
+  if (mapLoaded) MapView.renderScrubbed(Events.getAll(), Movements.getAll(), _scrubDate, CFG, CURRENT_DATE);
 });
 
 /* ── Add Waypoint mode (map waypoint button) ────────────────── */
@@ -707,6 +768,8 @@ function openQuickWaypointModal() {
 function setQpColor(hex) {
   _qpSelectedColor = hex;
   document.getElementById('qp-color-preview').style.background = hex;
+  const hexInput = document.getElementById('qp-hex-input');
+  if (hexInput) hexInput.value = hex;
   document.querySelectorAll('#qp-swatch-grid .color-swatch').forEach(s =>
     s.classList.toggle('selected', s.dataset.color === hex)
   );
@@ -731,6 +794,8 @@ document.getElementById('qp-save-btn')?.addEventListener('click', async () => {
     const data = {
       title,
       description: document.getElementById('qp-desc').value.trim(),
+      location: (document.getElementById('qp-location')?.value || '').trim(),
+      markerType: document.querySelector('#qp-mtype-row .mtype-btn.active')?.dataset.mtype || 'waypoint',
       year: +document.querySelector('[name=qp-year]').value,
       month: +document.querySelector('[name=qp-month]').value,
       week: +document.querySelector('[name=qp-week]').value,
@@ -746,7 +811,7 @@ document.getElementById('qp-save-btn')?.addEventListener('click', async () => {
     closeModal('quick-waypoint-modal');
     _addPinCoords = null;
     Calendar.render();
-    if (mapLoaded && _scrubDate) MapView.renderScrubbed(Events.getAll(), Movements.getAll(), _scrubDate, CFG);
+    if (mapLoaded && _scrubDate) MapView.renderScrubbed(Events.getAll(), Movements.getAll(), _scrubDate, CFG, CURRENT_DATE);
     refreshTimeline();
     showBanner('Waypoint added!', 'success');
   } catch (e) { showBanner(e.message, 'error'); }
@@ -766,6 +831,34 @@ document.getElementById('save-and-waypoint-btn')?.addEventListener('click', () =
   document.getElementById('save-event-btn').click();
 });
 
+/* ── Marker type toggle buttons ─────────────────────────────── */
+document.querySelectorAll('#ev-mtype-row .mtype-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('#ev-mtype-row .mtype-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+  });
+});
+document.querySelectorAll('#qp-mtype-row .mtype-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('#qp-mtype-row .mtype-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+  });
+});
+
+/* ── Toggle marker type from map popup ──────────────────────── */
+document.addEventListener('map:toggle-marker-type', async e => {
+  const ev = Events.getAll().find(x => x.id === e.detail.id);
+  if (!ev || !canWrite()) { showBanner('Set your identity to edit.', 'error'); return; }
+  const newType = (ev.markerType || 'event') === 'waypoint' ? 'event' : 'waypoint';
+  try {
+    await Events.update(ev.id, { ...ev, markerType: newType });
+    appendActivityLog('event_edit', `Toggled "${ev.title}" to ${newType}`);
+    Calendar.render();
+    refreshTimeline();
+    if (mapLoaded && _scrubDate) MapView.renderScrubbed(Events.getAll(), Movements.getAll(), _scrubDate, CFG, CURRENT_DATE);
+  } catch (err) { showBanner(err.message, 'error'); }
+});
+
 /* ── Edit event from map popup ──────────────────────────────── */
 document.addEventListener('map:edit-event', e => {
   openViewModal(e.detail.id);
@@ -783,7 +876,7 @@ document.getElementById('wp-clear-btn')?.addEventListener('click', () => {
 });
 document.getElementById('wp-cancel-btn')?.addEventListener('click', () => {
   exitWaypointModeIfActive();
-  if (mapLoaded && _scrubDate) MapView.renderScrubbed(Events.getAll(), Movements.getAll(), _scrubDate, CFG);
+  if (mapLoaded && _scrubDate) MapView.renderScrubbed(Events.getAll(), Movements.getAll(), _scrubDate, CFG, CURRENT_DATE);
 });
 document.getElementById('wp-save-btn')?.addEventListener('click', async () => {
   if (!_scrubDate) return;
@@ -797,7 +890,7 @@ document.getElementById('wp-save-btn')?.addEventListener('click', async () => {
     await Movements.setDay(_scrubDate.year, _scrubDate.month, _scrubDate.week, _scrubDate.day, { waypoints, waypointColor });
     appendActivityLog('waypoints_save', `Saved ${waypoints.length} waypoint(s)`);
     exitWaypointModeIfActive();
-    MapView.renderScrubbed(Events.getAll(), Movements.getAll(), _scrubDate, CFG);
+    MapView.renderScrubbed(Events.getAll(), Movements.getAll(), _scrubDate, CFG, CURRENT_DATE);
     showBanner(`${waypoints.length} waypoint(s) saved!`, 'success');
   } catch (e) { showBanner(e.message, 'error'); }
 });
@@ -1039,7 +1132,7 @@ function enablePinForEvent(eventId) {
       const ev = Events.getAll().find(e => e.id === eventId);
       if (ev) {
         await Events.update(eventId, { ...ev, mapX: x, mapY: y });
-        if (mapLoaded && _scrubDate) MapView.renderScrubbed(Events.getAll(), Movements.getAll(), _scrubDate, CFG);
+        if (mapLoaded && _scrubDate) MapView.renderScrubbed(Events.getAll(), Movements.getAll(), _scrubDate, CFG, CURRENT_DATE);
         showBanner('Waypoint placed!', 'success');
       }
     } catch (e) { showBanner(e.message, 'error'); }
@@ -1052,7 +1145,7 @@ document.addEventListener('map:scrub-to-day', e => {
   exitWaypointModeIfActive();
   _scrubDate = { ...e.detail, hour: 0 };
   updateScrubLabel();
-  if (mapLoaded) MapView.renderScrubbed(Events.getAll(), Movements.getAll(), _scrubDate, CFG);
+  if (mapLoaded) MapView.renderScrubbed(Events.getAll(), Movements.getAll(), _scrubDate, CFG, CURRENT_DATE);
 });
 
 /* ── Live update poll ───────────────────────────────────────── */
@@ -1182,19 +1275,46 @@ window.addEventListener('DOMContentLoaded', async () => {
 
 function buildColorSwatches() {
   const grid = document.getElementById('color-swatch-grid');
-  if (!grid) return;
-  grid.innerHTML = COLOR_SWATCHES.map(c =>
-    `<div class="color-swatch" data-color="${c}" style="background:${c}" title="${c}"></div>`
-  ).join('');
-  grid.querySelectorAll('.color-swatch').forEach(s => {
-    s.addEventListener('click', () => setModalColor(s.dataset.color));
-  });
+  if (grid) {
+    grid.innerHTML = COLOR_SWATCHES.map(c =>
+      `<div class="color-swatch" data-color="${c}" style="background:${c}" title="${c}"></div>`
+    ).join('');
+    grid.querySelectorAll('.color-swatch').forEach(s => {
+      s.addEventListener('click', () => setModalColor(s.dataset.color));
+    });
+  }
+
   const qpGrid = document.getElementById('qp-swatch-grid');
-  if (!qpGrid) return;
-  qpGrid.innerHTML = COLOR_SWATCHES.map(c =>
-    `<div class="color-swatch" data-color="${c}" style="background:${c}" title="${c}"></div>`
-  ).join('');
-  qpGrid.querySelectorAll('.color-swatch').forEach(s => {
-    s.addEventListener('click', () => setQpColor(s.dataset.color));
+  if (qpGrid) {
+    qpGrid.innerHTML = COLOR_SWATCHES.map(c =>
+      `<div class="color-swatch" data-color="${c}" style="background:${c}" title="${c}"></div>`
+    ).join('');
+    qpGrid.querySelectorAll('.color-swatch').forEach(s => {
+      s.addEventListener('click', () => setQpColor(s.dataset.color));
+    });
+  }
+  document.getElementById('qp-hex-input')?.addEventListener('input', e => {
+    const v = e.target.value;
+    if (/^#[0-9A-Fa-f]{6}$/.test(v)) {
+      document.getElementById('qp-color-preview').style.background = v;
+      _qpSelectedColor = v;
+      document.querySelectorAll('#qp-swatch-grid .color-swatch').forEach(s =>
+        s.classList.toggle('selected', s.dataset.color === v)
+      );
+    }
+  });
+
+  const advGrid = document.getElementById('advance-color-swatch-grid');
+  if (advGrid) {
+    advGrid.innerHTML = COLOR_SWATCHES.map(c =>
+      `<div class="color-swatch" data-color="${c}" style="background:${c}" title="${c}"></div>`
+    ).join('');
+    advGrid.querySelectorAll('.color-swatch').forEach(s => {
+      s.addEventListener('click', () => setAdvanceColor(s.dataset.color));
+    });
+  }
+  document.getElementById('advance-hex-input')?.addEventListener('input', e => {
+    const v = e.target.value;
+    if (/^#[0-9A-Fa-f]{6}$/.test(v)) setAdvanceColor(v);
   });
 }
