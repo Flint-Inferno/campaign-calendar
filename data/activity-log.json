@@ -86,5 +86,13 @@
     "playerColor": "#0000c4",
     "action": "event_delete",
     "details": "Deleted event: \"wesdrftgyhj\""
+  },
+  {
+    "id": "0fbbe90a-0f43-49e5-8296-6d58374f9b08",
+    "timestamp": "2026-05-16T22:36:06.748Z",
+    "playerName": "Flint (DM)",
+    "playerColor": "#0000c4",
+    "action": "event_delete",
+    "details": "Deleted event: \"asdfg\""
   }
 ]
