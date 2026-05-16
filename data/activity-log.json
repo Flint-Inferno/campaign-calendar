@@ -38,5 +38,13 @@
     "playerColor": "#0000c4",
     "action": "event_add",
     "details": "Added event: \"test\""
+  },
+  {
+    "id": "8a34106c-6f53-4330-b35a-b91b89961158",
+    "timestamp": "2026-05-16T22:06:33.187Z",
+    "playerName": "Flint (DM)",
+    "playerColor": "#0000c4",
+    "action": "event_edit",
+    "details": "Toggled \"Ambush on the Road\" to waypoint"
   }
 ]
