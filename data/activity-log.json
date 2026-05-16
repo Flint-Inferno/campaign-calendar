@@ -102,5 +102,13 @@
     "playerColor": "#0000c4",
     "action": "event_delete",
     "details": "Deleted event: \"wesdrftgyhj\""
+  },
+  {
+    "id": "3c92580c-9a64-42a2-bd89-175cdd880f5b",
+    "timestamp": "2026-05-16T22:51:38.737Z",
+    "playerName": "Flint (DM)",
+    "playerColor": "#0000c4",
+    "action": "event_delete",
+    "details": "Deleted event: \"Siege of Varlen Keep\""
   }
 ]
