@@ -6,8 +6,6 @@ let timelineLoaded = false;
 let editingEventId = null;
 let _scrubDate = null;
 let _pendingMapPin = null;
-let _openedFromTimeline = false;
-let _saveAndAddWaypoint = false;
 
 const COLOR_SWATCHES = [
   '#8B2E2E','#6B3A2A','#8B6914','#2E5A1C','#1C3D5A',
@@ -333,16 +331,8 @@ document.getElementById('save-event-btn').addEventListener('click', async () => 
     closeModal('event-modal');
     Calendar.render();
     refreshTimeline();
-    const waypoint = _saveAndAddWaypoint; _saveAndAddWaypoint = false;
-    const fromTimeline = _openedFromTimeline; _openedFromTimeline = false;
-    if (waypoint || fromTimeline) {
-      _pendingMapPin = savedId;
-      document.querySelector('.tab-btn[data-tab="map"]')?.click();
-      showBanner('Event saved! Click the map to place a waypoint.', 'success');
-    } else {
-      if (mapLoaded && _scrubDate) MapView.renderScrubbed(Events.getAll(), _scrubDate, CFG, CURRENT_DATE);
-      showBanner('Saved!', 'success');
-    }
+    if (mapLoaded && _scrubDate) MapView.renderScrubbed(Events.getAll(), _scrubDate, CFG, CURRENT_DATE);
+    showBanner('Saved!', 'success');
   } catch (e) {
     showBanner(e.message, 'error');
   }
@@ -369,8 +359,8 @@ document.getElementById('delete-event-btn').addEventListener('click', async () =
   setBusy(false);
 });
 
-document.getElementById('cancel-event-btn').addEventListener('click', () => { _openedFromTimeline = false; closeModal('event-modal'); });
-document.getElementById('event-modal').querySelector('.modal-backdrop').addEventListener('click', () => { _openedFromTimeline = false; closeModal('event-modal'); });
+document.getElementById('cancel-event-btn').addEventListener('click', () => closeModal('event-modal'));
+document.getElementById('event-modal').querySelector('.modal-backdrop').addEventListener('click', () => closeModal('event-modal'));
 
 /* ── Time calculator ────────────────────────────────────────── */
 document.getElementById('advance-time-toggle').addEventListener('click', () => {
@@ -873,10 +863,6 @@ document.getElementById('reposition-pin-btn')?.addEventListener('click', () => {
   document.querySelector('.tab-btn[data-tab="map"]')?.click();
 });
 
-document.getElementById('save-and-waypoint-btn')?.addEventListener('click', () => {
-  _saveAndAddWaypoint = true;
-  document.getElementById('save-event-btn').click();
-});
 
 /* ── Marker type toggle buttons ─────────────────────────────── */
 document.querySelectorAll('#ev-mtype-row .mtype-btn').forEach(btn => {
@@ -965,7 +951,7 @@ function initTimeline() {
     TimelineView.init(
       document.getElementById('timeline-scroll'),
       CFG,
-      date => { _openedFromTimeline = true; openAddModal({ ...date }); },
+      date => { openAddModal({ ...date }); },
       (id, el) => openEventPopover(id, el)
     );
     timelineLoaded = true;
