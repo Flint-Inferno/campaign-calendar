@@ -147,21 +147,5 @@
     "mapX": null,
     "mapY": null,
     "tags": []
-  },
-  {
-    "title": "wesdrftgyhj",
-    "description": "",
-    "year": 6532,
-    "month": 8,
-    "week": 1,
-    "day": 1,
-    "hour": 14,
-    "color": "#5A4A2A",
-    "markerType": "waypoint",
-    "location": "Willowshade",
-    "mapX": 2802,
-    "mapY": 1593,
-    "tags": [],
-    "id": "8a93e181-76f6-4018-b8e4-b86f124398bb"
   }
 ]
