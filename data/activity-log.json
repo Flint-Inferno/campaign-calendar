@@ -142,5 +142,13 @@
     "playerColor": "#0000c4",
     "action": "event_add",
     "details": "Auto-created time skip: \"Zidreyi killed a man\""
+  },
+  {
+    "id": "94a763ca-e3ee-4cbc-ba0b-b7b4afab09fa",
+    "timestamp": "2026-05-16T23:36:05.002Z",
+    "playerName": "Flint (DM)",
+    "playerColor": "#0000c4",
+    "action": "event_add",
+    "details": "Added event: \"Started Campaign in Willowshade\""
   }
 ]
