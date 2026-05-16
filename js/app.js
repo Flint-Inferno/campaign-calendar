@@ -306,18 +306,31 @@ document.getElementById('advance-time-toggle').addEventListener('click', () => {
       if (el) el.value = '0';
     });
     document.getElementById('calc-result-row')?.classList.add('hidden');
+    document.getElementById('tc-dir-btn').classList.add('active');
+    document.getElementById('tc-dir-btn-back').classList.remove('active');
   }
+});
+
+document.getElementById('tc-dir-btn').addEventListener('click', () => {
+  document.getElementById('tc-dir-btn').classList.add('active');
+  document.getElementById('tc-dir-btn-back').classList.remove('active');
+});
+document.getElementById('tc-dir-btn-back').addEventListener('click', () => {
+  document.getElementById('tc-dir-btn-back').classList.add('active');
+  document.getElementById('tc-dir-btn').classList.remove('active');
 });
 
 document.getElementById('calc-btn').addEventListener('click', () => {
   if (!CFG || !CURRENT_DATE) return;
+  const backward = document.getElementById('tc-dir-btn-back').classList.contains('active');
+  const sign = backward ? -1 : 1;
   const f = document.getElementById('time-calc-form');
   const dur = {
-    years:  +f.querySelector('[name=dur-years]').value  || 0,
-    months: +f.querySelector('[name=dur-months]').value || 0,
-    weeks:  +f.querySelector('[name=dur-weeks]').value  || 0,
-    days:   +f.querySelector('[name=dur-days]').value   || 0,
-    hours:  +f.querySelector('[name=dur-hours]').value  || 0
+    years:  sign * (+f.querySelector('[name=dur-years]').value  || 0),
+    months: sign * (+f.querySelector('[name=dur-months]').value || 0),
+    weeks:  sign * (+f.querySelector('[name=dur-weeks]').value  || 0),
+    days:   sign * (+f.querySelector('[name=dur-days]').value   || 0),
+    hours:  sign * (+f.querySelector('[name=dur-hours]').value  || 0)
   };
   const result = TimeCalc.add(CURRENT_DATE, dur, CFG);
   document.getElementById('calc-result').textContent = TimeCalc.format(result, CFG);

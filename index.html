@@ -159,7 +159,10 @@
     <div id="time-calc-panel" class="hidden">
       <h4>Time Calculator</h4>
       <form id="time-calc-form" onsubmit="return false">
-        <div class="tc-section-label">Add duration from now</div>
+        <div class="tc-dir-row">
+          <button type="button" id="tc-dir-btn" data-dir="forward" class="tc-dir-btn active">▶ Forward</button>
+          <button type="button" id="tc-dir-btn-back" class="tc-dir-btn">◀ Backward</button>
+        </div>
         <div class="tc-dur-grid">
           <div><label>Years</label><input type="number" name="dur-years" value="0" min="0" autocomplete="off"></div>
           <div><label>Months</label><input type="number" name="dur-months" value="0" min="0" autocomplete="off"></div>

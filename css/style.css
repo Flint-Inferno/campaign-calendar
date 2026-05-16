@@ -762,6 +762,29 @@ header {
   width: 100%;
 }
 
+.tc-dir-row {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+.tc-dir-btn {
+  flex: 1;
+  font-family: 'Cinzel', serif;
+  font-size: 0.7rem;
+  padding: 4px 6px;
+  background: var(--parchment-dark);
+  color: var(--ink-light);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+.tc-dir-btn.active {
+  background: var(--crimson);
+  color: #f5e6c8;
+  border-color: var(--crimson);
+}
+
 .tc-dur-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
