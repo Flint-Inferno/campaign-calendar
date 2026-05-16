@@ -8,7 +8,6 @@ let _mvtDate = null;
 let _scrubDate = null;
 let _pendingMapPin = null;
 let _openedFromTimeline = false;
-let _saveAndAddMarker = false;
 let _saveAndAddWaypoint = false;
 
 const COLOR_SWATCHES = [
@@ -265,28 +264,12 @@ document.getElementById('save-event-btn').addEventListener('click', async () => 
     closeModal('event-modal');
     Calendar.render();
     refreshTimeline();
-    const marker = _saveAndAddMarker; _saveAndAddMarker = false;
     const waypoint = _saveAndAddWaypoint; _saveAndAddWaypoint = false;
     const fromTimeline = _openedFromTimeline; _openedFromTimeline = false;
-    if (marker || fromTimeline) {
+    if (waypoint || fromTimeline) {
       _pendingMapPin = savedId;
       document.querySelector('.tab-btn[data-tab="map"]')?.click();
-      showBanner('Event saved! Click the map to place a pin.', 'success');
-    } else if (waypoint) {
-      const evDate = { year: data.year, month: data.month, week: data.week, day: data.day };
-      _scrubDate = { ...evDate, hour: 0 };
-      updateScrubLabel();
-      document.querySelector('.tab-btn[data-tab="map"]')?.click();
-      setTimeout(() => {
-        if (!mapLoaded) return;
-        const dayMvt = Movements.getForDay(evDate.year, evDate.month, evDate.week, evDate.day);
-        MapView.enableWaypointMode(dayMvt?.waypoints || [], dayMvt?.waypointColor || '#8b6914', () => renderWaypointList());
-        const colorInput = document.getElementById('wp-color-input');
-        if (colorInput) colorInput.value = dayMvt?.waypointColor || '#8b6914';
-        document.getElementById('waypoint-panel')?.classList.remove('hidden');
-        renderWaypointList();
-        showBanner('Event saved! Add waypoints for this day.', 'success');
-      }, 0);
+      showBanner('Event saved! Click the map to place a waypoint.', 'success');
     } else {
       if (mapLoaded && _scrubDate) MapView.renderScrubbed(Events.getAll(), Movements.getAll(), _scrubDate, CFG);
       showBanner('Saved!', 'success');
@@ -617,18 +600,20 @@ document.getElementById('identity-pat-clear')?.addEventListener('click', () => {
 
 /* ── Map controls ────────────────────────────────────────────── */
 document.getElementById('pin-mode-btn').addEventListener('click', () => {
+  if (!mapLoaded) return;
   if (!canWrite()) { showBanner('Set your identity to a recognized player name to edit.', 'error'); return; }
-  if (MapView.isPinMode()) {
-    MapView.disablePinMode();
-    document.getElementById('pin-mode-btn').classList.remove('active');
+  if (MapView.isWaypointMode()) {
+    exitWaypointModeIfActive();
   } else {
-    MapView.enablePinMode((x, y) => {
-      MapView.disablePinMode();
-      document.getElementById('pin-mode-btn').classList.remove('active');
-      const nav = Calendar.getNav();
-      openAddModal({ year: nav.year, month: nav.month, week: nav.week, day: 1, hour: 0 }, { x, y });
-    });
+    const scrubDay = _scrubDate || { year: CURRENT_DATE?.year || 1, month: CURRENT_DATE?.month || 1, week: CURRENT_DATE?.week || 1, day: CURRENT_DATE?.day || 1 };
+    const dayMvt = Movements.getForDay(scrubDay.year, scrubDay.month, scrubDay.week, scrubDay.day);
+    MapView.enableWaypointMode(dayMvt?.waypoints || [], dayMvt?.waypointColor || '#8b6914', () => renderWaypointList());
+    const colorInput = document.getElementById('wp-color-input');
+    if (colorInput) colorInput.value = dayMvt?.waypointColor || '#8b6914';
+    document.getElementById('waypoint-panel')?.classList.remove('hidden');
     document.getElementById('pin-mode-btn').classList.add('active');
+    renderWaypointList();
+    showBanner('Click the map to add trail waypoints for this day.', 'info');
   }
 });
 
@@ -661,7 +646,7 @@ function updateScrubLabel() {
 function exitWaypointModeIfActive() {
   if (!MapView.isWaypointMode()) return;
   MapView.disableWaypointMode();
-  document.getElementById('waypoint-mode-btn')?.classList.remove('active');
+  document.getElementById('pin-mode-btn')?.classList.remove('active');
   document.getElementById('waypoint-panel')?.classList.add('hidden');
 }
 
@@ -681,7 +666,7 @@ document.getElementById('scrub-next-btn')?.addEventListener('click', () => {
   if (mapLoaded) MapView.renderScrubbed(Events.getAll(), Movements.getAll(), _scrubDate, CFG);
 });
 
-/* ── Add Pin mode (map waypoint button) ─────────────────────── */
+/* ── Add Waypoint mode (map waypoint button) ────────────────── */
 let _addPinCoords = null;
 let _qpSelectedColor = '#6B3A2A';
 
@@ -697,14 +682,14 @@ document.getElementById('waypoint-mode-btn')?.addEventListener('click', () => {
       MapView.disablePinMode();
       document.getElementById('waypoint-mode-btn').classList.remove('active');
       _addPinCoords = { x, y };
-      openQuickPinModal();
+      openQuickWaypointModal();
     });
     document.getElementById('waypoint-mode-btn').classList.add('active');
-    showBanner('Click the map to place a new pin.', 'info');
+    showBanner('Click the map to place a new waypoint.', 'info');
   }
 });
 
-function openQuickPinModal() {
+function openQuickWaypointModal() {
   document.getElementById('qp-title').value = '';
   document.getElementById('qp-desc').value = '';
   const d = CURRENT_DATE || { year: 1, month: 1, week: 1, day: 1, hour: 0 };
@@ -714,7 +699,7 @@ function openQuickPinModal() {
   setSelectValue(document.querySelector('[name=qp-day]'), d.day);
   setSelectValue(document.querySelector('[name=qp-hour]'), d.hour || 0);
   setQpColor((CFG && CFG.defaultEventColor) || '#6B3A2A');
-  openModal('quick-pin-modal');
+  openModal('quick-waypoint-modal');
 }
 
 function setQpColor(hex) {
@@ -726,11 +711,11 @@ function setQpColor(hex) {
 }
 
 document.getElementById('qp-cancel-btn')?.addEventListener('click', () => {
-  closeModal('quick-pin-modal');
+  closeModal('quick-waypoint-modal');
   _addPinCoords = null;
 });
-document.getElementById('quick-pin-modal')?.querySelector('.modal-backdrop')?.addEventListener('click', () => {
-  closeModal('quick-pin-modal');
+document.getElementById('quick-waypoint-modal')?.querySelector('.modal-backdrop')?.addEventListener('click', () => {
+  closeModal('quick-waypoint-modal');
   _addPinCoords = null;
 });
 
@@ -755,18 +740,18 @@ document.getElementById('qp-save-btn')?.addEventListener('click', async () => {
       mapY: _addPinCoords?.y ?? null
     };
     await Events.add(data);
-    appendActivityLog('event_add', `Added pin: "${title}"`);
-    closeModal('quick-pin-modal');
+    appendActivityLog('event_add', `Added waypoint: "${title}"`);
+    closeModal('quick-waypoint-modal');
     _addPinCoords = null;
     Calendar.render();
     if (mapLoaded && _scrubDate) MapView.renderScrubbed(Events.getAll(), Movements.getAll(), _scrubDate, CFG);
     refreshTimeline();
-    showBanner('Pin added!', 'success');
+    showBanner('Waypoint added!', 'success');
   } catch (e) { showBanner(e.message, 'error'); }
-  btn.disabled = false; btn.textContent = 'Add Pin';
+  btn.disabled = false; btn.textContent = 'Add Waypoint';
 });
 
-/* ── Reposition Pin (from edit modal) ───────────────────────── */
+/* ── Reposition Waypoint (from edit modal) ──────────────────── */
 document.getElementById('reposition-pin-btn')?.addEventListener('click', () => {
   if (!editingEventId) return;
   closeModal('event-modal');
@@ -774,10 +759,6 @@ document.getElementById('reposition-pin-btn')?.addEventListener('click', () => {
   document.querySelector('.tab-btn[data-tab="map"]')?.click();
 });
 
-document.getElementById('save-and-marker-btn')?.addEventListener('click', () => {
-  _saveAndAddMarker = true;
-  document.getElementById('save-event-btn').click();
-});
 document.getElementById('save-and-waypoint-btn')?.addEventListener('click', () => {
   _saveAndAddWaypoint = true;
   document.getElementById('save-event-btn').click();
@@ -1048,22 +1029,20 @@ document.getElementById('tl-zoom-in')?.addEventListener('click', () => TimelineV
 document.getElementById('tl-zoom-out')?.addEventListener('click', () => TimelineView.zoom(1 / 1.6));
 document.getElementById('tl-scroll-now')?.addEventListener('click', () => TimelineView.scrollToNow());
 
-/* ── Pin-for-event mode (from timeline → map flow) ──────────── */
+/* ── Waypoint-for-event mode (from timeline / save+waypoint flow) */
 function enablePinForEvent(eventId) {
   MapView.enablePinMode(async (x, y) => {
     MapView.disablePinMode();
-    document.getElementById('pin-mode-btn')?.classList.remove('active');
     try {
       const ev = Events.getAll().find(e => e.id === eventId);
       if (ev) {
         await Events.update(eventId, { ...ev, mapX: x, mapY: y });
         if (mapLoaded && _scrubDate) MapView.renderScrubbed(Events.getAll(), Movements.getAll(), _scrubDate, CFG);
-        showBanner('Map pin placed!', 'success');
+        showBanner('Waypoint placed!', 'success');
       }
     } catch (e) { showBanner(e.message, 'error'); }
   });
-  document.getElementById('pin-mode-btn')?.classList.add('active');
-  showBanner('Click the map to place the event pin, or press Escape to skip.', 'info');
+  showBanner('Click the map to place the waypoint, or press Escape to skip.', 'info');
 }
 
 /* ── Map scrub-to-day (click waypoint/trail on other day) ─────── */

@@ -163,26 +163,18 @@ const MapView = (() => {
     return _trailVisible;
   }
 
-  /* ── Waypoint markers (numbered, colored) ──────────────────── */
-  function _makeWpIcon(num, color) {
-    const bg = color || '#8b6914';
-    return L.divIcon({
-      html: `<div class="wp-marker" style="background:${bg}">${num}</div>`,
-      className: 'wp-marker-wrap',
-      iconSize: [22, 22],
-      iconAnchor: [11, 11]
-    });
+  /* ── Waypoint markers (colored circles) ────────────────────── */
+  function _wpCircleOpts(color, opacity, interactive) {
+    return { radius: 8, fillColor: color || '#8b6914', color: '#2c1810', weight: 1.5, fillOpacity: opacity, interactive };
   }
 
   function _refreshWaypointMarkers() {
     _waypointLayers.forEach(l => _map.removeLayer(l));
     _waypointLayers = [];
     if (!_map) return;
-    _pendingWaypoints.forEach((wp, i) => {
-      const m = L.marker([wp.y, wp.x], {
-        icon: _makeWpIcon(i + 1, _pendingColor),
-        interactive: false
-      }).addTo(_map);
+    _pendingWaypoints.forEach(wp => {
+      const m = L.circleMarker([wp.y, wp.x], _wpCircleOpts(_pendingColor, 0.9, false)).addTo(_map);
+      if (wp.label) m.bindTooltip(escHtml(wp.label));
       _waypointLayers.push(m);
     });
   }
@@ -196,9 +188,9 @@ const MapView = (() => {
     for (const day of days) {
       const isActive = _dayKey(day) === activeKey;
       const color = isActive ? (day.waypointColor || '#8b6914') : '#aaa';
-      day.waypoints.forEach((wp, i) => {
-        const icon = _makeWpIcon(i + 1, color);
-        const m = L.marker([wp.y, wp.x], { icon, interactive: true, opacity: isActive ? 1 : 0.35 }).addTo(_map);
+      const opacity = isActive ? 0.9 : 0.35;
+      day.waypoints.forEach(wp => {
+        const m = L.circleMarker([wp.y, wp.x], _wpCircleOpts(color, opacity, true)).addTo(_map);
         if (wp.label) m.bindTooltip(escHtml(wp.label));
         if (!isActive) m.on('click', () => _dispatchScrubTo(day));
         _waypointLayers.push(m);

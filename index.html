@@ -88,14 +88,14 @@
     <!-- ══════════════════════════════════════════════════════ -->
     <div id="tab-map" class="tab-content hidden">
       <div class="map-controls">
-        <button id="pin-mode-btn" style="display:none">📍 Place Pin</button>
+        <button id="pin-mode-btn">🛤 Record Trail</button>
         <button id="trail-toggle-btn">🗺 Party Trail</button>
         <div class="map-scrubber">
           <button id="scrub-prev-btn">◄</button>
           <span id="scrub-date-label">—</span>
           <button id="scrub-next-btn">►</button>
         </div>
-        <button id="waypoint-mode-btn">📍 Add Pin</button>
+        <button id="waypoint-mode-btn">📍 Add Waypoint</button>
       </div>
       <div id="waypoint-panel" class="waypoint-panel hidden">
         <div id="wp-list" class="wp-list"></div>
@@ -303,10 +303,9 @@
 
     <div class="modal-actions">
       <button id="delete-event-btn" class="hidden">Delete</button>
-      <button id="reposition-pin-btn" class="hidden">📍 Reposition Pin</button>
+      <button id="reposition-pin-btn" class="hidden">📍 Reposition Waypoint</button>
       <button id="cancel-event-btn">Cancel</button>
       <button id="save-event-btn">Save</button>
-      <button id="save-and-marker-btn">Save + Marker</button>
       <button id="save-and-waypoint-btn">Save + Waypoint</button>
     </div>
   </div>
@@ -388,12 +387,12 @@
 </div>
 
 <!-- ══════════════════════════════════════════════════════════ -->
-<!-- Quick Pin Modal -->
+<!-- Quick Waypoint Modal -->
 <!-- ══════════════════════════════════════════════════════════ -->
-<div id="quick-pin-modal" class="modal hidden" role="dialog" aria-modal="true">
+<div id="quick-waypoint-modal" class="modal hidden" role="dialog" aria-modal="true">
   <div class="modal-backdrop"></div>
   <div class="modal-box" style="width:min(460px,95vw)">
-    <h2>Add Map Pin</h2>
+    <h2>Add Waypoint</h2>
     <div class="form-row">
       <label for="qp-title">Title *</label>
       <input id="qp-title" type="text" placeholder="What happened here?" autocomplete="off">
@@ -421,7 +420,7 @@
     </div>
     <div class="modal-actions">
       <button id="qp-cancel-btn">Cancel</button>
-      <button id="qp-save-btn">Add Pin</button>
+      <button id="qp-save-btn">Add Waypoint</button>
     </div>
   </div>
 </div>
