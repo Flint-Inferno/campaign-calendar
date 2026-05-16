@@ -14,5 +14,26 @@
     "mapY": 1783,
     "tags": [],
     "id": "1ba62eb9-366c-4e2b-80c9-f2e6f74f645b"
+  },
+  {
+    "title": "Started Campaign in Willowshade",
+    "description": "",
+    "location": "Willowshade",
+    "markerType": "waypoint",
+    "year": 6532,
+    "month": 7,
+    "week": 1,
+    "day": 7,
+    "hour": 0,
+    "endYear": 6532,
+    "endMonth": 7,
+    "endWeek": 1,
+    "endDay": 7,
+    "endHour": 0,
+    "color": "#8B2E2E",
+    "tags": [],
+    "mapX": null,
+    "mapY": null,
+    "id": "fac64959-c6b2-45d4-ab8d-68d4cc4defaa"
   }
 ]
