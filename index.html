@@ -88,8 +88,6 @@
     <!-- ══════════════════════════════════════════════════════ -->
     <div id="tab-map" class="tab-content hidden">
       <div class="map-controls">
-        <button id="pin-mode-btn">🛤 Record Trail</button>
-        <button id="trail-toggle-btn">🗺 Party Trail</button>
         <div class="map-scrubber">
           <button id="scrub-prev-btn">◄</button>
           <span id="scrub-date-label">—</span>
@@ -97,19 +95,7 @@
         </div>
         <button id="waypoint-mode-btn">📍 Add Waypoint</button>
       </div>
-      <div id="waypoint-panel" class="waypoint-panel hidden">
-        <div id="wp-list" class="wp-list"></div>
-        <div class="wp-panel-bottom">
-          <label class="wp-color-label">Color <input id="wp-color-input" type="color" value="#8b6914"></label>
-          <div class="wp-panel-actions">
-            <button id="wp-undo-btn">↩ Undo</button>
-            <button id="wp-clear-btn">✕ Clear</button>
-            <button id="wp-cancel-btn">Cancel</button>
-            <button id="wp-save-btn">Save Waypoints</button>
-          </div>
-        </div>
-      </div>
-      <div id="map-container">
+<div id="map-container">
         <div id="map-placeholder" class="hidden">
           <p style="font-size:1.1rem">No world map uploaded.</p>
           <p style="font-size:0.85rem;color:#5a3a28">Open <strong>/admin.html</strong> to upload your world map image.</p>
@@ -325,46 +311,6 @@
   </div>
 </div>
 
-<!-- ══════════════════════════════════════════════════════════ -->
-<!-- Movement Modal -->
-<!-- ══════════════════════════════════════════════════════════ -->
-<div id="mvt-modal" class="modal hidden" role="dialog" aria-modal="true">
-  <div class="modal-backdrop"></div>
-  <div class="modal-box" style="width:min(640px,95vw)">
-    <h2>Movement — <span id="mvt-modal-date" style="font-weight:400;font-size:.88em"></span></h2>
-
-    <div class="form-row">
-      <label>Starting Location <span style="font-size:.7em;opacity:.7">(auto-filled from previous day)</span></label>
-      <input id="mvt-start-loc" type="text" readonly style="opacity:.65;cursor:default" placeholder="Unknown">
-    </div>
-
-    <div class="form-row">
-      <label>Ending Location</label>
-      <input id="mvt-end-loc" type="text" placeholder="Where did the party end up?">
-    </div>
-
-    <div class="form-row">
-      <label>Party Segments</label>
-      <p id="mvt-no-members-note" class="hidden">No party members configured. Add them in <strong>admin.html</strong> → Party Members.</p>
-      <div class="mvt-seg-headers">
-        <span>Member</span><span>Activity</span><span>From</span><span>To</span><span></span>
-      </div>
-      <div id="mvt-segments-table"></div>
-      <button type="button" id="mvt-add-seg-btn">+ Add Segment</button>
-    </div>
-
-    <div class="form-row">
-      <label>Timeline Preview</label>
-      <div id="mvt-timeline"></div>
-    </div>
-
-    <div class="modal-actions">
-      <button id="mvt-clear-btn">Clear Day</button>
-      <button id="mvt-cancel-btn">Cancel</button>
-      <button id="mvt-save-btn">Save</button>
-    </div>
-  </div>
-</div>
 
 <!-- ══════════════════════════════════════════════════════════ -->
 <!-- Advance Time Confirm Modal -->
@@ -478,7 +424,6 @@
 <script src="js/github-api.js"></script>
 <script src="js/time-calc.js"></script>
 <script src="js/events.js"></script>
-<script src="js/movements.js"></script>
 <script src="js/activity-log.js"></script>
 <script src="js/calendar.js"></script>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>

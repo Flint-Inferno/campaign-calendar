@@ -1,19 +1,12 @@
 const MapView = (() => {
   let _map = null;
   let _overlay = null;
-  let _trailLayers = [];
   let _pinLayers = [];
-  let _waypointLayers = [];
   let _chainLayers = [];
   let _container = null;
   let _cfg = null;
   let _pinModeActive = false;
   let _pinCallback = null;
-  let _wpModeActive = false;
-  let _wpModeCallback = null;
-  let _pendingWaypoints = [];
-  let _pendingColor = '#8b6914';
-  let _trailVisible = false;
   let _locationLayer = null;
 
   const MAP_URL = `https://raw.githubusercontent.com/${REPO_OWNER}/${REPO_NAME}/main/data/map.png`;
@@ -52,12 +45,6 @@ const MapView = (() => {
   function onMapClick(e) {
     const x = Math.round(e.latlng.lng);
     const y = Math.round(e.latlng.lat);
-    if (_wpModeActive) {
-      _pendingWaypoints.push({ x, y, label: '' });
-      _refreshWaypointMarkers();
-      if (_wpModeCallback) _wpModeCallback([..._pendingWaypoints]);
-      return;
-    }
     if (!_pinModeActive) return;
     if (_pinCallback) _pinCallback(x, y);
   }
@@ -188,62 +175,6 @@ const MapView = (() => {
     return html;
   }
 
-  /* ── Movement waypoint trail (per-day colored segments) ─────── */
-  function _dayKey(m) { return `${m.year}-${m.month}-${m.week}-${m.day}`; }
-  function _scrubKey(s) { return s ? `${s.year}-${s.month}-${s.week}-${s.day}` : ''; }
-
-  function _dispatchScrubTo(day) {
-    document.dispatchEvent(new CustomEvent('map:scrub-to-day', {
-      detail: { year: day.year, month: day.month, week: day.week, day: day.day }
-    }));
-  }
-
-  function renderTrail(movements, scrubDate, cfg) {
-    _trailLayers.forEach(l => _map.removeLayer(l));
-    _trailLayers = [];
-    if (!_map || !_trailVisible || !cfg) return;
-
-    const sorted = [...movements]
-      .filter(m => m.waypoints && m.waypoints.length > 0)
-      .sort((a, b) =>
-        TimeCalc.toAbsolute({ year: a.year, month: a.month, week: a.week, day: a.day, hour: 0 }, cfg) -
-        TimeCalc.toAbsolute({ year: b.year, month: b.month, week: b.week, day: b.day, hour: 0 }, cfg)
-      );
-
-    const activeKey = _scrubKey(scrubDate);
-
-    for (let i = 0; i < sorted.length; i++) {
-      const day = sorted[i];
-      const isActive = _dayKey(day) === activeKey;
-      const color = isActive ? (day.waypointColor || '#8b6914') : '#888';
-      const opacity = isActive ? 0.9 : 0.25;
-      const weight = isActive ? 2.5 : 1.5;
-
-      if (day.waypoints.length >= 2) {
-        const latlngs = day.waypoints.map(wp => [wp.y, wp.x]);
-        const line = L.polyline(latlngs, { color, weight, opacity }).addTo(_map);
-        if (!isActive) line.on('click', () => _dispatchScrubTo(day));
-        _trailLayers.push(line);
-      }
-
-      if (i < sorted.length - 1) {
-        const last = day.waypoints[day.waypoints.length - 1];
-        const next = sorted[i + 1].waypoints[0];
-        _trailLayers.push(
-          L.polyline([[last.y, last.x], [next.y, next.x]], {
-            color: '#999', weight: 1, dashArray: '4,7', opacity: 0.45
-          }).addTo(_map)
-        );
-      }
-    }
-  }
-
-  function toggleTrail(movements, scrubDate, cfg) {
-    _trailVisible = !_trailVisible;
-    renderTrail(movements, scrubDate, cfg);
-    return _trailVisible;
-  }
-
   /* ── Waypoint chain (chronological event-waypoints) ──────────── */
   function renderWaypointChain(events, cfg, currentDate) {
     _chainLayers.forEach(l => _map.removeLayer(l));
@@ -271,51 +202,14 @@ const MapView = (() => {
     }
   }
 
-  /* ── Trail waypoint markers (colored circles, record-trail mode) */
-  function _wpCircleOpts(color, opacity, interactive) {
-    return { radius: 8, fillColor: color || '#8b6914', color: '#2c1810', weight: 1.5, fillOpacity: opacity, interactive };
-  }
-
-  function _refreshWaypointMarkers() {
-    _waypointLayers.forEach(l => _map.removeLayer(l));
-    _waypointLayers = [];
-    if (!_map) return;
-    _pendingWaypoints.forEach(wp => {
-      const m = L.circleMarker([wp.y, wp.x], _wpCircleOpts(_pendingColor, 0.9, false)).addTo(_map);
-      if (wp.label) m.bindTooltip(escHtml(wp.label));
-      _waypointLayers.push(m);
-    });
-  }
-
-  function renderAllWaypoints(movements, scrubDate) {
-    _waypointLayers.forEach(l => _map.removeLayer(l));
-    _waypointLayers = [];
-    if (!_map) return;
-    const activeKey = _scrubKey(scrubDate);
-    const days = movements.filter(m => m.waypoints && m.waypoints.length > 0);
-    for (const day of days) {
-      const isActive = _dayKey(day) === activeKey;
-      const color = isActive ? (day.waypointColor || '#8b6914') : '#aaa';
-      const opacity = isActive ? 0.9 : 0.35;
-      day.waypoints.forEach(wp => {
-        const m = L.circleMarker([wp.y, wp.x], _wpCircleOpts(color, opacity, true)).addTo(_map);
-        if (wp.label) m.bindTooltip(escHtml(wp.label));
-        if (!isActive) m.on('click', () => _dispatchScrubTo(day));
-        _waypointLayers.push(m);
-      });
-    }
-  }
-
   /* ── Full scrubbed render ──────────────────────────────────── */
-  function renderScrubbed(events, movements, scrubDate, cfg, currentDate) {
+  function renderScrubbed(events, scrubDate, cfg, currentDate) {
     if (!_map || !scrubDate || !cfg) return;
     const scrubAbs = TimeCalc.toAbsolute({ ...scrubDate, hour: 23 }, cfg);
     const visible = events.filter(ev =>
       TimeCalc.toAbsolute({ year: ev.year, month: ev.month, week: ev.week, day: ev.day, hour: ev.hour || 0 }, cfg) <= scrubAbs
     );
     renderPins(visible, cfg);
-    renderTrail(movements, scrubDate, cfg);
-    if (!_wpModeActive) renderAllWaypoints(movements, scrubDate);
     renderWaypointChain(visible, cfg, currentDate);
   }
 
@@ -352,49 +246,6 @@ const MapView = (() => {
 
   function isPinMode() { return _pinModeActive; }
 
-  /* ── Waypoint mode ─────────────────────────────────────────── */
-  function enableWaypointMode(existingWaypoints, existingColor, callback) {
-    _wpModeActive = true;
-    _pendingWaypoints = [...(existingWaypoints || [])];
-    _pendingColor = existingColor || '#8b6914';
-    _wpModeCallback = callback;
-    if (_container) _container.style.cursor = 'crosshair';
-    _refreshWaypointMarkers();
-  }
-
-  function disableWaypointMode() {
-    _wpModeActive = false;
-    _wpModeCallback = null;
-    _waypointLayers.forEach(l => _map.removeLayer(l));
-    _waypointLayers = [];
-    _pendingWaypoints = [];
-    _pendingColor = '#8b6914';
-    if (_container) _container.style.cursor = '';
-  }
-
-  function isWaypointMode() { return _wpModeActive; }
-
-  function undoLastWaypoint() {
-    if (_pendingWaypoints.length === 0) return;
-    _pendingWaypoints.pop();
-    _refreshWaypointMarkers();
-    if (_wpModeCallback) _wpModeCallback([..._pendingWaypoints]);
-  }
-
-  function clearPendingWaypoints() {
-    _pendingWaypoints = [];
-    _refreshWaypointMarkers();
-    if (_wpModeCallback) _wpModeCallback([]);
-  }
-
-  function setPendingColor(color) {
-    _pendingColor = color || '#8b6914';
-    _refreshWaypointMarkers();
-  }
-
-  function getPendingWaypoints() { return [..._pendingWaypoints]; }
-  function getPendingColor() { return _pendingColor; }
-
   /* ── Utilities ─────────────────────────────────────────────── */
   function invalidateSize() {
     if (_map) _map.invalidateSize();
@@ -413,12 +264,8 @@ const MapView = (() => {
 
   return {
     init, setConfig, loadMap,
-    renderPins, renderTrail, toggleTrail,
-    renderAllWaypoints, renderScrubbed, renderWaypointChain, renderCurrentLocation,
+    renderPins, renderScrubbed, renderWaypointChain, renderCurrentLocation,
     enablePinMode, disablePinMode, isPinMode,
-    enableWaypointMode, disableWaypointMode, isWaypointMode,
-    undoLastWaypoint, clearPendingWaypoints, getPendingWaypoints,
-    setPendingColor, getPendingColor,
     invalidateSize
   };
 })();
