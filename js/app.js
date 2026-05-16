@@ -21,7 +21,7 @@ async function appInit() {
   showBanner('Loading…', 'info');
   try {
     const [cfgRes, evRes, cdRes, mvtRes, wtRes, logRes] = await Promise.all([
-      GithubAPI.readFile('data/config.json'),
+      GithubAPI.readFile('data/config.json').catch(e => { throw new Error('Failed to load config: ' + e.message); }),
       GithubAPI.readFile('data/events.json').catch(() => ({ content: [] })),
       GithubAPI.readFile('data/current-date.json').catch(() => ({ content: { year:1,month:1,week:1,day:1,hour:0 } })),
       GithubAPI.readFile('data/movements.json').catch(() => ({ content: [] })),
@@ -39,7 +39,7 @@ async function appInit() {
     const writeToken = wtRes.content?.token || '';
     if (writeToken) { try { GithubAPI.setPAT(atob(writeToken)); } catch (_) { GithubAPI.setPAT(writeToken); } }
   } catch (e) {
-    showBanner('Failed to load calendar data. Check your internet connection.', 'error');
+    showBanner(e.message || 'Failed to load calendar data. Check your internet connection.', 'error');
     return;
   }
 
