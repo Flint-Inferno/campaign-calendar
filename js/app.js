@@ -864,6 +864,10 @@ function appendActivityLog(action, details) {
   ActivityLog.save().catch(() => {});
 }
 
+function escHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
 function renderLogTab() {
   const entries = ActivityLog.getAll();
   const list = document.getElementById('log-list');
