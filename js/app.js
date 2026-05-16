@@ -179,6 +179,8 @@ function populateModal(data) {
   document.querySelectorAll('#ev-mtype-row .mtype-btn').forEach(b =>
     b.classList.toggle('active', b.dataset.mtype === mtype)
   );
+  const repoBtn = document.getElementById('reposition-pin-btn');
+  if (repoBtn) repoBtn.disabled = mtype === 'none';
 }
 
 function fillDatePickers(prefix, d) {
@@ -853,6 +855,8 @@ document.querySelectorAll('#ev-mtype-row .mtype-btn').forEach(btn => {
   btn.addEventListener('click', () => {
     document.querySelectorAll('#ev-mtype-row .mtype-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
+    const repoBtn = document.getElementById('reposition-pin-btn');
+    if (repoBtn) repoBtn.disabled = btn.dataset.mtype === 'none';
   });
 });
 document.querySelectorAll('#qp-mtype-row .mtype-btn').forEach(btn => {

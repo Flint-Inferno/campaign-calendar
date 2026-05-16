@@ -1190,7 +1190,8 @@ header {
 #save-and-waypoint-btn { background: var(--gold); color: var(--ink); border-color: var(--gold); }
 #save-and-waypoint-btn:hover { background: var(--gold-light); border-color: var(--gold-light); }
 #reposition-pin-btn { background: var(--parchment-dark); color: var(--ink); border-color: var(--border); }
-#reposition-pin-btn:hover { background: var(--parchment-deep); }
+#reposition-pin-btn:hover:not(:disabled) { background: var(--parchment-deep); }
+#reposition-pin-btn:disabled { opacity: 0.4; cursor: not-allowed; }
 #qp-save-btn { background: var(--crimson); color: var(--parchment); border-color: var(--crimson); }
 #qp-save-btn:hover { opacity: 0.88; }
 #qp-save-btn:disabled { opacity: 0.5; cursor: default; }
