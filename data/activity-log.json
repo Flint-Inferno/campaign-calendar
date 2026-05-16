@@ -30,5 +30,13 @@
     "playerColor": "#0000c4",
     "action": "event_delete",
     "details": "Deleted event: \"Time Skip → Year 6532 · Falm · Ravethen · Day 8 · 12:00\""
+  },
+  {
+    "id": "327de306-7c17-430a-ab69-669984c86e9b",
+    "timestamp": "2026-05-16T21:53:28.489Z",
+    "playerName": "Flint (DM)",
+    "playerColor": "#0000c4",
+    "action": "event_add",
+    "details": "Added event: \"test\""
   }
 ]
