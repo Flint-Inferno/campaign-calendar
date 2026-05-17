@@ -230,5 +230,13 @@
     "playerColor": "#0000c4",
     "action": "event_add",
     "details": "Added waypoint: \"test 2\""
+  },
+  {
+    "id": "27674ff2-411c-44f8-aec4-e38fdfa62f08",
+    "timestamp": "2026-05-17T13:41:27.693Z",
+    "playerName": "Flint (DM)",
+    "playerColor": "#0000c4",
+    "action": "event_edit",
+    "details": "Toggled \"test 2\" to waypoint"
   }
 ]
