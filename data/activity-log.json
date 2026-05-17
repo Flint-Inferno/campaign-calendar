@@ -150,5 +150,13 @@
     "playerColor": "#0000c4",
     "action": "event_add",
     "details": "Added event: \"Started Campaign in Willowshade\""
+  },
+  {
+    "id": "3831742f-28f7-4744-b7a3-c14f9b7fb47d",
+    "timestamp": "2026-05-17T02:17:29.494Z",
+    "playerName": "Valvys",
+    "playerColor": "#ffc800",
+    "action": "event_edit",
+    "details": "Edited event: \"Started Campaign in Willowshade\""
   }
 ]
