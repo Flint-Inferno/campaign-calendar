@@ -366,5 +366,13 @@
     "playerColor": "#102457",
     "action": "event_add",
     "details": "Added event: \"Caught up to Ivory\""
+  },
+  {
+    "id": "9e9608f8-c52a-420b-b252-7b43f7013dea",
+    "timestamp": "2026-05-17T17:14:35.465Z",
+    "playerName": "Flint (DM)",
+    "playerColor": "#102457",
+    "action": "event_add",
+    "details": "Added event: \"Arrived in Fort Bastion\""
   }
 ]
