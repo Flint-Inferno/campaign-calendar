@@ -361,6 +361,37 @@ header {
   pointer-events: none;
 }
 
+.tl-month-div {
+  position: absolute;
+  left: 0; right: 0;
+  height: 0;
+  border-top: 1px dashed var(--border);
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.55;
+}
+.tl-month-div.is-year {
+  border-top: 1px solid var(--gold);
+  opacity: 0.45;
+}
+.tl-month-div-label {
+  position: absolute;
+  right: calc(50% + 6px);
+  top: -9px;
+  font-family: 'Cinzel', serif;
+  font-size: 0.58rem;
+  color: var(--ink-light);
+  background: var(--parchment);
+  padding: 0 3px;
+  pointer-events: none;
+  white-space: nowrap;
+}
+.tl-month-div.is-year .tl-month-div-label {
+  color: var(--gold);
+  font-weight: 600;
+  font-size: 0.62rem;
+}
+
 /* ── Log tab ─────────────────────────────────────────────────── */
 .log-header {
   display: flex;

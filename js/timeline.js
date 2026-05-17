@@ -6,16 +6,19 @@ const TimelineView = (() => {
   let _container = null;
   let _onDateClick = null;
   let _onEventClick = null;
+  let _zoomInitialized = false;
 
   const PAD = 60;
   const MIN_PPH = 0.05;
   const MAX_PPH = 24;
+  const INIT_DAYS_SPAN = 50;
 
   function init(container, cfg, onDateClick, onEventClick) {
     _container = container;
     _cfg = cfg;
     _onDateClick = onDateClick;
     _onEventClick = onEventClick;
+    _zoomInitialized = false;
   }
 
   function setData(events, currentDate) {
@@ -24,22 +27,18 @@ const TimelineView = (() => {
   }
 
   function _minMaxAbs() {
-    const absList = [];
+    const nowAbs = _currentDate ? TimeCalc.toAbsolute(_currentDate, _cfg) : 0;
+    const buffer = 25 * _cfg.hoursPerDay;
+    const absList = [nowAbs - buffer, nowAbs + buffer];
     for (const ev of _events) {
       absList.push(TimeCalc.toAbsolute({ year: ev.year, month: ev.month, week: ev.week, day: ev.day, hour: ev.hour || 0 }, _cfg));
       if (ev.endYear != null) {
         absList.push(TimeCalc.toAbsolute({ year: ev.endYear, month: ev.endMonth, week: ev.endWeek, day: ev.endDay, hour: ev.endHour || 0 }, _cfg));
       }
     }
-    if (_currentDate) absList.push(TimeCalc.toAbsolute(_currentDate, _cfg));
-    if (absList.length === 0) {
-      const nowAbs = _currentDate ? TimeCalc.toAbsolute(_currentDate, _cfg) : 0;
-      return { min: Math.max(0, nowAbs - 240), max: nowAbs + 240 };
-    }
     const rawMin = Math.min(...absList);
     const rawMax = Math.max(...absList);
-    const span = Math.max(rawMax - rawMin, 24);
-    return { min: Math.max(0, rawMin - span * 0.05), max: rawMax + span * 0.05 + 1 };
+    return { min: Math.max(0, rawMin), max: rawMax + 1 };
   }
 
   function _absToY(abs, minAbs) {
@@ -54,8 +53,36 @@ const TimelineView = (() => {
     return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
   }
 
+  function _renderDividers(inner, minAbs, maxAbs) {
+    const hpm = _cfg.weeksPerMonth * _cfg.daysPerWeek * _cfg.hoursPerDay;
+    const hpy = hpm * _cfg.monthsPerYear;
+    const firstBoundary = Math.ceil(minAbs / hpm) * hpm;
+    for (let abs = firstBoundary; abs <= maxAbs; abs += hpm) {
+      const date = TimeCalc.fromAbsolute(abs, _cfg);
+      const isYear = abs % hpy === 0;
+      const y = _absToY(abs, minAbs);
+
+      const div = document.createElement('div');
+      div.className = 'tl-month-div' + (isYear ? ' is-year' : '');
+      div.style.top = y + 'px';
+
+      const label = document.createElement('span');
+      label.className = 'tl-month-div-label';
+      const monthName = (_cfg.monthNames || [])[date.month - 1] || `Month ${date.month}`;
+      label.textContent = isYear ? `Year ${date.year}` : monthName;
+      div.appendChild(label);
+
+      inner.appendChild(div);
+    }
+  }
+
   function render() {
     if (!_container || !_cfg) return;
+
+    if (!_zoomInitialized && _container.clientHeight > 0) {
+      _pph = _container.clientHeight / (INIT_DAYS_SPAN * _cfg.hoursPerDay);
+      _zoomInitialized = true;
+    }
 
     const { min: minAbs, max: maxAbs } = _minMaxAbs();
     const trackH = Math.max(200, PAD * 2 + (maxAbs - minAbs) * _pph);
@@ -66,12 +93,12 @@ const TimelineView = (() => {
     inner.style.height = trackH + 'px';
     _container.appendChild(inner);
 
-    /* center line */
     const cl = document.createElement('div');
     cl.className = 'tl-center-line';
     inner.appendChild(cl);
 
-    /* NOW line */
+    _renderDividers(inner, minAbs, maxAbs);
+
     if (_currentDate) {
       const nowY = _absToY(TimeCalc.toAbsolute(_currentDate, _cfg), minAbs);
       const nowEl = document.createElement('div');
@@ -81,7 +108,6 @@ const TimelineView = (() => {
       inner.appendChild(nowEl);
     }
 
-    /* events */
     const sorted = [..._events].sort((a, b) =>
       TimeCalc.toAbsolute({ year: a.year, month: a.month, week: a.week, day: a.day, hour: a.hour || 0 }, _cfg) -
       TimeCalc.toAbsolute({ year: b.year, month: b.month, week: b.week, day: b.day, hour: b.hour || 0 }, _cfg)
@@ -97,7 +123,6 @@ const TimelineView = (() => {
       wrap.className = `tl-event tl-event-${side}`;
       wrap.style.top = y + 'px';
 
-      /* duration bar */
       if (ev.endYear != null) {
         const endAbs = TimeCalc.toAbsolute({ year: ev.endYear, month: ev.endMonth, week: ev.endWeek, day: ev.endDay, hour: ev.endHour || 0 }, _cfg);
         const barH = Math.max(3, (endAbs - abs) * _pph);
@@ -107,13 +132,11 @@ const TimelineView = (() => {
         wrap.appendChild(bar);
       }
 
-      /* dot */
       const dot = document.createElement('div');
       dot.className = 'tl-dot';
       dot.style.background = color;
       wrap.appendChild(dot);
 
-      /* chip */
       const chip = document.createElement('div');
       chip.className = 'tl-chip';
       chip.style.setProperty('--chip-color', color);
@@ -124,7 +147,6 @@ const TimelineView = (() => {
       inner.appendChild(wrap);
     });
 
-    /* click-to-add */
     inner.addEventListener('click', e => {
       if (e.target.closest('.tl-event') || e.target.closest('.tl-now')) return;
       const rect = inner.getBoundingClientRect();
@@ -138,20 +160,16 @@ const TimelineView = (() => {
     if (!_container || !_cfg || !_currentDate) return;
     const { min: minAbs } = _minMaxAbs();
     const nowY = _absToY(TimeCalc.toAbsolute(_currentDate, _cfg), minAbs);
-    _container.scrollTop = Math.max(0, nowY - _container.clientHeight * 0.75);
+    _container.scrollTop = Math.max(0, nowY - _container.clientHeight * 0.5);
   }
 
   function zoom(factor) {
-    const { min: minAbs } = _minMaxAbs();
-    const nowAbs = _currentDate ? TimeCalc.toAbsolute(_currentDate, _cfg) : minAbs;
-    const nowY = _absToY(nowAbs, minAbs);
-    const scrollFrac = _container ? (nowY - _container.clientHeight * 0.5) / Math.max(1, _container.scrollHeight) : 0;
     _pph = Math.max(MIN_PPH, Math.min(MAX_PPH, _pph * factor));
     render();
-    if (_container) {
+    if (_container && _currentDate) {
       const { min: newMin } = _minMaxAbs();
-      const newNowY = _absToY(nowAbs, newMin);
-      _container.scrollTop = Math.max(0, newNowY - _container.clientHeight * 0.75);
+      const newNowY = _absToY(TimeCalc.toAbsolute(_currentDate, _cfg), newMin);
+      _container.scrollTop = Math.max(0, newNowY - _container.clientHeight * 0.5);
     }
   }
 
