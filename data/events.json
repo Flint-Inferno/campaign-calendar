@@ -67,5 +67,21 @@
     "mapY": 1421,
     "tags": [],
     "id": "403612f2-d532-486f-b5a2-d8bca86cf92f"
+  },
+  {
+    "title": "Test 1",
+    "description": "",
+    "location": "",
+    "markerType": "event",
+    "year": 6532,
+    "month": 4,
+    "week": 5,
+    "day": 8,
+    "hour": 0,
+    "color": "#5A4A2A",
+    "tags": [],
+    "mapX": 1202,
+    "mapY": 1733,
+    "id": "c39ca9cc-4556-45f2-8a4f-8655178b2181"
   }
 ]
