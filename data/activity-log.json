@@ -238,5 +238,13 @@
     "playerColor": "#0000c4",
     "action": "event_edit",
     "details": "Toggled \"test 2\" to waypoint"
+  },
+  {
+    "id": "273fe195-c3e1-499f-b82a-7a74e9bc6c2a",
+    "timestamp": "2026-05-17T13:46:48.179Z",
+    "playerName": "Flint (DM)",
+    "playerColor": "#0000c4",
+    "action": "event_delete",
+    "details": "Deleted event: \"test 2\""
   }
 ]
