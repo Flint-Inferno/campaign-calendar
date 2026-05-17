@@ -262,5 +262,13 @@
     "playerColor": "#0000c4",
     "action": "event_delete",
     "details": "Deleted event: \"fringe test\""
+  },
+  {
+    "id": "664dc8c6-53a9-4aa0-b426-807031f9f34f",
+    "timestamp": "2026-05-17T14:01:42.199Z",
+    "playerName": "Flint (DM)",
+    "playerColor": "#0000c4",
+    "action": "event_add",
+    "details": "Added event: \"qwerty\""
   }
 ]
