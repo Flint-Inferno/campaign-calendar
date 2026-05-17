@@ -1568,24 +1568,6 @@ header {
   #calendar-grid { display: none; }
   #tab-calendar { display: flex; flex-direction: column; }
 
-  /* mobile calendar header */
-  .mob-cal-header {
-    display: flex; align-items: center; gap: 6px;
-    padding: 8px 12px; border-bottom: 1px solid var(--border);
-    flex-shrink: 0;
-  }
-  .mob-cal-header button {
-    font-family: 'Cinzel', serif; font-size: 0.78rem;
-    background: var(--parchment-dark); border: 1px solid var(--border);
-    color: var(--ink); padding: 6px 10px; border-radius: var(--radius);
-    cursor: pointer; min-height: 44px;
-  }
-  #mob-cal-label {
-    flex: 1; text-align: center;
-    font-family: 'Cinzel', serif; font-size: 0.85rem; color: var(--ink);
-  }
-  #mob-cal-next { margin-left: auto; }
-
   /* mini dot grid */
   #mob-mini-grid { padding: 6px 12px 4px; flex-shrink: 0; border-bottom: 1px solid var(--border); }
   .mob-mini-header, .mob-mini-row {

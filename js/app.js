@@ -695,16 +695,6 @@ function renderMobileCalendar() {
   }
 }
 
-document.getElementById('mob-cal-prev')?.addEventListener('click', () => {
-  _mobMonth--;
-  if (_mobMonth < 1) { _mobMonth = CFG?.monthsPerYear || 12; _mobYear--; }
-  renderMobileCalendar();
-});
-document.getElementById('mob-cal-next')?.addEventListener('click', () => {
-  _mobMonth++;
-  if (_mobMonth > (CFG?.monthsPerYear || 12)) { _mobMonth = 1; _mobYear++; }
-  renderMobileCalendar();
-});
 window.addEventListener('resize', () => {
   const calTab = document.getElementById('tab-calendar');
   if (calTab && !calTab.classList.contains('hidden')) {
