@@ -40,7 +40,7 @@
     "title": "Temple of Etarepes",
     "description": "Arrival at temple past Limelight\nWe take a tour and plan a heist\nExecute the heist, ditch town, make plans",
     "location": "",
-    "markerType": "waypoint",
+    "markerType": "event",
     "year": 6532,
     "month": 7,
     "week": 5,
@@ -48,8 +48,8 @@
     "hour": 0,
     "color": "#6B3A2A",
     "tags": [],
-    "mapX": 2824,
-    "mapY": 1335,
+    "mapX": null,
+    "mapY": null,
     "id": "8e283568-09ee-483e-80cf-7b1ad67564c6"
   },
   {
@@ -62,10 +62,26 @@
     "hour": 0,
     "color": "#6B3A2A",
     "markerType": "waypoint",
-    "location": "Lake",
+    "location": "",
     "mapX": 2943,
     "mapY": 1421,
     "tags": [],
     "id": "403612f2-d532-486f-b5a2-d8bca86cf92f"
+  },
+  {
+    "title": "Valvys Ethraath is born",
+    "description": "",
+    "location": "",
+    "markerType": "event",
+    "year": 6508,
+    "month": 1,
+    "week": 1,
+    "day": 1,
+    "hour": 0,
+    "color": "#2C2C6B",
+    "tags": [],
+    "mapX": 1598,
+    "mapY": 1607,
+    "id": "06376155-57de-420c-8fcc-246631313fc4"
   }
 ]
