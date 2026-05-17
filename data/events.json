@@ -67,5 +67,21 @@
     "mapY": 1421,
     "tags": [],
     "id": "403612f2-d532-486f-b5a2-d8bca86cf92f"
+  },
+  {
+    "title": "fringe test",
+    "description": "",
+    "location": "",
+    "markerType": "none",
+    "year": 6532,
+    "month": 7,
+    "week": 5,
+    "day": 8,
+    "hour": 0,
+    "color": "#8B6914",
+    "tags": [],
+    "mapX": 2079,
+    "mapY": 1326,
+    "id": "802d8c29-8c12-47f5-9af8-dfbb7c77b8d1"
   }
 ]
