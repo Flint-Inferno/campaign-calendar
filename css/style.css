@@ -1524,7 +1524,6 @@ header {
     width: 100%; font-size: 0.72rem; color: var(--ink-light);
     font-family: 'Cinzel', serif; margin: 0; order: 3;
   }
-  .tab-nav { display: none; }
   #clock-svg { display: none; }
   .sidebar { display: none; }
 
@@ -1543,34 +1542,6 @@ header {
   }
   #time-calc-panel:not(.hidden) { transform: translateY(0); }
 
-  /* account for bottom nav */
-  .main-body { padding-bottom: 56px; }
-  #tab-timeline { height: calc(100vh - 56px - 56px); }
-  #tab-map { height: calc(100vh - 56px - 56px); }
-
-  /* bottom nav */
-  #mobile-bottom-nav {
-    display: flex;
-    position: fixed;
-    bottom: 0; left: 0; right: 0;
-    height: 56px;
-    background: var(--parchment-dark);
-    border-top: 1px solid var(--border);
-    z-index: 900;
-  }
-  .mob-tab-btn {
-    flex: 1;
-    display: flex; flex-direction: column;
-    align-items: center; justify-content: center;
-    gap: 2px;
-    background: none; border: none;
-    color: var(--ink-light);
-    font-family: 'Cinzel', serif;
-    font-size: 0.58rem; cursor: pointer;
-    min-height: 44px;
-  }
-  .mob-tab-btn.active { color: var(--ink); border-top: 2px solid var(--accent, #8b6914); }
-  .mob-tab-btn { font-size: 0.72rem; }
 
   /* advance time button in header */
   #mob-advance-btn {

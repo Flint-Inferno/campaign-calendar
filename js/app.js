@@ -80,7 +80,6 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
     const tab = btn.dataset.tab;
     document.querySelectorAll('.tab-content').forEach(c => c.classList.toggle('hidden', c.id !== `tab-${tab}`));
     document.getElementById('app-sidebar')?.classList.toggle('hidden', tab === 'log');
-    document.querySelectorAll('.mob-tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
     if (tab === 'map') {
       if (!mapLoaded) initMap();
       else {
@@ -95,13 +94,6 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
   });
 });
 
-/* ── Mobile bottom nav ──────────────────────────────────────── */
-document.querySelectorAll('.mob-tab-btn').forEach(btn => {
-  btn.addEventListener('click', () => {
-    const tabBtn = document.querySelector(`.tab-btn[data-tab="${btn.dataset.tab}"]`);
-    if (tabBtn) tabBtn.click();
-  });
-});
 
 async function initMap() {
   showBanner('Loading map…', 'info');
