@@ -83,5 +83,21 @@
     "mapX": 2179,
     "mapY": 1481,
     "id": "9053e3ad-3e90-4ee9-ae67-aefddf700b74"
+  },
+  {
+    "title": "Arrived in Feyrun's Edge",
+    "description": "",
+    "location": "Feyrun's Edge",
+    "markerType": "waypoint",
+    "year": 6532,
+    "month": 7,
+    "week": 2,
+    "day": 8,
+    "hour": 0,
+    "color": "#6B3A2A",
+    "tags": [],
+    "mapX": 1930,
+    "mapY": 1693,
+    "id": "8dddb46b-3b72-439c-b4ac-7ee5a0c9205f"
   }
 ]
