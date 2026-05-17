@@ -53,19 +53,19 @@
     "id": "8e283568-09ee-483e-80cf-7b1ad67564c6"
   },
   {
-    "title": "Valvys Ethraath is born",
+    "title": "Teleport to Willowshade",
     "description": "",
-    "location": "",
-    "markerType": "event",
-    "year": 6508,
-    "month": 1,
-    "week": 1,
-    "day": 1,
+    "year": 6532,
+    "month": 7,
+    "week": 5,
+    "day": 8,
     "hour": 0,
-    "color": "#6B6B1C",
+    "color": "#6B3A2A",
+    "markerType": "waypoint",
+    "location": "",
+    "mapX": 2943,
+    "mapY": 1421,
     "tags": [],
-    "mapX": null,
-    "mapY": null,
-    "id": "2cc25e91-de2d-4890-80dc-eed4e7f9ae10"
+    "id": "403612f2-d532-486f-b5a2-d8bca86cf92f"
   }
 ]
