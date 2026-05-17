@@ -294,5 +294,13 @@
     "playerColor": "#8B2E2E",
     "action": "event_add",
     "details": "Added event: \"another test\""
+  },
+  {
+    "id": "1f36ab50-2544-4569-bd51-6a965af37162",
+    "timestamp": "2026-05-17T16:42:25.674Z",
+    "playerName": "Unknown",
+    "playerColor": "#8B2E2E",
+    "action": "event_delete",
+    "details": "Deleted event: \"another test\""
   }
 ]
