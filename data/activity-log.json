@@ -176,11 +176,27 @@
     "details": "Added event: \"Temple of Etarepes\""
   },
   {
-    "id": "1d59d3a7-7f51-4d07-9b30-c04fe82f7b06",
-    "timestamp": "2026-05-17T02:29:41.830Z",
-    "playerName": "Zidreyi",
-    "playerColor": "#0538ad",
+    "id": "4e1ee0e0-2c04-4a04-bc12-2497d12cea54",
+    "timestamp": "2026-05-17T02:28:51.157Z",
+    "playerName": "Valvys",
+    "playerColor": "#ffc800",
+    "action": "date_advance",
+    "details": "Advanced to Year 6532 · Falm · Ravethen · Day 8 · 00:00"
+  },
+  {
+    "id": "363c4075-0e84-435f-83cf-b4b26c3e2e96",
+    "timestamp": "2026-05-17T02:28:51.878Z",
+    "playerName": "Valvys",
+    "playerColor": "#ffc800",
     "action": "event_add",
-    "details": "Added event: \"Valvys Ethraath is born\""
+    "details": "Auto-created time skip: \"Time Skip → Year 6532 · Falm · Ravethen · Day 8 · 00:00\""
+  },
+  {
+    "id": "25936459-1a1b-4fa6-9671-8d72407ca35d",
+    "timestamp": "2026-05-17T02:30:11.233Z",
+    "playerName": "Valvys",
+    "playerColor": "#ffc800",
+    "action": "event_edit",
+    "details": "Edited event: \"Teleport to Willowshade\""
   }
 ]
