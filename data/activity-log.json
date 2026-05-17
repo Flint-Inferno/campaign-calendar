@@ -200,19 +200,11 @@
     "details": "Edited event: \"Teleport to Willowshade\""
   },
   {
-    "id": "ad8024b4-ed77-4d71-b878-71f50721f46a",
-    "timestamp": "2026-05-17T02:31:10.518Z",
-    "playerName": "Valvys",
-    "playerColor": "#ffc800",
-    "action": "event_edit",
-    "details": "Edited event: \"Teleport to Willowshade\""
-  },
-  {
-    "id": "2269d913-d5f1-49cc-8a5b-299e1565c662",
-    "timestamp": "2026-05-17T02:31:55.177Z",
-    "playerName": "Valvys",
-    "playerColor": "#ffc800",
-    "action": "event_edit",
-    "details": "Toggled \"Temple of Etarepes\" to waypoint"
+    "id": "e8929b85-1c10-489c-808a-7ac53a65f23a",
+    "timestamp": "2026-05-17T02:33:24.020Z",
+    "playerName": "Zidreyi",
+    "playerColor": "#0538ad",
+    "action": "event_add",
+    "details": "Added waypoint: \"Valvys Ethraath is born\""
   }
 ]
