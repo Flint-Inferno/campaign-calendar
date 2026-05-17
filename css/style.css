@@ -640,6 +640,8 @@ header {
 }
 .day-cell:last-child { border-right: none; }
 .day-cell:hover { background: rgba(var(--mc-rgb, 44, 24, 16), 0.10); }
+.day-cell.selected { outline: 2px solid var(--gold, #d4a84b); outline-offset: -2px; background: rgba(212,168,75,0.12); }
+.day-col.selected { background: rgba(212,168,75,0.12); }
 .day-cell.current-day { background: rgba(var(--mc-rgb, 44, 24, 16), 0.20); }
 .day-cell.current-day .day-number {
   background: var(--crimson);

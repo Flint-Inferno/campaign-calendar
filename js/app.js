@@ -55,7 +55,7 @@ async function appInit() {
 
   Calendar.init(document.getElementById('calendar-grid'), CFG, CURRENT_DATE);
   Calendar.onEventClick = (id, el) => openEventPopover(id, el);
-  Calendar.onCellClick = (date) => openAddModal(date);
+  Calendar.onCellClick = (date) => selectCalendarDay(date);
 
   MapView.init(document.getElementById('map-container'), CFG);
 
@@ -115,6 +115,26 @@ async function initMap() {
   MapView.invalidateSize();
 }
 
+/* ── Day selection ──────────────────────────────────────────── */
+let _selectedDate = null;
+
+function selectCalendarDay(date) {
+  _selectedDate = date;
+  document.querySelectorAll('#calendar-grid .day-cell.selected, #calendar-grid .day-col.selected')
+    .forEach(el => el.classList.remove('selected'));
+  const cell = document.querySelector(
+    `#calendar-grid .day-cell[data-week="${date.week}"][data-day="${date.day}"],` +
+    `#calendar-grid .day-col[data-week="${date.week}"][data-day="${date.day}"]`
+  );
+  if (cell) cell.classList.add('selected');
+}
+
+function clearDaySelection() {
+  _selectedDate = null;
+  document.querySelectorAll('#calendar-grid .day-cell.selected, #calendar-grid .day-col.selected')
+    .forEach(el => el.classList.remove('selected'));
+}
+
 /* ── Calendar view toggle ───────────────────────────────────── */
 document.querySelectorAll('.view-btn').forEach(btn => {
   btn.addEventListener('click', () => {
@@ -123,14 +143,15 @@ document.querySelectorAll('.view-btn').forEach(btn => {
     Calendar.setView(btn.dataset.view);
     Calendar.render();
     updateNavLabel();
+    clearDaySelection();
   });
 });
 
 /* ── Navigation ─────────────────────────────────────────────── */
-document.getElementById('prev-btn').addEventListener('click', () => { Calendar.navigatePrev(); Calendar.render(); updateNavLabel(); syncMobileCalendar(); });
-document.getElementById('next-btn').addEventListener('click', () => { Calendar.navigateNext(); Calendar.render(); updateNavLabel(); syncMobileCalendar(); });
+document.getElementById('prev-btn').addEventListener('click', () => { Calendar.navigatePrev(); Calendar.render(); updateNavLabel(); syncMobileCalendar(); clearDaySelection(); });
+document.getElementById('next-btn').addEventListener('click', () => { Calendar.navigateNext(); Calendar.render(); updateNavLabel(); syncMobileCalendar(); clearDaySelection(); });
 document.getElementById('today-btn').addEventListener('click', () => {
-  if (CURRENT_DATE) { Calendar.goToDate(CURRENT_DATE); Calendar.render(); updateNavLabel(); syncMobileCalendar(); }
+  if (CURRENT_DATE) { Calendar.goToDate(CURRENT_DATE); Calendar.render(); updateNavLabel(); syncMobileCalendar(); clearDaySelection(); }
 });
 
 function updateNavLabel() {
@@ -146,7 +167,8 @@ function syncMobileCalendar() {
 
 /* ── Add Event button ───────────────────────────────────────── */
 document.getElementById('add-event-btn').addEventListener('click', () => {
-  openAddModal(CURRENT_DATE ? { ...CURRENT_DATE } : { year: 1, month: 1, week: 1, day: 1, hour: 0 });
+  const prefill = _selectedDate || CURRENT_DATE || { year: 1, month: 1, week: 1, day: 1, hour: 0 };
+  openAddModal({ ...prefill });
 });
 
 /* ── Event modal ─────────────────────────────────────────────── */
