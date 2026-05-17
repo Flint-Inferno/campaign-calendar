@@ -40,7 +40,7 @@
     "title": "Temple of Etarepes",
     "description": "Arrival at temple past Limelight\nWe take a tour and plan a heist\nExecute the heist, ditch town, make plans",
     "location": "",
-    "markerType": "event",
+    "markerType": "waypoint",
     "year": 6532,
     "month": 7,
     "week": 5,
