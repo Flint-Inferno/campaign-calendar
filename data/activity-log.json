@@ -310,5 +310,13 @@
     "playerColor": "#102457",
     "action": "event_add",
     "details": "Added waypoint: \"Arrived in Feyrun's Edge\""
+  },
+  {
+    "id": "f28e2f18-3bf9-4e2e-b366-e4b89ad6094e",
+    "timestamp": "2026-05-17T16:56:28.070Z",
+    "playerName": "Flint (DM)",
+    "playerColor": "#102457",
+    "action": "event_edit",
+    "details": "Edited event: \"Arrived in Feyrun's Edge\""
   }
 ]
