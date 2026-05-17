@@ -67,21 +67,5 @@
     "mapY": 1421,
     "tags": [],
     "id": "403612f2-d532-486f-b5a2-d8bca86cf92f"
-  },
-  {
-    "title": "Valvys Ethraath is born",
-    "description": "",
-    "location": "",
-    "markerType": "event",
-    "year": 6508,
-    "month": 1,
-    "week": 1,
-    "day": 1,
-    "hour": 0,
-    "color": "#2C2C6B",
-    "tags": [],
-    "mapX": 1598,
-    "mapY": 1607,
-    "id": "06376155-57de-420c-8fcc-246631313fc4"
   }
 ]
