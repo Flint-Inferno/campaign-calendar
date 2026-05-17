@@ -278,5 +278,13 @@
     "playerColor": "#0000c4",
     "action": "event_delete",
     "details": "Deleted event: \"qwerty\""
+  },
+  {
+    "id": "8e24770a-fd87-4d95-8050-fa51ff2fd3c4",
+    "timestamp": "2026-05-17T16:01:34.400Z",
+    "playerName": "Flint (DM)",
+    "playerColor": "#0000c4",
+    "action": "event_add",
+    "details": "Added event: \"Arrived in Archmouth\""
   }
 ]
