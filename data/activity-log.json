@@ -350,5 +350,13 @@
     "playerColor": "#102457",
     "action": "event_add",
     "details": "Added event: \"Arrived in Orzek\""
+  },
+  {
+    "id": "1abb8b4e-8d67-4b10-8296-886bef7a4d20",
+    "timestamp": "2026-05-17T17:09:35.087Z",
+    "playerName": "Flint (DM)",
+    "playerColor": "#102457",
+    "action": "event_add",
+    "details": "Added event: \"Arrived in Evermore\""
   }
 ]
