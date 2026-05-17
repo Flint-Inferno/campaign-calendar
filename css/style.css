@@ -1554,6 +1554,15 @@ header {
     overflow-y: auto;
   }
 
+  /* calendar — restore original mobile sizing */
+  .calendar-controls { padding: 8px 10px; }
+  #calendar-grid { padding: 8px 10px; }
+  .month-header-row, .week-row {
+    grid-template-columns: 60px repeat(var(--days-per-week, 10), 1fr);
+  }
+  .week-label { font-size: 0.62rem; padding: 4px 2px; }
+  .day-cell { height: 60px; }
+
   /* touch targets */
   .calendar-controls button,
   .timeline-controls button,
@@ -1564,7 +1573,6 @@ header {
 /* ── Responsive — portrait only ──────────────────────────────── */
 @media (max-width: 680px) and (orientation: portrait) {
   .mobile-portrait-only { display: block; }
-  #tab-calendar { display: flex; flex-direction: column; overflow-y: auto; }
 
   /* agenda */
   #mob-agenda { flex: 1; overflow-y: auto; padding: 4px 12px 12px; }
