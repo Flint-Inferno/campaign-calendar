@@ -35,21 +35,5 @@
     "mapX": 1922,
     "mapY": 1809,
     "id": "fac64959-c6b2-45d4-ab8d-68d4cc4defaa"
-  },
-  {
-    "title": "test",
-    "description": "",
-    "location": "",
-    "markerType": "event",
-    "year": 6532,
-    "month": 7,
-    "week": 1,
-    "day": 8,
-    "hour": 0,
-    "color": "#6B3A2A",
-    "tags": [],
-    "mapX": null,
-    "mapY": null,
-    "id": "185cb755-df08-44a3-bf1a-24d82606e8a9"
   }
 ]
