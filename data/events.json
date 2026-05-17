@@ -227,5 +227,21 @@
     "mapX": 2389,
     "mapY": 893,
     "id": "b1630b1e-e694-46d0-b663-e16f2890e6e9"
+  },
+  {
+    "title": "Calth'm Ethraath is executed",
+    "description": "The head of the palace guard, Calth'm Ethraath, is accused of conspiring against the throne of Uzgard. He",
+    "location": "Gwendrall",
+    "markerType": "event",
+    "year": 6531,
+    "month": 1,
+    "week": 1,
+    "day": 1,
+    "hour": 0,
+    "color": "#2C2C6B",
+    "tags": [],
+    "mapX": 1604,
+    "mapY": 1611,
+    "id": "67869a09-92a7-4dd6-b0e3-f2a9db71c380"
   }
 ]
