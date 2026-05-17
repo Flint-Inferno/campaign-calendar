@@ -20,6 +20,7 @@
 <header>
   <h1 id="calendar-name">Campaign Calendar</h1>
   <span id="save-status">Saving…</span>
+  <p id="mobile-date-subtitle" class="mobile-only"></p>
 
   <nav class="tab-nav">
     <button class="tab-btn active" data-tab="calendar">Calendar</button>
@@ -27,6 +28,8 @@
     <button class="tab-btn" data-tab="timeline">Timeline</button>
     <button class="tab-btn" data-tab="log">Log</button>
   </nav>
+
+  <button id="mob-advance-btn" class="mobile-only">⏰ Advance Time</button>
 
   <div class="identity-control">
     <button id="identity-toggle">⚔ <span id="identity-name-display">Set Identity</span></button>
@@ -81,6 +84,17 @@
       </div>
 
       <div id="calendar-grid"></div>
+
+      <div id="mobile-calendar" class="mobile-portrait-only">
+        <div class="mob-cal-header">
+          <button id="mob-cal-prev">◄</button>
+          <span id="mob-cal-label"></span>
+          <button id="mob-cal-next">►</button>
+          <button id="mob-cal-add">+ Add</button>
+        </div>
+        <div id="mob-mini-grid"></div>
+        <div id="mob-agenda"></div>
+      </div>
 
     </div>
 
@@ -421,6 +435,21 @@
 </div>
 
 <!-- ── Scripts ─────────────────────────────────────────────── -->
+<nav id="mobile-bottom-nav">
+  <button class="mob-tab-btn active" data-tab="calendar">
+    <span class="mob-tab-icon">📅</span><span class="mob-tab-label">Calendar</span>
+  </button>
+  <button class="mob-tab-btn" data-tab="map">
+    <span class="mob-tab-icon">🗺</span><span class="mob-tab-label">Map</span>
+  </button>
+  <button class="mob-tab-btn" data-tab="timeline">
+    <span class="mob-tab-icon">⏱</span><span class="mob-tab-label">Timeline</span>
+  </button>
+  <button class="mob-tab-btn" data-tab="log">
+    <span class="mob-tab-icon">📜</span><span class="mob-tab-label">Log</span>
+  </button>
+</nav>
+
 <script src="js/repo-config.js"></script>
 <script src="js/github-api.js"></script>
 <script src="js/time-calc.js"></script>

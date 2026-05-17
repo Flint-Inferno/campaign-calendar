@@ -1509,17 +1509,192 @@ header {
 /* ── Utilities ───────────────────────────────────────────────── */
 .hidden { display: none !important; }
 .mt-8 { margin-top: 8px; }
+.mobile-only { display: none; }
+.mobile-portrait-only { display: none; }
 
-/* ── Responsive ──────────────────────────────────────────────── */
+/* ── Responsive — base mobile (≤680px) ──────────────────────── */
 @media (max-width: 680px) {
-  .sidebar { display: none; }
-  .calendar-controls { padding: 8px 10px; }
-  #calendar-grid { padding: 8px 10px; }
-  .month-header-row, .week-row {
-    grid-template-columns: 60px repeat(var(--days-per-week, 10), 1fr);
+  /* utilities */
+  .mobile-only { display: block; }
+
+  /* header */
+  header { padding: 8px 12px; gap: 6px; flex-wrap: wrap; }
+  #calendar-name { font-size: 1rem; flex: 1; }
+  #mobile-date-subtitle {
+    width: 100%; font-size: 0.72rem; color: var(--ink-light);
+    font-family: 'Cinzel', serif; margin: 0; order: 3;
   }
-  .week-label { font-size: 0.62rem; padding: 4px 2px; }
-  .day-cell { height: 60px; }
+  .tab-nav { display: none; }
+  #clock-svg { display: none; }
+  .sidebar { display: none; }
+
+  /* time calc becomes a slide-up sheet fixed above bottom nav */
+  #time-calc-panel {
+    position: fixed;
+    bottom: 56px; left: 0; right: 0;
+    background: var(--parchment-dark);
+    border-top: 2px solid var(--border);
+    padding: 16px;
+    z-index: 850;
+    max-height: 60vh;
+    overflow-y: auto;
+    transform: translateY(100%);
+    transition: transform 0.28s ease;
+  }
+  #time-calc-panel:not(.hidden) { transform: translateY(0); }
+
+  /* account for bottom nav */
+  .main-body { padding-bottom: 56px; }
+  #tab-timeline { height: calc(100vh - 56px - 56px); }
+  #tab-map { height: calc(100vh - 56px - 56px); }
+
+  /* bottom nav */
+  #mobile-bottom-nav {
+    display: flex;
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    height: 56px;
+    background: var(--parchment-dark);
+    border-top: 1px solid var(--border);
+    z-index: 900;
+  }
+  .mob-tab-btn {
+    flex: 1;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    gap: 2px;
+    background: none; border: none;
+    color: var(--ink-light);
+    font-family: 'Cinzel', serif;
+    font-size: 0.58rem; cursor: pointer;
+    min-height: 44px;
+  }
+  .mob-tab-btn.active { color: var(--ink); border-top: 2px solid var(--accent, #8b6914); }
+  .mob-tab-icon { font-size: 1.1rem; line-height: 1; }
+
+  /* advance time button in header */
+  #mob-advance-btn {
+    font-family: 'Cinzel', serif;
+    font-size: 0.72rem;
+    background: var(--parchment-dark);
+    border: 1px solid var(--border);
+    color: var(--ink);
+    padding: 5px 10px;
+    border-radius: var(--radius);
+    cursor: pointer;
+    white-space: nowrap;
+  }
+
+  /* full-screen modals */
+  .modal-overlay { align-items: flex-start; padding: 0; }
+  .modal-box {
+    width: 100vw !important;
+    max-width: 100vw !important;
+    min-height: 100dvh;
+    border-radius: 0;
+    margin: 0;
+    overflow-y: auto;
+  }
+
+  /* touch targets */
+  .calendar-controls button,
+  .timeline-controls button,
+  .map-controls button { min-height: 44px; padding: 0 14px; }
+
+}
+
+/* ── Responsive — portrait only ──────────────────────────────── */
+@media (max-width: 680px) and (orientation: portrait) {
+  .mobile-portrait-only { display: flex; flex-direction: column; flex: 1; overflow: hidden; }
+  .calendar-controls { display: none; }
+  #calendar-grid { display: none; }
+  #tab-calendar { display: flex; flex-direction: column; }
+
+  /* mobile calendar header */
+  .mob-cal-header {
+    display: flex; align-items: center; gap: 6px;
+    padding: 8px 12px; border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+  .mob-cal-header button {
+    font-family: 'Cinzel', serif; font-size: 0.78rem;
+    background: var(--parchment-dark); border: 1px solid var(--border);
+    color: var(--ink); padding: 6px 10px; border-radius: var(--radius);
+    cursor: pointer; min-height: 44px;
+  }
+  #mob-cal-label {
+    flex: 1; text-align: center;
+    font-family: 'Cinzel', serif; font-size: 0.85rem; color: var(--ink);
+  }
+
+  /* mini dot grid */
+  #mob-mini-grid { padding: 6px 12px 4px; flex-shrink: 0; border-bottom: 1px solid var(--border); }
+  .mob-mini-header, .mob-mini-row {
+    display: grid;
+    grid-template-columns: repeat(var(--days-per-week, 7), 1fr);
+    gap: 2px;
+  }
+  .mob-mini-head-cell {
+    text-align: center; font-size: 0.58rem;
+    color: var(--ink-light); padding: 2px 0;
+    font-family: 'Cinzel', serif;
+  }
+  .mob-mini-cell {
+    aspect-ratio: 1; display: flex;
+    align-items: center; justify-content: center;
+    font-size: 0.62rem; border-radius: 50%;
+    position: relative; cursor: pointer;
+    color: var(--ink);
+  }
+  .mob-mini-cell.mob-mini-today {
+    background: var(--accent, #8b6914); color: #fff;
+  }
+  .mob-mini-cell.mob-mini-has-event::after {
+    content: ''; position: absolute; bottom: 1px;
+    width: 4px; height: 4px; border-radius: 50%;
+    background: var(--ink);
+  }
+  .mob-mini-cell.mob-mini-today.mob-mini-has-event::after { background: #fff; }
+
+  /* agenda */
+  #mob-agenda { flex: 1; overflow-y: auto; padding: 4px 12px 12px; }
+  .mob-agenda-week-label {
+    font-family: 'Cinzel', serif; font-size: 0.72rem;
+    color: var(--ink-light); text-transform: uppercase;
+    letter-spacing: 0.05em; padding: 10px 0 4px;
+    border-bottom: 1px solid var(--border); margin-bottom: 4px;
+  }
+  .mob-agenda-event {
+    display: flex; align-items: center; gap: 8px;
+    padding: 9px 4px; min-height: 44px;
+    border-bottom: 1px solid rgba(0,0,0,0.06);
+    cursor: pointer;
+  }
+  .mob-agenda-dot {
+    width: 9px; height: 9px; border-radius: 50%;
+    background: var(--event-color, #6B3A2A); flex-shrink: 0;
+  }
+  .mob-agenda-day {
+    font-size: 0.72rem; color: var(--ink-light);
+    flex-shrink: 0; width: 44px;
+    font-family: 'Cinzel', serif;
+  }
+  .mob-agenda-title {
+    font-size: 0.85rem; color: var(--ink);
+    flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    font-family: 'IM Fell English', serif;
+  }
+  .mob-agenda-empty {
+    font-size: 0.8rem; color: var(--ink-light);
+    font-style: italic; padding: 6px 4px;
+  }
+}
+
+/* ── Responsive — landscape mobile (show full grid) ──────────── */
+@media (max-width: 680px) and (orientation: landscape) {
+  #mobile-calendar { display: none !important; }
+  .calendar-controls { display: flex; }
+  #calendar-grid { display: block; }
 }
 
 /* ── Event popover ───────────────────────────────────────────── */

@@ -59,8 +59,11 @@ async function appInit() {
 
   MapView.init(document.getElementById('map-container'), CFG);
 
+  _mobYear  = CURRENT_DATE.year;
+  _mobMonth = CURRENT_DATE.month;
   updateCurrentDateDisplay();
   Calendar.render();
+  renderMobileCalendar();
   updateNavLabel();
   hideBanner();
 
@@ -77,6 +80,7 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
     const tab = btn.dataset.tab;
     document.querySelectorAll('.tab-content').forEach(c => c.classList.toggle('hidden', c.id !== `tab-${tab}`));
     document.getElementById('app-sidebar')?.classList.toggle('hidden', tab === 'log');
+    document.querySelectorAll('.mob-tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
     if (tab === 'map') {
       if (!mapLoaded) initMap();
       else {
@@ -87,6 +91,15 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
     }
     if (tab === 'timeline') initTimeline();
     if (tab === 'log') renderLogTab();
+    if (tab === 'calendar') renderMobileCalendar();
+  });
+});
+
+/* ── Mobile bottom nav ──────────────────────────────────────── */
+document.querySelectorAll('.mob-tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const tabBtn = document.querySelector(`.tab-btn[data-tab="${btn.dataset.tab}"]`);
+    if (tabBtn) tabBtn.click();
   });
 });
 
@@ -340,6 +353,7 @@ document.getElementById('save-event-btn').addEventListener('click', async () => 
     }
     closeModal('event-modal');
     Calendar.render();
+    renderMobileCalendar();
     refreshTimeline();
     if (mapLoaded && _scrubDate) MapView.renderScrubbed(Events.getAll(), _scrubDate, CFG, CURRENT_DATE);
     if (isNew && data.markerType !== 'none') {
@@ -365,6 +379,7 @@ document.getElementById('delete-event-btn').addEventListener('click', async () =
     appendActivityLog('event_delete', `Deleted event: "${evTitle}"`);
     closeModal('event-modal');
     Calendar.render();
+    renderMobileCalendar();
     if (mapLoaded && _scrubDate) MapView.renderScrubbed(Events.getAll(), _scrubDate, CFG, CURRENT_DATE);
     refreshTimeline();
     showBanner('Event deleted.', 'success');
@@ -568,6 +583,7 @@ document.getElementById('advance-confirm-ok')?.addEventListener('click', async (
     CURRENT_DATE = result;
     Calendar.setCurrentDate(CURRENT_DATE);
     Calendar.render();
+    renderMobileCalendar();
     refreshTimeline();
     updateCurrentDateDisplay();
     _scrubDate = { year: result.year, month: result.month, week: result.week, day: result.day, hour: 0 };
@@ -597,11 +613,122 @@ document.getElementById('advance-confirm-modal')?.querySelector('.modal-backdrop
 
 function updateCurrentDateDisplay() {
   if (!CURRENT_DATE || !CFG) return;
-  document.getElementById('current-date-display').textContent = TimeCalc.format(CURRENT_DATE, CFG);
+  const dateText = TimeCalc.format(CURRENT_DATE, CFG);
+  document.getElementById('current-date-display').textContent = dateText;
+  const mobSub = document.getElementById('mobile-date-subtitle');
+  if (mobSub) mobSub.textContent = dateText;
   const locEl = document.getElementById('current-location-display');
   if (locEl) locEl.textContent = CURRENT_DATE.currentLocation || '';
   updateClock(CURRENT_DATE.hour || 0);
 }
+
+/* ── Mobile calendar ────────────────────────────────────────── */
+let _mobYear = 1, _mobMonth = 1;
+
+function renderMobileCalendar() {
+  const label    = document.getElementById('mob-cal-label');
+  const miniGrid = document.getElementById('mob-mini-grid');
+  const agenda   = document.getElementById('mob-agenda');
+  if (!label || !miniGrid || !agenda || !CFG) return;
+
+  const monthName = (CFG.monthNames || [])[_mobMonth - 1] || `Month ${_mobMonth}`;
+  label.textContent = `${monthName}, Year ${_mobYear}`;
+
+  const monthEvents = Events.getAll().filter(ev => ev.year === _mobYear && ev.month === _mobMonth);
+
+  // Mini grid
+  miniGrid.innerHTML = '';
+  const headerRow = document.createElement('div');
+  headerRow.className = 'mob-mini-header';
+  for (let d = 1; d <= CFG.daysPerWeek; d++) {
+    const c = document.createElement('div');
+    c.className = 'mob-mini-head-cell';
+    c.textContent = `D${d}`;
+    headerRow.appendChild(c);
+  }
+  miniGrid.appendChild(headerRow);
+
+  for (let w = 1; w <= CFG.weeksPerMonth; w++) {
+    const row = document.createElement('div');
+    row.className = 'mob-mini-row';
+    for (let d = 1; d <= CFG.daysPerWeek; d++) {
+      const cell = document.createElement('div');
+      cell.className = 'mob-mini-cell';
+      cell.textContent = d;
+      if (monthEvents.some(ev => ev.week === w && ev.day === d)) cell.classList.add('mob-mini-has-event');
+      if (CURRENT_DATE && CURRENT_DATE.year === _mobYear && CURRENT_DATE.month === _mobMonth &&
+          CURRENT_DATE.week === w && CURRENT_DATE.day === d) cell.classList.add('mob-mini-today');
+      cell.addEventListener('click', () => {
+        document.getElementById(`mob-agenda-week-${w}`)?.scrollIntoView({ behavior: 'smooth' });
+      });
+      row.appendChild(cell);
+    }
+    miniGrid.appendChild(row);
+  }
+
+  // Agenda
+  agenda.innerHTML = '';
+  for (let w = 1; w <= CFG.weeksPerMonth; w++) {
+    const weekEvs = monthEvents.filter(ev => ev.week === w).sort((a, b) => a.day - b.day);
+    const section = document.createElement('div');
+    section.className = 'mob-agenda-week';
+    section.id = `mob-agenda-week-${w}`;
+
+    const wLbl = document.createElement('div');
+    wLbl.className = 'mob-agenda-week-label';
+    wLbl.textContent = `Week ${w}`;
+    section.appendChild(wLbl);
+
+    if (weekEvs.length === 0) {
+      const empty = document.createElement('div');
+      empty.className = 'mob-agenda-empty';
+      empty.textContent = 'No events';
+      section.appendChild(empty);
+    } else {
+      weekEvs.forEach(ev => {
+        const row = document.createElement('div');
+        row.className = 'mob-agenda-event';
+        row.style.setProperty('--event-color', ev.color || CFG.defaultEventColor || '#6B3A2A');
+        const dot = document.createElement('span'); dot.className = 'mob-agenda-dot';
+        const day = document.createElement('span'); day.className = 'mob-agenda-day';
+        day.textContent = `Day ${ev.day}`;
+        const title = document.createElement('span'); title.className = 'mob-agenda-title';
+        title.textContent = ev.title;
+        row.append(dot, day, title);
+        row.addEventListener('click', () => openEventPopover(ev.id, row));
+        section.appendChild(row);
+      });
+    }
+    agenda.appendChild(section);
+  }
+}
+
+document.getElementById('mob-cal-prev')?.addEventListener('click', () => {
+  _mobMonth--;
+  if (_mobMonth < 1) { _mobMonth = CFG?.monthsPerYear || 12; _mobYear--; }
+  renderMobileCalendar();
+});
+document.getElementById('mob-cal-next')?.addEventListener('click', () => {
+  _mobMonth++;
+  if (_mobMonth > (CFG?.monthsPerYear || 12)) { _mobMonth = 1; _mobYear++; }
+  renderMobileCalendar();
+});
+document.getElementById('mob-cal-add')?.addEventListener('click', () => {
+  openAddModal({ year: _mobYear, month: _mobMonth, week: 1, day: 1 });
+});
+
+document.getElementById('mob-advance-btn')?.addEventListener('click', () => {
+  const panel = document.getElementById('time-calc-panel');
+  if (panel) panel.classList.toggle('hidden');
+});
+
+window.addEventListener('resize', () => {
+  const calTab = document.getElementById('tab-calendar');
+  if (calTab && !calTab.classList.contains('hidden')) {
+    Calendar.render();
+    renderMobileCalendar();
+  }
+});
 
 function initClock() {
   const g = document.getElementById('clock-markers');
@@ -863,6 +990,7 @@ document.getElementById('qp-save-btn')?.addEventListener('click', async () => {
     closeModal('quick-waypoint-modal');
     _addPinCoords = null;
     Calendar.render();
+    renderMobileCalendar();
     if (mapLoaded && _scrubDate) MapView.renderScrubbed(Events.getAll(), _scrubDate, CFG, CURRENT_DATE);
     refreshTimeline();
     showBanner('Marker added!', 'success');
