@@ -67,5 +67,21 @@
     "mapY": 1421,
     "tags": [],
     "id": "403612f2-d532-486f-b5a2-d8bca86cf92f"
+  },
+  {
+    "title": "Arrived in Archmouth",
+    "description": "",
+    "location": "Archmouth",
+    "markerType": "waypoint",
+    "year": 6532,
+    "month": 7,
+    "week": 2,
+    "day": 2,
+    "hour": 0,
+    "color": "#6B3A2A",
+    "tags": [],
+    "mapX": null,
+    "mapY": null,
+    "id": "9053e3ad-3e90-4ee9-ae67-aefddf700b74"
   }
 ]
