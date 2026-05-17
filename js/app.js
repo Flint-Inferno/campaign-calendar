@@ -705,15 +705,6 @@ document.getElementById('mob-cal-next')?.addEventListener('click', () => {
   if (_mobMonth > (CFG?.monthsPerYear || 12)) { _mobMonth = 1; _mobYear++; }
   renderMobileCalendar();
 });
-document.getElementById('mob-cal-add')?.addEventListener('click', () => {
-  openAddModal({ year: _mobYear, month: _mobMonth, week: 1, day: 1 });
-});
-
-document.getElementById('mob-advance-btn')?.addEventListener('click', () => {
-  const panel = document.getElementById('time-calc-panel');
-  if (panel) panel.classList.toggle('hidden');
-});
-
 window.addEventListener('resize', () => {
   const calTab = document.getElementById('tab-calendar');
   if (calTab && !calTab.classList.contains('hidden')) {

@@ -1543,19 +1543,6 @@ header {
   #time-calc-panel:not(.hidden) { transform: translateY(0); }
 
 
-  /* advance time button in header */
-  #mob-advance-btn {
-    font-family: 'Cinzel', serif;
-    font-size: 0.72rem;
-    background: var(--parchment-dark);
-    border: 1px solid var(--border);
-    color: var(--ink);
-    padding: 5px 10px;
-    border-radius: var(--radius);
-    cursor: pointer;
-    white-space: nowrap;
-  }
-
   /* full-screen modals */
   .modal-overlay { align-items: flex-start; padding: 0; }
   .modal-box {
@@ -1597,6 +1584,7 @@ header {
     flex: 1; text-align: center;
     font-family: 'Cinzel', serif; font-size: 0.85rem; color: var(--ink);
   }
+  #mob-cal-next { margin-left: auto; }
 
   /* mini dot grid */
   #mob-mini-grid { padding: 6px 12px 4px; flex-shrink: 0; border-bottom: 1px solid var(--border); }
