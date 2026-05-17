@@ -414,35 +414,49 @@ document.getElementById('cancel-event-btn').addEventListener('click', () => clos
 document.getElementById('event-modal').querySelector('.modal-backdrop').addEventListener('click', () => closeModal('event-modal'));
 
 /* ── Time calculator ────────────────────────────────────────── */
-document.getElementById('advance-time-toggle').addEventListener('click', () => {
+function openTimeCalc() {
   const panel = document.getElementById('time-calc-panel');
   const opening = panel.classList.contains('hidden');
   panel.classList.toggle('hidden');
-  if (opening) {
+  if (!opening) return;
+
+  document.getElementById('calc-result-row')?.classList.add('hidden');
+
+  if (_selectedDate && CFG && CURRENT_DATE) {
+    const hpd = CFG.hoursPerDay;
+    const hpw = hpd * CFG.daysPerWeek;
+    const hpm = hpw * CFG.weeksPerMonth;
+    const hpy = hpm * CFG.monthsPerYear;
+    const selAbs = TimeCalc.toAbsolute({ ..._selectedDate, hour: _selectedDate.hour || 0 }, CFG);
+    const nowAbs = TimeCalc.toAbsolute({ ...CURRENT_DATE, hour: CURRENT_DATE.hour || 0 }, CFG);
+    const forward = selAbs >= nowAbs;
+    let diff = Math.abs(selAbs - nowAbs);
+    const years  = Math.floor(diff / hpy); diff %= hpy;
+    const months = Math.floor(diff / hpm); diff %= hpm;
+    const weeks  = Math.floor(diff / hpw); diff %= hpw;
+    const days   = Math.floor(diff / hpd); diff %= hpd;
+    const hours  = diff;
+    [['dur-years',years],['dur-months',months],['dur-weeks',weeks],['dur-days',days],['dur-hours',hours]].forEach(([n,v]) => {
+      const el = document.querySelector(`[name=${n}]`);
+      if (el) el.value = v;
+    });
+    document.getElementById('tc-dir-btn').classList.toggle('active', forward);
+    document.getElementById('tc-dir-btn-back').classList.toggle('active', !forward);
+  } else {
     ['dur-years','dur-months','dur-weeks','dur-days','dur-hours'].forEach(n => {
       const el = document.querySelector(`[name=${n}]`);
       if (el) el.value = '0';
     });
-    document.getElementById('calc-result-row')?.classList.add('hidden');
     document.getElementById('tc-dir-btn').classList.add('active');
     document.getElementById('tc-dir-btn-back').classList.remove('active');
   }
-});
+}
+
+document.getElementById('advance-time-toggle').addEventListener('click', openTimeCalc);
 
 document.getElementById('mob-advance-btn')?.addEventListener('click', (e) => {
   e.stopPropagation();
-  const panel = document.getElementById('time-calc-panel');
-  const opening = panel.classList.contains('hidden');
-  panel.classList.toggle('hidden');
-  if (opening) {
-    ['dur-years','dur-months','dur-weeks','dur-days','dur-hours'].forEach(n => {
-      const el = document.querySelector(`[name=${n}]`);
-      if (el) el.value = '0';
-    });
-    document.getElementById('calc-result-row')?.classList.add('hidden');
-    document.getElementById('tc-dir-btn').classList.add('active');
-    document.getElementById('tc-dir-btn-back').classList.remove('active');
-  }
+  openTimeCalc();
 });
 
 document.getElementById('time-calc-panel')?.addEventListener('click', (e) => e.stopPropagation());
