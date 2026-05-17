@@ -1519,20 +1519,28 @@ header {
   /* utilities */
   .mobile-only { display: block; }
 
-  /* header */
-  header { padding: 8px 12px; gap: 6px; flex-wrap: wrap; }
-  #calendar-name { font-size: 1rem; flex: 1; }
-  #mob-header-row {
-    display: flex; width: 100%; order: 3;
-    align-items: center; gap: 8px;
-  }
-  #mobile-date-subtitle { flex: 1; font-size: 0.72rem; color: var(--ink-light); font-family: 'Cinzel', serif; margin: 0; }
+  /* header — row 1: title | advance | ⚔  row 2: tabs */
+  header { padding: 6px 10px; gap: 4px 6px; flex-wrap: wrap; align-items: center; }
+  #calendar-name { font-size: 0.92rem; flex: 1; min-width: 0; }
+
+  /* Advance Time inline on row 1 */
+  #mob-header-row { display: flex; width: auto; order: 0; align-items: center; }
+  #mobile-date-subtitle { display: none; }
   #mob-advance-btn {
-    font-family: 'Cinzel', serif; font-size: 0.72rem;
+    font-family: 'Cinzel', serif; font-size: 0.65rem;
     background: var(--parchment-dark); border: 1px solid var(--border);
-    color: var(--ink); padding: 5px 10px; border-radius: var(--radius);
-    cursor: pointer; white-space: nowrap; flex-shrink: 0;
+    color: var(--ink); padding: 4px 8px; border-radius: var(--radius);
+    cursor: pointer; white-space: nowrap;
   }
+
+  /* identity — icon only on row 1 */
+  .identity-control { margin-left: 0; }
+  #identity-name-display { display: none; }
+  #identity-toggle { padding: 4px 9px; font-size: 0.8rem; }
+
+  /* tab nav — compact full-width second row */
+  .tab-nav { order: 1; width: 100%; gap: 2px; }
+  .tab-btn { flex: 1; font-size: 0.6rem; padding: 5px 2px; letter-spacing: 0; text-align: center; }
   #clock-svg { display: none; }
 
   /* collapse sidebar to zero-width (not display:none) so fixed children can escape */
@@ -1572,8 +1580,14 @@ header {
     overflow-y: auto;
   }
 
-  /* calendar — restore original mobile sizing */
-  .calendar-controls { padding: 8px 10px; }
+  /* calendar controls — row 1: nav, row 2: view toggle + add */
+  .calendar-controls { padding: 5px 8px; gap: 5px; }
+  .nav-controls { width: 100%; order: 1; justify-content: center; gap: 5px; }
+  .view-toggle { order: 2; }
+  #add-event-btn { order: 2; margin-left: auto; }
+  .view-btn, .nav-controls button, #add-event-btn { font-size: 0.72rem; padding: 0 10px; }
+
+  /* calendar grid sizing */
   #calendar-grid { padding: 8px 10px; }
   .month-header-row, .week-row {
     grid-template-columns: 60px repeat(var(--days-per-week, 10), 1fr);
@@ -1581,10 +1595,10 @@ header {
   .week-label { font-size: 0.62rem; padding: 4px 2px; }
   .day-cell { height: 60px; }
 
-  /* touch targets */
+  /* touch targets — keep height, allow tighter horizontal padding */
   .calendar-controls button,
   .timeline-controls button,
-  .map-controls button { min-height: 44px; padding: 0 14px; }
+  .map-controls button { min-height: 44px; }
 
 }
 
