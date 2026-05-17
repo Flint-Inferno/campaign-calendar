@@ -47,6 +47,16 @@ header {
   min-width: 160px;
 }
 
+#save-status {
+  display: none;
+  font-size: 0.78rem;
+  font-style: italic;
+  opacity: 0.7;
+  color: var(--gold-light);
+  white-space: nowrap;
+}
+#save-status.visible { display: inline; }
+
 .tab-nav { display: flex; gap: 4px; }
 
 .tab-btn {

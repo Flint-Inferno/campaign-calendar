@@ -41,27 +41,64 @@ const GithubAPI = (() => {
   }
 
   const _queues = {};
+  let _retryNotifier = null;
+  let _retryAttempts = 6;
+  let _retryDelayMs  = 5000;
 
-  async function writeJSON(path, content, message) {
+  function setRetryNotifier(fn) { _retryNotifier = fn; }
+  function setRetryConfig({ attempts, delayMs }) {
+    if (attempts != null) _retryAttempts = attempts;
+    if (delayMs  != null) _retryDelayMs  = delayMs;
+  }
+
+  async function writeJSON(path, content, message, mergeFn = null) {
     const prev = _queues[path] || Promise.resolve();
     const next = prev.then(async () => {
-      let sha;
-      try { sha = (await readFile(path)).sha; } catch (e) { if (e.status !== 404) throw e; }
       const pat = getPersonalPAT() || getPAT();
       if (!pat) throw new Error('No write access — contact the DM.');
-      const encoded = btoa(unescape(encodeURIComponent(JSON.stringify(content, null, 2))));
-      const body = { message, content: encoded };
-      if (sha) body.sha = sha;
-      const res = await fetch(`${BASE}/repos/${REPO_OWNER}/${REPO_NAME}/contents/${path}`, {
-        method: 'PUT',
-        headers: { ...authHeaders(), 'Content-Type': 'application/json' },
-        body: JSON.stringify(body)
-      });
-      if (!res.ok) {
+
+      let currentContent = content;
+
+      for (let attempt = 0; attempt < _retryAttempts; attempt++) {
+        let sha, remoteContent;
+        try {
+          const file = await readFile(path);
+          sha = file.sha;
+          remoteContent = file.content;
+        } catch (e) { if (e.status !== 404) throw e; }
+
+        if (attempt > 0 && mergeFn && remoteContent != null) {
+          currentContent = mergeFn(remoteContent);
+        }
+
+        const encoded = btoa(unescape(encodeURIComponent(JSON.stringify(currentContent, null, 2))));
+        const body = { message, content: encoded };
+        if (sha) body.sha = sha;
+
+        const res = await fetch(`${BASE}/repos/${REPO_OWNER}/${REPO_NAME}/contents/${path}`, {
+          method: 'PUT',
+          headers: { ...authHeaders(), 'Content-Type': 'application/json' },
+          body: JSON.stringify(body)
+        });
+
+        if (res.ok) {
+          if (attempt > 0 && _retryNotifier) _retryNotifier(false);
+          return res.json();
+        }
+
+        if (res.status === 409 && attempt < _retryAttempts - 1) {
+          if (attempt === 0 && _retryNotifier) _retryNotifier(true);
+          await new Promise(r => setTimeout(r, _retryDelayMs));
+          continue;
+        }
+
+        if (attempt > 0 && _retryNotifier) _retryNotifier(false);
         const err = await res.json().catch(() => ({}));
         throw new Error(err.message || `GitHub write failed (${res.status})`);
       }
-      return res.json();
+
+      if (_retryNotifier) _retryNotifier(false);
+      throw new Error(`Save failed after ${_retryAttempts} attempts — another player may be editing simultaneously.`);
     });
     _queues[path] = next.catch(() => {});
     return next;
@@ -105,5 +142,5 @@ const GithubAPI = (() => {
     return (await res.json()).login;
   }
 
-  return { getPAT, setPAT, getPersonalPAT, setPersonalPAT, readFile, writeJSON, writeImage, testPAT };
+  return { getPAT, setPAT, getPersonalPAT, setPersonalPAT, readFile, writeJSON, writeImage, testPAT, setRetryNotifier, setRetryConfig };
 })();

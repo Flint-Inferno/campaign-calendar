@@ -178,9 +178,32 @@
     </div>
   </div>
 
-  <!-- ── 9. Danger Zone ───────────────────────────────────── -->
+  <!-- ── 9. Save Retry Settings ──────────────────────────────── -->
+  <div class="admin-section">
+    <div class="admin-section-title">9 · Save Retry Settings</div>
+    <div class="admin-section-body">
+      <p style="font-size:.85rem;color:var(--ink-light);margin-bottom:10px">
+        When a save conflicts with another player's edit, the app retries automatically.
+        Adjust how many times it retries and how long it waits between each attempt.
+        Default: 6 attempts, 5 seconds apart (~30 second window).
+      </p>
+      <div class="admin-grid-2">
+        <div class="admin-field">
+          <label>Max Attempts</label>
+          <input id="cfg-retryAttempts" type="number" min="1" max="20" value="6">
+        </div>
+        <div class="admin-field">
+          <label>Delay Between Attempts (seconds)</label>
+          <input id="cfg-retryDelaySec" type="number" min="1" max="60" value="5">
+        </div>
+      </div>
+      <button class="admin-save-btn" id="save-retry-btn">Save Retry Settings</button>
+    </div>
+  </div>
+
+  <!-- ── 10. Danger Zone ──────────────────────────────────────── -->
   <div class="admin-section danger-zone">
-    <div class="admin-section-title">9 · Danger Zone</div>
+    <div class="admin-section-title">10 · Danger Zone</div>
     <div class="admin-section-body">
       <p style="font-size:.85rem;color:var(--ink-light);margin-bottom:10px">These actions are irreversible (well, the repo has git history).</p>
       <button class="danger-btn" id="export-csv-btn">Export Events as CSV</button>
@@ -254,6 +277,9 @@ function populateFields() {
 
   updateCurrentDateDisplay();
   loadWriteKeyStatus();
+
+  document.getElementById('cfg-retryAttempts').value = CFG.retryAttempts ?? 6;
+  document.getElementById('cfg-retryDelaySec').value = (CFG.retryDelayMs ?? 5000) / 1000;
 
   const mapUrl = `https://raw.githubusercontent.com/${REPO_OWNER}/${REPO_NAME}/main/data/map.png?t=${Date.now()}`;
   const img = document.getElementById('map-preview');
@@ -539,6 +565,13 @@ document.getElementById('save-days-btn').addEventListener('click', () => {
 
 document.getElementById('save-color-btn').addEventListener('click', () => {
   saveConfig({ defaultEventColor: document.getElementById('cfg-defaultEventColorHex').value || '#6B3A2A' }, 'Default color saved!');
+});
+
+document.getElementById('save-retry-btn').addEventListener('click', () => {
+  saveConfig({
+    retryAttempts: +document.getElementById('cfg-retryAttempts').value,
+    retryDelayMs:  +document.getElementById('cfg-retryDelaySec').value * 1000
+  }, 'Retry settings saved!');
 });
 
 /* ── Map upload ─────────────────────────────────────────────── */

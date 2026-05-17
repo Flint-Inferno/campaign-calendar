@@ -14,6 +14,11 @@ const COLOR_SWATCHES = [
 ];
 
 /* ── Init ───────────────────────────────────────────────────── */
+GithubAPI.setRetryNotifier((active) => {
+  const el = document.getElementById('save-status');
+  if (el) el.classList.toggle('visible', active);
+});
+
 async function appInit() {
   showBanner('Loading…', 'info');
   try {
@@ -29,6 +34,10 @@ async function appInit() {
       GithubAPI.readFile('data/activity-log.json').catch(() => ({ content: [] }))
     ]);
     CFG = cfgRes.content;
+    GithubAPI.setRetryConfig({
+      attempts: CFG.retryAttempts ?? 6,
+      delayMs:  CFG.retryDelayMs  ?? 5000
+    });
     Events.importJSON(evRes.content);
     CURRENT_DATE = cdRes.content;
     _scrubDate = CURRENT_DATE

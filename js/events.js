@@ -10,14 +10,17 @@ const Events = (() => {
     }
   }
 
-  async function save(message) {
-    await GithubAPI.writeJSON('data/events.json', _data, message);
+  async function save(message, mergeFn) {
+    await GithubAPI.writeJSON('data/events.json', _data, message, mergeFn);
   }
 
   async function add(event) {
     event.id = crypto.randomUUID();
     _data.push(event);
-    await save(`Add event: ${event.title}`);
+    const ev = event;
+    await save(`Add event: ${ev.title}`,
+      (remote) => remote.some(e => e.id === ev.id) ? remote : [...remote, ev]
+    );
     return event;
   }
 
@@ -25,14 +28,19 @@ const Events = (() => {
     const idx = _data.findIndex(e => e.id === id);
     if (idx === -1) throw new Error('Event not found');
     _data[idx] = { ..._data[idx], ...updates };
-    await save(`Update event: ${_data[idx].title}`);
-    return _data[idx];
+    const updated = _data[idx];
+    await save(`Update event: ${updated.title}`,
+      (remote) => remote.map(e => e.id === id ? updated : e)
+    );
+    return updated;
   }
 
   async function remove(id) {
     const ev = _data.find(e => e.id === id);
     _data = _data.filter(e => e.id !== id);
-    await save(`Delete event: ${ev ? ev.title : id}`);
+    await save(`Delete event: ${ev?.title ?? id}`,
+      (remote) => remote.filter(e => e.id !== id)
+    );
   }
 
   function getAll() {

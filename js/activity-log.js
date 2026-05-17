@@ -9,7 +9,14 @@ const ActivityLog = (() => {
   }
 
   async function save() {
-    await GithubAPI.writeJSON('data/activity-log.json', _data, 'Update activity log');
+    const snapshot = [..._data];
+    await GithubAPI.writeJSON('data/activity-log.json', snapshot, 'Update activity log',
+      (remote) => {
+        const remoteIds = new Set(remote.map(e => e.id));
+        const newEntries = snapshot.filter(e => !remoteIds.has(e.id));
+        return [...remote, ...newEntries].slice(-500);
+      }
+    );
   }
 
   function getAll() { return [..._data].reverse(); }
