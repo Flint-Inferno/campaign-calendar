@@ -326,5 +326,13 @@
     "playerColor": "#102457",
     "action": "event_add",
     "details": "Added event: \"Met/saved Ivory\""
+  },
+  {
+    "id": "7a3af30d-8c46-42c6-a4cf-0e5ebf49bd8c",
+    "timestamp": "2026-05-17T17:01:33.446Z",
+    "playerName": "Flint (DM)",
+    "playerColor": "#102457",
+    "action": "event_add",
+    "details": "Added event: \"Arrived in Sandsport\""
   }
 ]
