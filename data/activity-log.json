@@ -166,5 +166,13 @@
     "playerColor": "#ffc800",
     "action": "event_edit",
     "details": "Edited event: \"Zidreyi killed a man\""
+  },
+  {
+    "id": "77573b85-aa9e-44e4-87df-d213f4969fb7",
+    "timestamp": "2026-05-17T02:20:03.336Z",
+    "playerName": "Flint (DM)",
+    "playerColor": "#0000c4",
+    "action": "event_add",
+    "details": "Added event: \"test\""
   }
 ]
