@@ -174,5 +174,13 @@
     "playerColor": "#0000c4",
     "action": "event_add",
     "details": "Added event: \"test\""
+  },
+  {
+    "id": "687b4e6e-4a06-4855-a624-792695ed06ce",
+    "timestamp": "2026-05-17T02:21:26.166Z",
+    "playerName": "Flint (DM)",
+    "playerColor": "#0000c4",
+    "action": "event_delete",
+    "details": "Deleted event: \"test\""
   }
 ]
