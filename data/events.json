@@ -131,5 +131,21 @@
     "mapX": 2392,
     "mapY": 1338,
     "id": "97975327-04a7-4052-8968-fe32e09d245f"
+  },
+  {
+    "title": "Arrived in Desertport",
+    "description": "",
+    "location": "Desertport",
+    "markerType": "waypoint",
+    "year": 6532,
+    "month": 7,
+    "week": 3,
+    "day": 2,
+    "hour": 0,
+    "color": "#6B3A2A",
+    "tags": [],
+    "mapX": null,
+    "mapY": null,
+    "id": "cab34758-b352-41c6-aa18-9be24e6cb365"
   }
 ]
