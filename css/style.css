@@ -1570,7 +1570,7 @@ header {
     min-height: 44px;
   }
   .mob-tab-btn.active { color: var(--ink); border-top: 2px solid var(--accent, #8b6914); }
-  .mob-tab-icon { font-size: 1.1rem; line-height: 1; }
+  .mob-tab-btn { font-size: 0.72rem; }
 
   /* advance time button in header */
   #mob-advance-btn {
