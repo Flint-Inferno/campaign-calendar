@@ -7,6 +7,7 @@ const TimelineView = (() => {
   let _onDateClick = null;
   let _onEventClick = null;
   let _zoomInitialized = false;
+  let _addArmed = false;
 
   const PAD = 60;
   const MIN_PPH = 0.05;
@@ -148,7 +149,10 @@ const TimelineView = (() => {
     });
 
     inner.addEventListener('click', e => {
+      if (!_addArmed) return;
       if (e.target.closest('.tl-event') || e.target.closest('.tl-now')) return;
+      _addArmed = false;
+      _container.classList.remove('tl-add-armed');
       const rect = inner.getBoundingClientRect();
       const y = e.clientY - rect.top;
       const abs = Math.max(0, _yToAbs(y, minAbs));
@@ -160,7 +164,7 @@ const TimelineView = (() => {
     if (!_container || !_cfg || !_currentDate) return;
     const { min: minAbs } = _minMaxAbs();
     const nowY = _absToY(TimeCalc.toAbsolute(_currentDate, _cfg), minAbs);
-    _container.scrollTop = Math.max(0, nowY - _container.clientHeight * 0.5);
+    _container.scrollTop = Math.max(0, nowY - _container.clientHeight * 0.75);
   }
 
   function zoom(factor) {
@@ -169,9 +173,19 @@ const TimelineView = (() => {
     if (_container && _currentDate) {
       const { min: newMin } = _minMaxAbs();
       const newNowY = _absToY(TimeCalc.toAbsolute(_currentDate, _cfg), newMin);
-      _container.scrollTop = Math.max(0, newNowY - _container.clientHeight * 0.5);
+      _container.scrollTop = Math.max(0, newNowY - _container.clientHeight * 0.75);
     }
   }
 
-  return { init, setData, render, scrollToNow, zoom };
+  function armAddMode() {
+    _addArmed = true;
+    if (_container) _container.classList.add('tl-add-armed');
+  }
+
+  function disarmAddMode() {
+    _addArmed = false;
+    if (_container) _container.classList.remove('tl-add-armed');
+  }
+
+  return { init, setData, render, scrollToNow, zoom, armAddMode, disarmAddMode };
 })();

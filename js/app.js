@@ -966,7 +966,11 @@ function initTimeline() {
     TimelineView.init(
       document.getElementById('timeline-scroll'),
       CFG,
-      date => { openAddModal({ ...date }); },
+      date => {
+        const btn = document.getElementById('tl-add-event-btn');
+        if (btn) { btn.classList.remove('active'); btn.textContent = '+ Add Event'; }
+        openAddModal({ ...date });
+      },
       (id, el) => openEventPopover(id, el)
     );
     timelineLoaded = true;
@@ -982,6 +986,19 @@ function refreshTimeline() {
   TimelineView.render();
 }
 
+document.getElementById('tl-add-event-btn')?.addEventListener('click', () => {
+  const btn = document.getElementById('tl-add-event-btn');
+  if (btn.classList.contains('active')) {
+    TimelineView.disarmAddMode();
+    btn.classList.remove('active');
+    btn.textContent = '+ Add Event';
+  } else {
+    TimelineView.armAddMode();
+    btn.classList.add('active');
+    btn.textContent = '✕ Cancel';
+    showBanner('Click the timeline to place a new event.', 'info');
+  }
+});
 document.getElementById('tl-zoom-in')?.addEventListener('click', () => TimelineView.zoom(1.6));
 document.getElementById('tl-zoom-out')?.addEventListener('click', () => TimelineView.zoom(1 / 1.6));
 document.getElementById('tl-scroll-now')?.addEventListener('click', () => TimelineView.scrollToNow());
