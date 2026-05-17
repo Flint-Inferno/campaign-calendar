@@ -99,5 +99,21 @@
     "mapX": 1930,
     "mapY": 1693,
     "id": "8dddb46b-3b72-439c-b4ac-7ee5a0c9205f"
+  },
+  {
+    "title": "Met/saved Ivory",
+    "description": "",
+    "location": "Archmouth",
+    "markerType": "waypoint",
+    "year": 6532,
+    "month": 7,
+    "week": 2,
+    "day": 3,
+    "hour": 0,
+    "color": "#6B3A2A",
+    "tags": [],
+    "mapX": null,
+    "mapY": null,
+    "id": "38170417-d7b5-41ce-a2fd-d9966e629596"
   }
 ]
