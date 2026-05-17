@@ -243,5 +243,21 @@
     "mapX": 1604,
     "mapY": 1611,
     "id": "67869a09-92a7-4dd6-b0e3-f2a9db71c380"
+  },
+  {
+    "title": "The Great Redemption",
+    "description": "Five heroes, believed to be divinely sent, free the land from infernal powers.",
+    "location": "",
+    "markerType": "none",
+    "year": 1,
+    "month": 1,
+    "week": 1,
+    "day": 1,
+    "hour": 0,
+    "color": "#8B2E2E",
+    "tags": [],
+    "mapX": null,
+    "mapY": null,
+    "id": "ce1be9e5-fa13-4d0b-a5ea-97ccf2832a31"
   }
 ]
