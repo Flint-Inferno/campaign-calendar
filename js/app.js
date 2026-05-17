@@ -429,6 +429,34 @@ document.getElementById('advance-time-toggle').addEventListener('click', () => {
   }
 });
 
+document.getElementById('mob-advance-btn')?.addEventListener('click', (e) => {
+  e.stopPropagation();
+  const panel = document.getElementById('time-calc-panel');
+  const opening = panel.classList.contains('hidden');
+  panel.classList.toggle('hidden');
+  if (opening) {
+    ['dur-years','dur-months','dur-weeks','dur-days','dur-hours'].forEach(n => {
+      const el = document.querySelector(`[name=${n}]`);
+      if (el) el.value = '0';
+    });
+    document.getElementById('calc-result-row')?.classList.add('hidden');
+    document.getElementById('tc-dir-btn').classList.add('active');
+    document.getElementById('tc-dir-btn-back').classList.remove('active');
+  }
+});
+
+document.getElementById('time-calc-panel')?.addEventListener('click', (e) => e.stopPropagation());
+
+document.addEventListener('click', (e) => {
+  if (window.innerWidth > 680) return;
+  const panel = document.getElementById('time-calc-panel');
+  if (!panel || panel.classList.contains('hidden')) return;
+  const btn = document.getElementById('mob-advance-btn');
+  if (!panel.contains(e.target) && (!btn || !btn.contains(e.target))) {
+    panel.classList.add('hidden');
+  }
+});
+
 document.getElementById('tc-dir-btn').addEventListener('click', () => {
   document.getElementById('tc-dir-btn').classList.add('active');
   document.getElementById('tc-dir-btn-back').classList.remove('active');
