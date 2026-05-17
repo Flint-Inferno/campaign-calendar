@@ -406,5 +406,13 @@
     "playerColor": "#102457",
     "action": "event_add",
     "details": "Added event: \"The Great Redemption\""
+  },
+  {
+    "id": "0aaf8d81-6e05-41c1-a2c9-5b1fc3d5521d",
+    "timestamp": "2026-05-17T22:06:44.300Z",
+    "playerName": "Flint (DM)",
+    "playerColor": "#102457",
+    "action": "event_edit",
+    "details": "Edited event: \"Calth'm Ethraath is executed\""
   }
 ]
