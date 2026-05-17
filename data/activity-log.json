@@ -318,5 +318,13 @@
     "playerColor": "#102457",
     "action": "event_edit",
     "details": "Edited event: \"Arrived in Feyrun's Edge\""
+  },
+  {
+    "id": "395ab2d6-bace-40a0-ac94-f6c15ce330b1",
+    "timestamp": "2026-05-17T16:58:59.125Z",
+    "playerName": "Flint (DM)",
+    "playerColor": "#102457",
+    "action": "event_add",
+    "details": "Added event: \"Met/saved Ivory\""
   }
 ]
