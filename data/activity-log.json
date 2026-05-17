@@ -246,5 +246,13 @@
     "playerColor": "#0000c4",
     "action": "event_delete",
     "details": "Deleted event: \"test 2\""
+  },
+  {
+    "id": "4dffd9bc-02e6-416a-8112-b2fcf9e2b8f3",
+    "timestamp": "2026-05-17T13:47:41.298Z",
+    "playerName": "Flint (DM)",
+    "playerColor": "#0000c4",
+    "action": "event_delete",
+    "details": "Deleted event: \"Test 1\""
   }
 ]
