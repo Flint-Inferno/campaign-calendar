@@ -71,5 +71,7 @@
       "color": "#8b2e2e"
     }
   ],
-  "defaultEventColor": "#6B3A2A"
+  "defaultEventColor": "#6B3A2A",
+  "retryAttempts": 12,
+  "retryDelayMs": 5000
 }
