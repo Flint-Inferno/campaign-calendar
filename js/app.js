@@ -127,14 +127,21 @@ document.querySelectorAll('.view-btn').forEach(btn => {
 });
 
 /* ── Navigation ─────────────────────────────────────────────── */
-document.getElementById('prev-btn').addEventListener('click', () => { Calendar.navigatePrev(); Calendar.render(); updateNavLabel(); });
-document.getElementById('next-btn').addEventListener('click', () => { Calendar.navigateNext(); Calendar.render(); updateNavLabel(); });
+document.getElementById('prev-btn').addEventListener('click', () => { Calendar.navigatePrev(); Calendar.render(); updateNavLabel(); syncMobileCalendar(); });
+document.getElementById('next-btn').addEventListener('click', () => { Calendar.navigateNext(); Calendar.render(); updateNavLabel(); syncMobileCalendar(); });
 document.getElementById('today-btn').addEventListener('click', () => {
-  if (CURRENT_DATE) { Calendar.goToDate(CURRENT_DATE); Calendar.render(); updateNavLabel(); }
+  if (CURRENT_DATE) { Calendar.goToDate(CURRENT_DATE); Calendar.render(); updateNavLabel(); syncMobileCalendar(); }
 });
 
 function updateNavLabel() {
   document.getElementById('nav-label').textContent = Calendar.navLabel();
+}
+
+function syncMobileCalendar() {
+  const nav = Calendar.getNav();
+  _mobYear = nav.year;
+  _mobMonth = nav.month;
+  renderMobileCalendar();
 }
 
 /* ── Add Event button ───────────────────────────────────────── */
