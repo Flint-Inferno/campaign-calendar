@@ -35,5 +35,21 @@
     "mapX": 1922,
     "mapY": 1809,
     "id": "fac64959-c6b2-45d4-ab8d-68d4cc4defaa"
+  },
+  {
+    "title": "Temple of Etarepes",
+    "description": "Arrival at temple past Limelight\nWe take a tour and plan a heist\nExecute the heist, ditch town, make plans",
+    "location": "",
+    "markerType": "event",
+    "year": 6532,
+    "month": 7,
+    "week": 5,
+    "day": 7,
+    "hour": 0,
+    "color": "#6B3A2A",
+    "tags": [],
+    "mapX": null,
+    "mapY": null,
+    "id": "8e283568-09ee-483e-80cf-7b1ad67564c6"
   }
 ]
