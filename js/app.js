@@ -327,6 +327,7 @@ document.getElementById('save-event-btn').addEventListener('click', async () => 
   if (!data.title) { showBanner('Title is required.', 'error'); return; }
   if (!canWrite()) { showBanner('Set your identity to a recognized player name to edit.', 'error'); return; }
   setBusy(true);
+  const isNew = !editingEventId;
   try {
     let savedId = editingEventId;
     if (editingEventId) {
@@ -341,7 +342,12 @@ document.getElementById('save-event-btn').addEventListener('click', async () => 
     Calendar.render();
     refreshTimeline();
     if (mapLoaded && _scrubDate) MapView.renderScrubbed(Events.getAll(), _scrubDate, CFG, CURRENT_DATE);
-    showBanner('Saved!', 'success');
+    if (isNew && data.markerType !== 'none') {
+      _pendingMapPin = savedId;
+      document.querySelector('.tab-btn[data-tab="map"]')?.click();
+    } else {
+      showBanner('Saved!', 'success');
+    }
   } catch (e) {
     showBanner(e.message, 'error');
   }
