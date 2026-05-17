@@ -198,5 +198,13 @@
     "playerColor": "#ffc800",
     "action": "event_edit",
     "details": "Edited event: \"Teleport to Willowshade\""
+  },
+  {
+    "id": "ad8024b4-ed77-4d71-b878-71f50721f46a",
+    "timestamp": "2026-05-17T02:31:10.518Z",
+    "playerName": "Valvys",
+    "playerColor": "#ffc800",
+    "action": "event_edit",
+    "details": "Edited event: \"Teleport to Willowshade\""
   }
 ]
