@@ -83,5 +83,21 @@
     "mapX": 1202,
     "mapY": 1733,
     "id": "c39ca9cc-4556-45f2-8a4f-8655178b2181"
+  },
+  {
+    "title": "test 2",
+    "description": "",
+    "location": "",
+    "markerType": "waypoint",
+    "year": 6532,
+    "month": 7,
+    "week": 5,
+    "day": 8,
+    "hour": 0,
+    "color": "#6B3A2A",
+    "tags": [],
+    "mapX": 1126,
+    "mapY": 1794,
+    "id": "8cf55561-e421-45ec-b7f5-4330246d78a0"
   }
 ]
