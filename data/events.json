@@ -147,5 +147,21 @@
     "mapX": 2583,
     "mapY": 1224,
     "id": "cab34758-b352-41c6-aa18-9be24e6cb365"
+  },
+  {
+    "title": "Arrived in Limelight",
+    "description": "",
+    "location": "Limelight",
+    "markerType": "waypoint",
+    "year": 6532,
+    "month": 7,
+    "week": 3,
+    "day": 3,
+    "hour": 0,
+    "color": "#2C2C6B",
+    "tags": [],
+    "mapX": null,
+    "mapY": null,
+    "id": "12f4e493-22ee-436c-bbfd-f6472f110c63"
   }
 ]
