@@ -206,5 +206,13 @@
     "playerColor": "#ffc800",
     "action": "event_edit",
     "details": "Edited event: \"Teleport to Willowshade\""
+  },
+  {
+    "id": "2269d913-d5f1-49cc-8a5b-299e1565c662",
+    "timestamp": "2026-05-17T02:31:55.177Z",
+    "playerName": "Valvys",
+    "playerColor": "#ffc800",
+    "action": "event_edit",
+    "details": "Toggled \"Temple of Etarepes\" to waypoint"
   }
 ]
