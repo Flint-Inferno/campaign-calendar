@@ -336,11 +336,11 @@
     "details": "Added event: \"Arrived in Sandsport\""
   },
   {
-    "id": "566ce60c-a466-4fee-97bf-9d094156768e",
-    "timestamp": "2026-05-17T17:03:00.645Z",
+    "id": "1113bb2b-9f9a-4838-a716-a23a90485da4",
+    "timestamp": "2026-05-17T17:04:29.368Z",
     "playerName": "Flint (DM)",
     "playerColor": "#102457",
     "action": "event_add",
-    "details": "Added event: \"Arrived in Desertport\""
+    "details": "Added event: \"Arrived in Limelight\""
   }
 ]
