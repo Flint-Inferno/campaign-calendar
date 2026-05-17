@@ -870,21 +870,12 @@ document.getElementById('qp-save-btn')?.addEventListener('click', async () => {
   btn.disabled = false; btn.textContent = 'Add Marker';
 });
 
-/* ── Remove Marker (from edit modal) ────────────────────────── */
-document.getElementById('reposition-pin-btn')?.addEventListener('click', async () => {
+/* ── Reposition Marker (from edit modal) ────────────────────── */
+document.getElementById('reposition-pin-btn')?.addEventListener('click', () => {
   if (!editingEventId) return;
-  if (!canWrite()) { showBanner('Set your identity to a recognized player name to edit.', 'error'); return; }
-  if (!confirm('Remove the map marker from this event?')) return;
-  try {
-    const ev = Events.getAll().find(e => e.id === editingEventId);
-    if (ev) {
-      await Events.update(editingEventId, { ...ev, mapX: null, mapY: null });
-      appendActivityLog('event_edit', `Removed marker from: "${ev.title}"`);
-      closeModal('event-modal');
-      if (mapLoaded && _scrubDate) MapView.renderScrubbed(Events.getAll(), _scrubDate, CFG, CURRENT_DATE);
-      showBanner('Marker removed.', 'success');
-    }
-  } catch (e) { showBanner(e.message, 'error'); }
+  closeModal('event-modal');
+  _pendingMapPin = editingEventId;
+  document.querySelector('.tab-btn[data-tab="map"]')?.click();
 });
 
 
