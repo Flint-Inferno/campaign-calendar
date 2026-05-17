@@ -398,5 +398,13 @@
     "playerColor": "#102457",
     "action": "event_add",
     "details": "Added waypoint: \"Calth'm Ethraath is executed\""
+  },
+  {
+    "id": "3cfd7eab-1af9-4a7a-b8ba-606e47bef7e7",
+    "timestamp": "2026-05-17T17:33:15.809Z",
+    "playerName": "Flint (DM)",
+    "playerColor": "#102457",
+    "action": "event_add",
+    "details": "Added event: \"The Great Redemption\""
   }
 ]
