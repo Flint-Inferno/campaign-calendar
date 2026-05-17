@@ -286,5 +286,13 @@
     "playerColor": "#0000c4",
     "action": "event_add",
     "details": "Added event: \"Arrived in Archmouth\""
+  },
+  {
+    "id": "d3f1e56d-4963-476b-8571-6949ee501cbf",
+    "timestamp": "2026-05-17T16:10:10.360Z",
+    "playerName": "Unknown",
+    "playerColor": "#8B2E2E",
+    "action": "event_add",
+    "details": "Added event: \"another test\""
   }
 ]
