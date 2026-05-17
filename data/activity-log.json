@@ -214,5 +214,13 @@
     "playerColor": "#0538ad",
     "action": "event_delete",
     "details": "Deleted event: \"Valvys Ethraath is born\""
+  },
+  {
+    "id": "181938ec-725f-4541-bf47-e0cf9d9bfb99",
+    "timestamp": "2026-05-17T13:39:45.084Z",
+    "playerName": "Flint (DM)",
+    "playerColor": "#0000c4",
+    "action": "event_add",
+    "details": "Added waypoint: \"Test 1\""
   }
 ]
