@@ -270,5 +270,13 @@
     "playerColor": "#0000c4",
     "action": "event_add",
     "details": "Added event: \"qwerty\""
+  },
+  {
+    "id": "b960dd68-15b8-47f4-9d13-2fb8e0dcaf16",
+    "timestamp": "2026-05-17T14:03:05.438Z",
+    "playerName": "Flint (DM)",
+    "playerColor": "#0000c4",
+    "action": "event_delete",
+    "details": "Deleted event: \"qwerty\""
   }
 ]
