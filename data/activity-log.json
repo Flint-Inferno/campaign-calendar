@@ -206,5 +206,13 @@
     "playerColor": "#0538ad",
     "action": "event_add",
     "details": "Added waypoint: \"Valvys Ethraath is born\""
+  },
+  {
+    "id": "5ff33145-9560-40f2-b131-010cad981c03",
+    "timestamp": "2026-05-17T02:39:22.460Z",
+    "playerName": "Zidreyi",
+    "playerColor": "#0538ad",
+    "action": "event_delete",
+    "details": "Deleted event: \"Valvys Ethraath is born\""
   }
 ]
