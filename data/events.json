@@ -115,5 +115,21 @@
     "mapX": 2179,
     "mapY": 1481,
     "id": "38170417-d7b5-41ce-a2fd-d9966e629596"
+  },
+  {
+    "title": "Arrived in Sandsport",
+    "description": "",
+    "location": "Sandsport",
+    "markerType": "waypoint",
+    "year": 6532,
+    "month": 7,
+    "week": 2,
+    "day": 10,
+    "hour": 0,
+    "color": "#6B3A2A",
+    "tags": [],
+    "mapX": null,
+    "mapY": null,
+    "id": "97975327-04a7-4052-8968-fe32e09d245f"
   }
 ]
