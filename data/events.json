@@ -195,5 +195,21 @@
     "mapX": 2100,
     "mapY": 942,
     "id": "e38dc898-c378-4551-a1e9-80eeeeac4a14"
+  },
+  {
+    "title": "Arrived in Fort Bastion",
+    "description": "",
+    "location": "Fort Bastion",
+    "markerType": "waypoint",
+    "year": 6532,
+    "month": 7,
+    "week": 3,
+    "day": 8,
+    "hour": 0,
+    "color": "#6B3A2A",
+    "tags": [],
+    "mapX": null,
+    "mapY": null,
+    "id": "d6b1c9ac-2085-4d9b-aceb-8dd90f6f8f39"
   }
 ]
