@@ -334,5 +334,13 @@
     "playerColor": "#102457",
     "action": "event_add",
     "details": "Added event: \"Arrived in Sandsport\""
+  },
+  {
+    "id": "566ce60c-a466-4fee-97bf-9d094156768e",
+    "timestamp": "2026-05-17T17:03:00.645Z",
+    "playerName": "Flint (DM)",
+    "playerColor": "#102457",
+    "action": "event_add",
+    "details": "Added event: \"Arrived in Desertport\""
   }
 ]
