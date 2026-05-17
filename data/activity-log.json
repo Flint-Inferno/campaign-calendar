@@ -256,11 +256,11 @@
     "details": "Deleted event: \"Test 1\""
   },
   {
-    "id": "69b99872-a169-4520-815b-63e21e3f0896",
-    "timestamp": "2026-05-17T13:56:33.588Z",
+    "id": "7523b25c-ae2b-4db8-94c2-2504b83f9acb",
+    "timestamp": "2026-05-17T13:58:02.028Z",
     "playerName": "Flint (DM)",
     "playerColor": "#0000c4",
-    "action": "event_add",
-    "details": "Added waypoint: \"fringe test\""
+    "action": "event_delete",
+    "details": "Deleted event: \"fringe test\""
   }
 ]
