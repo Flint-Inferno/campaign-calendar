@@ -67,21 +67,5 @@
     "mapY": 1421,
     "tags": [],
     "id": "403612f2-d532-486f-b5a2-d8bca86cf92f"
-  },
-  {
-    "title": "qwerty",
-    "description": "",
-    "location": "",
-    "markerType": "event",
-    "year": 6532,
-    "month": 7,
-    "week": 5,
-    "day": 8,
-    "hour": 0,
-    "color": "#4A1C2C",
-    "tags": [],
-    "mapX": 1676,
-    "mapY": 1447,
-    "id": "8bf1aa8b-1e85-445e-ba94-b5f835f5eea8"
   }
 ]
