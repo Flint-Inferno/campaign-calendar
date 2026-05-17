@@ -176,19 +176,11 @@
     "details": "Added event: \"Temple of Etarepes\""
   },
   {
-    "id": "4e1ee0e0-2c04-4a04-bc12-2497d12cea54",
-    "timestamp": "2026-05-17T02:28:51.157Z",
-    "playerName": "Valvys",
-    "playerColor": "#ffc800",
-    "action": "date_advance",
-    "details": "Advanced to Year 6532 · Falm · Ravethen · Day 8 · 00:00"
-  },
-  {
-    "id": "363c4075-0e84-435f-83cf-b4b26c3e2e96",
-    "timestamp": "2026-05-17T02:28:51.878Z",
-    "playerName": "Valvys",
-    "playerColor": "#ffc800",
+    "id": "1d59d3a7-7f51-4d07-9b30-c04fe82f7b06",
+    "timestamp": "2026-05-17T02:29:41.830Z",
+    "playerName": "Zidreyi",
+    "playerColor": "#0538ad",
     "action": "event_add",
-    "details": "Auto-created time skip: \"Time Skip → Year 6532 · Falm · Ravethen · Day 8 · 00:00\""
+    "details": "Added event: \"Valvys Ethraath is born\""
   }
 ]
