@@ -618,41 +618,10 @@ function updateCurrentDateDisplay() {
 let _mobYear = 1, _mobMonth = 1;
 
 function renderMobileCalendar() {
-  const miniGrid = document.getElementById('mob-mini-grid');
-  const agenda   = document.getElementById('mob-agenda');
-  if (!miniGrid || !agenda || !CFG) return;
+  const agenda = document.getElementById('mob-agenda');
+  if (!agenda || !CFG) return;
 
   const monthEvents = Events.getAll().filter(ev => ev.year === _mobYear && ev.month === _mobMonth);
-
-  // Mini grid
-  miniGrid.innerHTML = '';
-  const headerRow = document.createElement('div');
-  headerRow.className = 'mob-mini-header';
-  for (let d = 1; d <= CFG.daysPerWeek; d++) {
-    const c = document.createElement('div');
-    c.className = 'mob-mini-head-cell';
-    c.textContent = `D${d}`;
-    headerRow.appendChild(c);
-  }
-  miniGrid.appendChild(headerRow);
-
-  for (let w = 1; w <= CFG.weeksPerMonth; w++) {
-    const row = document.createElement('div');
-    row.className = 'mob-mini-row';
-    for (let d = 1; d <= CFG.daysPerWeek; d++) {
-      const cell = document.createElement('div');
-      cell.className = 'mob-mini-cell';
-      cell.textContent = d;
-      if (monthEvents.some(ev => ev.week === w && ev.day === d)) cell.classList.add('mob-mini-has-event');
-      if (CURRENT_DATE && CURRENT_DATE.year === _mobYear && CURRENT_DATE.month === _mobMonth &&
-          CURRENT_DATE.week === w && CURRENT_DATE.day === d) cell.classList.add('mob-mini-today');
-      cell.addEventListener('click', () => {
-        document.getElementById(`mob-agenda-week-${w}`)?.scrollIntoView({ behavior: 'smooth' });
-      });
-      row.appendChild(cell);
-    }
-    miniGrid.appendChild(row);
-  }
 
   // Agenda
   agenda.innerHTML = '';
