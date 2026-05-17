@@ -390,5 +390,13 @@
     "playerColor": "#102457",
     "action": "event_add",
     "details": "Added event: \"Arrived in Evermore\""
+  },
+  {
+    "id": "74b6130e-2a4d-43ac-aee2-b56a0b87cb2d",
+    "timestamp": "2026-05-17T17:26:49.787Z",
+    "playerName": "Flint (DM)",
+    "playerColor": "#102457",
+    "action": "event_add",
+    "details": "Added waypoint: \"Calth'm Ethraath is executed\""
   }
 ]
