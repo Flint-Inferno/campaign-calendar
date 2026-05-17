@@ -358,5 +358,13 @@
     "playerColor": "#102457",
     "action": "event_add",
     "details": "Added event: \"Arrived in Evermore\""
+  },
+  {
+    "id": "dec3b028-81b4-4a30-976e-88d57e736556",
+    "timestamp": "2026-05-17T17:12:26.346Z",
+    "playerName": "Flint (DM)",
+    "playerColor": "#102457",
+    "action": "event_add",
+    "details": "Added event: \"Caught up to Ivory\""
   }
 ]
