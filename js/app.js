@@ -618,13 +618,9 @@ function updateCurrentDateDisplay() {
 let _mobYear = 1, _mobMonth = 1;
 
 function renderMobileCalendar() {
-  const label    = document.getElementById('mob-cal-label');
   const miniGrid = document.getElementById('mob-mini-grid');
   const agenda   = document.getElementById('mob-agenda');
-  if (!label || !miniGrid || !agenda || !CFG) return;
-
-  const monthName = (CFG.monthNames || [])[_mobMonth - 1] || `Month ${_mobMonth}`;
-  label.textContent = `${monthName}, Year ${_mobYear}`;
+  if (!miniGrid || !agenda || !CFG) return;
 
   const monthEvents = Events.getAll().filter(ev => ev.year === _mobYear && ev.month === _mobMonth);
 
