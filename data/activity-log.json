@@ -342,5 +342,13 @@
     "playerColor": "#102457",
     "action": "event_add",
     "details": "Added event: \"Arrived in Limelight\""
+  },
+  {
+    "id": "28b85d32-1db4-49ec-8395-c9b3dd518ff3",
+    "timestamp": "2026-05-17T17:07:35.836Z",
+    "playerName": "Flint (DM)",
+    "playerColor": "#102457",
+    "action": "event_add",
+    "details": "Added event: \"Arrived in Orzek\""
   }
 ]
