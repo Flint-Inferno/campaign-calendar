@@ -13,6 +13,8 @@ const TimelineView = (() => {
   const MIN_PPH = 0.05;
   const MAX_PPH = 24;
   const INIT_DAYS_SPAN = 50;
+  const GAP_THRESHOLD_DAYS = 30;
+  const GAP_BAR_H = 52;
 
   function init(container, cfg, onDateClick, onEventClick) {
     _container = container;
@@ -42,38 +44,109 @@ const TimelineView = (() => {
     return { min: Math.max(0, rawMin), max: rawMax + 1 };
   }
 
-  function _absToY(abs, minAbs) {
-    return PAD + (abs - minAbs) * _pph;
-  }
+  function _buildLayout(minAbs, maxAbs) {
+    const anchors = new Set([minAbs, maxAbs]);
+    for (const ev of _events) {
+      const a = TimeCalc.toAbsolute(
+        { year: ev.year, month: ev.month, week: ev.week, day: ev.day, hour: ev.hour || 0 }, _cfg
+      );
+      if (a >= minAbs && a <= maxAbs) anchors.add(a);
+      if (ev.endYear != null) {
+        const b = TimeCalc.toAbsolute(
+          { year: ev.endYear, month: ev.endMonth, week: ev.endWeek, day: ev.endDay, hour: ev.endHour || 0 }, _cfg
+        );
+        if (b >= minAbs && b <= maxAbs) anchors.add(b);
+      }
+    }
+    const sorted = [...anchors].sort((a, b) => a - b);
 
-  function _yToAbs(y, minAbs) {
-    return Math.round((y - PAD) / _pph) + minAbs;
+    const threshold = GAP_THRESHOLD_DAYS * _cfg.hoursPerDay;
+    const segments = [];
+    let y = PAD;
+
+    for (let i = 0; i < sorted.length - 1; i++) {
+      const aStart = sorted[i];
+      const aEnd   = sorted[i + 1];
+      const span   = aEnd - aStart;
+      if (span > threshold) {
+        segments.push({ type: 'gap',  aStart, aEnd, yStart: y, yEnd: y + GAP_BAR_H });
+        y += GAP_BAR_H;
+      } else {
+        const h = span * _pph;
+        segments.push({ type: 'prop', aStart, aEnd, yStart: y, yEnd: y + h });
+        y += h;
+      }
+    }
+
+    const totalHeight = Math.max(200, y + PAD);
+
+    function absToY(abs) {
+      for (const s of segments) {
+        if (abs <= s.aEnd) {
+          if (s.type === 'gap') return s.yStart + GAP_BAR_H / 2;
+          const frac = (abs - s.aStart) / (s.aEnd - s.aStart || 1);
+          return s.yStart + frac * (s.yEnd - s.yStart);
+        }
+      }
+      return segments.at(-1)?.yEnd ?? PAD;
+    }
+
+    function yToAbs(yCoord) {
+      for (const s of segments) {
+        if (yCoord <= s.yEnd) {
+          if (s.type === 'gap') return Math.round((s.aStart + s.aEnd) / 2);
+          const frac = (yCoord - s.yStart) / (s.yEnd - s.yStart || 1);
+          return Math.round(s.aStart + frac * (s.aEnd - s.aStart));
+        }
+      }
+      return segments.at(-1)?.aEnd ?? 0;
+    }
+
+    return { segments, totalHeight, absToY, yToAbs };
   }
 
   function _esc(s) {
     return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
   }
 
-  function _renderDividers(inner, minAbs, maxAbs) {
+  function _renderDividers(inner, layout) {
     const hpm = _cfg.weeksPerMonth * _cfg.daysPerWeek * _cfg.hoursPerDay;
     const hpy = hpm * _cfg.monthsPerYear;
-    const firstBoundary = Math.ceil(minAbs / hpm) * hpm;
-    for (let abs = firstBoundary; abs <= maxAbs; abs += hpm) {
-      const date = TimeCalc.fromAbsolute(abs, _cfg);
-      const isYear = abs % hpy === 0;
-      const y = _absToY(abs, minAbs);
 
-      const div = document.createElement('div');
-      div.className = 'tl-month-div' + (isYear ? ' is-year' : '');
-      div.style.top = y + 'px';
+    for (const seg of layout.segments) {
+      if (seg.type === 'gap') {
+        const diff   = seg.aEnd - seg.aStart;
+        const years  = Math.floor(diff / hpy);
+        const months = Math.floor((diff % hpy) / hpm);
+        const label  = years > 0
+          ? `${years}y ${months}m gap`
+          : `${Math.round(diff / _cfg.hoursPerDay)}d gap`;
 
-      const label = document.createElement('span');
-      label.className = 'tl-month-div-label';
-      const monthName = (_cfg.monthNames || [])[date.month - 1] || `Month ${date.month}`;
-      label.textContent = isYear ? `Year ${date.year}` : monthName;
-      div.appendChild(label);
-
-      inner.appendChild(div);
+        const el = document.createElement('div');
+        el.className = 'tl-gap-bar';
+        el.style.top    = seg.yStart + 'px';
+        el.style.height = GAP_BAR_H + 'px';
+        el.textContent  = label;
+        inner.appendChild(el);
+      } else {
+        const spanHours  = seg.aEnd - seg.aStart;
+        const totalMonths = spanHours / hpm;
+        const step = totalMonths > 48 ? hpy : hpm;
+        const first = Math.ceil(seg.aStart / step) * step;
+        for (let abs = first; abs < seg.aEnd; abs += step) {
+          const date   = TimeCalc.fromAbsolute(abs, _cfg);
+          const isYear = abs % hpy === 0;
+          const div = document.createElement('div');
+          div.className = 'tl-month-div' + (isYear ? ' is-year' : '');
+          div.style.top = layout.absToY(abs) + 'px';
+          const lbl = document.createElement('span');
+          lbl.className = 'tl-month-div-label';
+          const mn = (_cfg.monthNames || [])[date.month - 1] || `Month ${date.month}`;
+          lbl.textContent = isYear ? `Year ${date.year}` : mn;
+          div.appendChild(lbl);
+          inner.appendChild(div);
+        }
+      }
     }
   }
 
@@ -86,22 +159,22 @@ const TimelineView = (() => {
     }
 
     const { min: minAbs, max: maxAbs } = _minMaxAbs();
-    const trackH = Math.max(200, PAD * 2 + (maxAbs - minAbs) * _pph);
+    const layout = _buildLayout(minAbs, maxAbs);
 
     _container.innerHTML = '';
     const inner = document.createElement('div');
     inner.className = 'tl-inner';
-    inner.style.height = trackH + 'px';
+    inner.style.height = layout.totalHeight + 'px';
     _container.appendChild(inner);
 
     const cl = document.createElement('div');
     cl.className = 'tl-center-line';
     inner.appendChild(cl);
 
-    _renderDividers(inner, minAbs, maxAbs);
+    _renderDividers(inner, layout);
 
     if (_currentDate) {
-      const nowY = _absToY(TimeCalc.toAbsolute(_currentDate, _cfg), minAbs);
+      const nowY = layout.absToY(TimeCalc.toAbsolute(_currentDate, _cfg));
       const nowEl = document.createElement('div');
       nowEl.className = 'tl-now';
       nowEl.style.top = nowY + 'px';
@@ -115,8 +188,10 @@ const TimelineView = (() => {
     );
 
     sorted.forEach((ev, i) => {
-      const abs = TimeCalc.toAbsolute({ year: ev.year, month: ev.month, week: ev.week, day: ev.day, hour: ev.hour || 0 }, _cfg);
-      const y = _absToY(abs, minAbs);
+      const abs = TimeCalc.toAbsolute(
+        { year: ev.year, month: ev.month, week: ev.week, day: ev.day, hour: ev.hour || 0 }, _cfg
+      );
+      const y    = layout.absToY(abs);
       const side = i % 2 === 0 ? 'left' : 'right';
       const color = ev.color || _cfg.defaultEventColor || '#6B3A2A';
 
@@ -125,8 +200,10 @@ const TimelineView = (() => {
       wrap.style.top = y + 'px';
 
       if (ev.endYear != null) {
-        const endAbs = TimeCalc.toAbsolute({ year: ev.endYear, month: ev.endMonth, week: ev.endWeek, day: ev.endDay, hour: ev.endHour || 0 }, _cfg);
-        const barH = Math.max(3, (endAbs - abs) * _pph);
+        const endAbs = TimeCalc.toAbsolute(
+          { year: ev.endYear, month: ev.endMonth, week: ev.endWeek, day: ev.endDay, hour: ev.endHour || 0 }, _cfg
+        );
+        const barH = Math.max(3, layout.absToY(endAbs) - y);
         const bar = document.createElement('div');
         bar.className = 'tl-bar';
         bar.style.cssText = `height:${barH}px;background:${color}`;
@@ -150,31 +227,28 @@ const TimelineView = (() => {
 
     inner.addEventListener('click', e => {
       if (!_addArmed) return;
-      if (e.target.closest('.tl-event') || e.target.closest('.tl-now')) return;
+      if (e.target.closest('.tl-event') || e.target.closest('.tl-now') || e.target.closest('.tl-gap-bar')) return;
       _addArmed = false;
       _container.classList.remove('tl-add-armed');
       const rect = inner.getBoundingClientRect();
-      const y = e.clientY - rect.top;
-      const abs = Math.max(0, _yToAbs(y, minAbs));
+      const clickY = e.clientY - rect.top;
+      const abs = Math.max(0, layout.yToAbs(clickY));
       if (_onDateClick) _onDateClick(TimeCalc.fromAbsolute(abs, _cfg));
     });
   }
 
   function scrollToNow() {
     if (!_container || !_cfg || !_currentDate) return;
-    const { min: minAbs } = _minMaxAbs();
-    const nowY = _absToY(TimeCalc.toAbsolute(_currentDate, _cfg), minAbs);
+    const { min: minAbs, max: maxAbs } = _minMaxAbs();
+    const layout = _buildLayout(minAbs, maxAbs);
+    const nowY = layout.absToY(TimeCalc.toAbsolute(_currentDate, _cfg));
     _container.scrollTop = Math.max(0, nowY - _container.clientHeight * 0.75);
   }
 
   function zoom(factor) {
     _pph = Math.max(MIN_PPH, Math.min(MAX_PPH, _pph * factor));
     render();
-    if (_container && _currentDate) {
-      const { min: newMin } = _minMaxAbs();
-      const newNowY = _absToY(TimeCalc.toAbsolute(_currentDate, _cfg), newMin);
-      _container.scrollTop = Math.max(0, newNowY - _container.clientHeight * 0.75);
-    }
+    scrollToNow();
   }
 
   function armAddMode() {

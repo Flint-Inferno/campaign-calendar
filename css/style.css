@@ -391,6 +391,22 @@ header {
   font-weight: 600;
   font-size: 0.62rem;
 }
+.tl-gap-bar {
+  position: absolute;
+  left: 0; right: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Cinzel', serif;
+  font-size: 0.7rem;
+  color: var(--ink-light);
+  letter-spacing: 0.05em;
+  border-top: 1px dashed var(--border);
+  border-bottom: 1px dashed var(--border);
+  background: color-mix(in srgb, var(--parchment-dark) 60%, transparent);
+  pointer-events: none;
+  user-select: none;
+}
 
 /* ── Log tab ─────────────────────────────────────────────────── */
 .log-header {
